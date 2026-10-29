@@ -647,6 +647,7 @@ import ScenarioSkillPackageCreateView from '@/views/agent/ScenarioSkillPackageCr
 import ScenarioNodeContractSummary from '@/views/agent/ScenarioNodeContractSummary.vue'
 import ScenarioTestReportSummary from '@/views/agent/ScenarioTestReportSummary.vue'
 import { isScenarioSimulationCurrent } from '@/domain/scenarioPackageTesting.js'
+import { scenarioPackageEditGuidance } from '@/domain/scenarioPackageGuidance.js'
 import { canAuthorScenarioPackage, scenarioPackageRole, scenarioRequiresConfirmation } from '@/domain/scenarioSkillPackages.js'
 import {
   useScenarioSkillPackagesStore,
@@ -1264,48 +1265,10 @@ function applyPackage(packageItem: ScenarioSkillPackage) {
 }
 
 function packageEditGuidance(packageItem: ScenarioSkillPackage) {
-  const actions = scenarioStore.actionsFor(packageItem.id, packageActor.value)
-  const actorId = packageActor.value.id
-  const isOwner = Boolean(actorId && actorId === packageItem.ownerId)
-  const hasPublishedVersion = Boolean(packageItem.publishedSnapshot) || ['published', 'disabled'].includes(packageItem.status)
-  if (actions.includes('edit')) {
-    return {
-      summary: hasPublishedVersion ? '可编辑修订' : '可编辑',
-      detail: hasPublishedVersion
-        ? '当前账号可编辑该技能包的修订，原创建者不变。保存、试运行并重新提审后，由未参与本轮修改的其他管理员审核；审核前，线上版本保持原状态。'
-        : '当前账号可编辑此草稿或驳回内容，完成试运行后重新提交审核；须由其他管理员审核。'
-    }
-  }
-  if (packageItem.status === 'review') {
-    if (actions.includes('withdraw')) {
-      return {
-        summary: '待审核暂不可编辑，可先撤回',
-        detail: `你是${isOwner ? '创建者' : '本轮提交人'}，可先撤回审核。撤回后回到草稿；继续编辑和提审仍需具备该内容的编辑权限。撤回不改变线上版本的启停状态；本人不能审核自己的内容。`
-      }
-    }
-    const canReview = actions.includes('approve') && actions.includes('reject')
-    const editedByActor = Boolean(actorId && packageItem.revisionEditors?.includes(actorId))
-    return {
-      summary: '待审核暂不可编辑',
-      detail: canReview
-        ? '当前账号可审批或驳回，不能直接编辑待审核内容。如需修改，应先由具备相应权限的创建者或本轮提交人撤回。'
-        : editedByActor && packageRole.value === 'admin'
-          ? '你参与了本轮编辑，不能审核自己的修改。待审核内容暂不可编辑，需由具备相应权限的创建者或本轮提交人撤回后修改。'
-          : '待审核内容暂不可编辑，当前账号没有撤回或审核权限。需由具备相应权限的创建者或本轮提交人撤回后修改。'
-    }
-  }
-  if (['draft', 'rejected'].includes(packageItem.status) && !hasPublishedVersion && !isOwner) {
-    return {
-      summary: '未发布内容，仅创建者可编辑',
-      detail: '此技能包尚未发布，草稿或驳回内容由具备创建及跨菜单编排权限的创建者维护。当前账号仅可查看。'
-    }
-  }
-  return {
-    summary: '当前账号无编辑权限',
-    detail: isOwner
-      ? '当前账号是创建者，但缺少所需的编辑权限。需具备创建及跨菜单编排权限后，再按当前状态编辑。'
-      : '已发布技能包及其修订可由具备相应权限的创建者或管理员维护，当前账号没有编辑权限。'
-  }
+  return scenarioPackageEditGuidance(packageItem, packageActor.value, {
+    actions: scenarioStore.actionsFor(packageItem.id, packageActor.value),
+    reviewDecision: scenarioStore.reviewDecision(packageItem.id, packageActor.value)
+  })
 }
 
 function openPackageDetail(packageItem: ScenarioSkillPackage, event?: MouseEvent, mode: PackageDetailMode = 'detail') {
