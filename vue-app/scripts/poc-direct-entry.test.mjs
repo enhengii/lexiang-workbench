@@ -61,7 +61,7 @@ test('selected disabled internal scenario opens enable request without a second 
 })
 
 test('choosing an internal scenario on the ADFS page also enters it immediately', async () => {
-  const page = mount()
+  const page = mount({ query: { mode: 'scenarios' } })
   await page.ready()
   await page.selectPocAccount(fixtures.POC_LOGIN_ACCOUNTS.find(account => account.username === 'noaccess'))
   assert.equal(page.navigations[0]?.path, '/access-denied')
@@ -95,7 +95,7 @@ test('automatic entry is disabled outside the opted-in isolated POC', async () =
 })
 
 test('manually entered demo credentials still require the correct password and login type', async () => {
-  const page = mount()
+  const page = mount({ query: { mode: 'scenarios' } })
   await page.ready()
   page.itcode.value = 'noaccess'
   page.password.value = 'wrong'
@@ -136,6 +136,7 @@ test('returning from an automatic-entry error clears the selected query', async 
   await page.back()
   assert.equal(page.navigations.at(-1)?.path, '/login')
   assert.equal(page.navigations.at(-1)?.query.pocAccount, undefined)
+  assert.equal(page.navigations.at(-1)?.query.mode, 'scenarios')
 })
 
 test('the direct ADFS form keeps real credentials on the existing backend path', async () => {

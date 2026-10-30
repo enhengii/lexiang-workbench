@@ -152,10 +152,10 @@ const pocReleaseLedger = ref({ records: {} })
 const basePocLogRecords = [
   {
     time: '2026-10-30',
-    releaseKey: 'workbench-demo-login-direct-20261030',
-    title: '内部演示账号直接进入对应场景',
-    changePoint: '选择内部演示账号后直接进入对应模拟流程，省去重复的 ADFS 登录表单。',
-    detail: '首次访问和账号禁用场景继续按原审批与启用状态分流；异常时可重试或返回选择。直接点击内网 ADFS 登录、管理员正常验证及外部登录保持原流程。演示与真实账号继续隔离，不调整任何权限规则。',
+    releaseKey: 'workbench-readable-entry-20261030',
+    title: '工作台字体调整与演示入口简化',
+    changePoint: '提高菜单、表格和详情文字的可读性；POC 默认入口直接进入演示工作台。',
+    detail: '主要内容使用 14px，操作与状态至少 13px，关键业务说明加深。POC 默认入口直接进入现有权限演示工作台，特殊账号场景可从选择演示场景进入；正常登录和真实权限保持原流程。',
     deployTargets: [],
     status: '发布状态以环境记录为准'
   },

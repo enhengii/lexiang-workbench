@@ -145,7 +145,7 @@ html[data-product="leaibot"] .nav-item {
   padding: 0 10px;
   margin-bottom: 2px;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   color: var(--color-text-secondary);
 }
@@ -153,7 +153,7 @@ html[data-product="leaibot"] .nav-item {
 html[data-product="leaibot"] .nav-sub .nav-item {
   min-height: 32px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
 }
 
@@ -255,7 +255,7 @@ html[data-product="leaibot"] .btn,
 html[data-product="leaibot"] .btn-secondary,
 html[data-product="leaibot"] .btn-primary {
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -286,7 +286,7 @@ html[data-product="leaibot"] .ops-date-input {
   border-color: var(--color-border);
   border-radius: 8px;
   color: var(--color-text);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 html[data-product="leaibot"] input::placeholder,
@@ -527,7 +527,7 @@ html[data-product="leaibot"] .geo-conv-period-btn {
   border-color: var(--color-border);
   background: #fff;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -557,7 +557,7 @@ html[data-product="leaibot"] .prd-tabs button {
   height: 40px;
   padding: 0 14px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
 }
 
@@ -577,7 +577,7 @@ html[data-product="leaibot"] .employee-cert-table,
 html[data-product="leaibot"] .prd-data-table,
 html[data-product="leaibot"] .geo-dark .geo-intent-table {
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 html[data-product="leaibot"] .table-wrap,
@@ -600,7 +600,7 @@ html[data-product="leaibot"] .geo-dark .geo-intent-table th {
   color: var(--color-text-secondary);
   background: #f5f6f8;
   border-bottom: 1px solid var(--color-border);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 

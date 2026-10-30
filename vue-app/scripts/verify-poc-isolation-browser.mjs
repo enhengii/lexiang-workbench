@@ -98,6 +98,14 @@ try {
     const original = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))
     const cookies = await context.cookies()
     const beforeDemoApi = api.length
+    for (const entrance of ['/login', '/adfs-login']) {
+      await page.goto(demo + entrance)
+      await page.waitForURL(demo + '/agent/permissions')
+      assert.equal(await page.locator('.adfs-form, #login-screen').count(), 0, 'Default POC entrance skips login forms')
+      assert.equal(api.length, beforeDemoApi, 'Default POC entry never authenticates a real account')
+    }
+    await page.getByRole('link', { name: '选择演示场景', exact: true }).click()
+    await page.waitForURL(demo + '/login?mode=scenarios')
     await page.getByRole('combobox').click()
     await page.getByRole('option', { name: '内部人员 · 首次登录申请权限 noaccess' }).click()
     await page.waitForURL(demo + '/access-denied?**')
@@ -171,7 +179,7 @@ try {
     console.log('First access final execution/relogin, enable approval/relogin, external-disabled and session/data isolation passed')
 
     // Hand-typed credentials retain their original password and login-type checks.
-    await page.goto(demo + '/adfs-login')
+    await page.goto(demo + '/adfs-login?mode=scenarios')
     await page.getByRole('combobox').fill('noaccess')
     await page.locator('input[type=password]').fill('wrong')
     await page.getByRole('button', { name: 'Submit', exact: true }).click()
@@ -190,7 +198,7 @@ try {
     await page.waitForURL(demo + '/account-enable-request?**')
     assert.equal(api.length, beforeDemoApi, 'Demo error paths never fall back to real APIs')
 
-    await page.goto(demo + '/login?loginType=external')
+    await page.goto(demo + '/login?loginType=external&mode=scenarios')
     const combo = page.getByRole('combobox')
     await combo.focus()
     await combo.press('ArrowUp')
@@ -207,7 +215,7 @@ try {
 
     for (const [width, height] of [[1440, 900], [1280, 720], [390, 844]]) {
       await page.setViewportSize({ width, height })
-      await page.goto(demo + '/login')
+      await page.goto(demo + '/login?mode=scenarios')
       await page.getByRole('combobox').click()
       assert.equal(await page.getByRole('option').count(), 4)
       const geometry = await page.locator('.poc-account-popup').boundingBox()

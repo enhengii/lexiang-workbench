@@ -288,7 +288,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -308,7 +308,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
   background: linear-gradient(135deg, #fff 0%, #f8faff 58%, #f6f3ff 100%);
   box-shadow: 0 4px 14px rgba(61, 78, 160, .07), inset 0 1px 0 rgba(255, 255, 255, .9);
   color: var(--color-text-secondary, #646a73);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -375,7 +375,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
   border: 1px solid rgba(99, 112, 241, .10);
   background: rgba(255, 255, 255, .68);
   color: var(--color-text-secondary, #646a73);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 18px;
 }
 
@@ -445,7 +445,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
 .temp-tab-history-header span,
 .temp-tab-history-hint {
   color: var(--color-text-tertiary, #8f959e);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .temp-tab-history-list {
@@ -505,7 +505,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
 
 .temp-tab-history-meta {
   color: var(--color-text-tertiary, #8f959e);
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .temp-tab-history-active {
@@ -514,7 +514,7 @@ const triggerDisplayTitle = computed(() => currentTab.value
   border-radius: 9px;
   background: rgba(51, 112, 255, .12);
   color: var(--color-primary, #3370ff);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 

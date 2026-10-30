@@ -138,7 +138,7 @@ html[data-product="leaibot"] .login-title {
 html[data-product="leaibot"] .form-label {
   margin-bottom: 8px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -149,7 +149,7 @@ html[data-product="leaibot"] .form-input {
   border-radius: var(--radius-md);
   background: var(--color-surface);
   color: var(--color-text);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 html[data-product="leaibot"] .form-input::placeholder {
@@ -183,7 +183,7 @@ html[data-product="leaibot"] button.btn {
   min-height: var(--control-height-md);
   padding: 0 16px;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1;
   white-space: nowrap;

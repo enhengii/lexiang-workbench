@@ -217,7 +217,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { pocLocalStorage } from '@/services/pocStorage'
-import { permissionLabEnabled } from '@/config/runtimeMode'
+import { allowPocSimulation, permissionLabEnabled } from '@/config/runtimeMode'
 import { labApi, type LabIdentity } from '@/services/permissionLab'
 import ApplicationProgressSummary from '@/components/auth/ApplicationProgressSummary.vue'
 import { applicationProgress } from '@/services/applicationProgress'
@@ -638,7 +638,7 @@ async function restorePendingApplication() {
 
 function backToLogin() {
   appStore.user = null
-  router.replace({ path: '/login', query: { loginType: isExternal.value ? 'external' : 'internal' } })
+  router.replace({ path: '/login', query: { loginType: isExternal.value ? 'external' : 'internal', ...(allowPocSimulation ? { mode: 'scenarios' } : {}) } })
 }
 
 onMounted(() => {

@@ -115,7 +115,7 @@ async function enterPocScenario() {
 }
 
 function returnToPocSelection() {
-  return router.replace({ path: '/login', query: { redirect: String(route.query.redirect || '/') } })
+  return router.replace({ path: '/login', query: { mode: 'scenarios', redirect: String(route.query.redirect || '/') } })
 }
 
 onMounted(enterPocScenario)

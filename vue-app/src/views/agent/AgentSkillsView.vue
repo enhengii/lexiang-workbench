@@ -1749,7 +1749,7 @@ onBeforeUnmount(() => {
   min-width: 1040px;
   border-collapse: collapse;
   table-layout: fixed;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .scenario-package-table th,
@@ -1764,7 +1764,7 @@ onBeforeUnmount(() => {
   height: 40px;
   background: var(--color-bg-muted);
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
 }
@@ -1785,8 +1785,8 @@ onBeforeUnmount(() => {
 .scenario-package-edit-hint {
   margin: 4px 0 0;
   padding-inline: calc(var(--space-2, 8px) + 1px);
-  color: var(--color-text-tertiary);
-  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-size: 14px;
   line-height: 1.6;
   white-space: normal;
   overflow-wrap: anywhere;
@@ -1797,7 +1797,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--color-border-subtle);
   border-radius: var(--radius-md);
   background: var(--color-surface);
-  font-size: var(--text-sm);
+  font-size: 14px;
 }
 
 .scenario-package-edit-rules summary {
@@ -1847,14 +1847,14 @@ onBeforeUnmount(() => {
 
 .scenario-package-table td small {
   margin-top: 4px;
-  color: var(--color-text-tertiary);
-  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .scenario-package-table code,
 .scenario-package-detail-panel code {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .scenario-package-status {
@@ -1862,7 +1862,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 8px;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
 }
@@ -1884,7 +1884,7 @@ onBeforeUnmount(() => {
 
 .scenario-package-review-section { display: grid; gap: 12px; }
 .scenario-package-review-section h4 { margin: 0; }
-.scenario-package-review-field { display: grid; gap: 8px; min-width: 0; font-size: 13px; }
+.scenario-package-review-field { display: grid; gap: 8px; min-width: 0; font-size: 14px; }
 .scenario-package-review-field textarea { box-sizing: border-box; width: 100%; min-height: 88px; padding: 12px; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; line-height: 1.6; resize: vertical; }
 .scenario-package-review-field textarea:focus { outline: none; box-shadow: var(--focus-ring); }
 .scenario-package-review-error { color: var(--color-danger); font-size: 13px; }
@@ -1911,11 +1911,11 @@ onBeforeUnmount(() => {
   display: grid;
   grid-template-columns: 84px minmax(0, 1fr);
   gap: 8px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .scenario-package-detail-summary dt {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 .scenario-package-detail-summary dd {
@@ -1973,7 +1973,7 @@ onBeforeUnmount(() => {
 .scenario-package-detail-section > p,
 .scenario-package-governance p {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
 }
 
@@ -2003,7 +2003,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
   background: var(--color-primary-subtle);
   color: var(--color-primary);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -2013,14 +2013,14 @@ onBeforeUnmount(() => {
   gap: 8px 12px;
   margin: 4px 0 0;
   color: var(--color-text-secondary);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .scenario-package-detail-steps small {
   display: block;
   margin-top: 8px;
-  color: var(--color-text-tertiary);
-  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
 }
 
 .scenario-package-governance {
@@ -2033,7 +2033,7 @@ onBeforeUnmount(() => {
 .scenario-package-governance strong {
   display: block;
   margin-bottom: 4px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .scenario-package-audit-list li {
@@ -2043,11 +2043,11 @@ onBeforeUnmount(() => {
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-border-subtle);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .scenario-package-audit-list span {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 1400px) {
@@ -2099,7 +2099,7 @@ onBeforeUnmount(() => {
 .skill-hub-detail-panel.skill-capability-change-panel { width: min(720px, calc(100vw - 48px)); max-height: calc(100vh - 48px); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); }
 .skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-head { flex: 0 0 auto; justify-content: flex-start; align-items: flex-start; padding: 20px 24px; text-align: left; border-bottom: 1px solid var(--color-border-subtle); }
 .skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-head h3 { font-size: 18px; font-weight: 600; line-height: 1.5; color: var(--color-text); }
-.skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-head p { margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: var(--color-text-secondary); }
+.skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-head p { margin: 8px 0 0; font-size: 14px; line-height: 1.6; color: var(--color-text-secondary); }
 .skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-close { top: 16px; right: 16px; width: 32px; height: 32px; border: 0; border-radius: var(--radius-md); }
 .skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-body { flex: 1 1 auto; min-height: 0; padding: 20px 24px; }
 .skill-hub-detail-panel:is(.scenario-package-detail-panel, .skill-capability-change-panel) .skill-hub-detail-foot { flex: 0 0 auto; padding: 16px 24px; border-top: 1px solid var(--color-border-subtle); }

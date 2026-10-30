@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { allowPocLogin, appBase, isPocSandbox, normalAppBase } from '@/config/runtimeMode'
+import { findPocLoginChoice } from '@/services/pocLoginChoices'
 import { aiInspectRoutes } from '@/views/aiinspect/routes'
 import { ACTIVITY_POINTS_MENU, canUseActivityPoints } from '@/services/activityPointsAccess'
 import { showWorkbenchToast } from '@/services/toast'
@@ -192,6 +193,8 @@ router.beforeEach(async (to) => {
       window.location.replace(normalAppBase + 'login')
       return false
     }
+    if ((to.path === '/login' || to.path === '/adfs-login')
+      && to.query.mode !== 'scenarios' && !findPocLoginChoice(to.query.pocAccount)) return '/agent/permissions'
     return true
   }
   const appStore = useAppStore()

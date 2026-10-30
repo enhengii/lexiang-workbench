@@ -3,7 +3,7 @@
     <section class="enable-request-card">
       <header class="enable-request-header">
         <div class="brand-lockup"><span class="brand-mark">L</span><b>联想乐享</b></div>
-        <RouterLink to="/login">返回登录</RouterLink>
+        <RouterLink :to="allowPocSimulation ? '/login?mode=scenarios' : '/login'">返回登录</RouterLink>
       </header>
       <div class="enable-request-heading">
         <h1>{{ externalRequest ? '账号已禁用' : '申请启用账号' }}</h1>
@@ -18,7 +18,7 @@
         class="enable-request-workspace"
         self-service
         :authorize="authorize"
-        @back="router.push('/login')"
+        @back="router.push(allowPocSimulation ? '/login?mode=scenarios' : '/login')"
         @submitted="openStatusPage"
       />
     </section>
@@ -30,7 +30,7 @@ import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import AccountEnableRequestFlow from '@/components/permissions/AccountEnableRequestFlow.vue'
 import { pocSessionStorage } from '@/services/pocStorage'
-import { permissionLabEnabled } from '@/config/runtimeMode'
+import { allowPocSimulation, permissionLabEnabled } from '@/config/runtimeMode'
 import { labApi, type LabIdentity } from '@/services/permissionLab'
 import { disabledIdentityError, DISABLED_ACCOUNT_KEY, DISABLED_ACCOUNT_TYPE_KEY, EXTERNAL_DISABLED_MESSAGE, type EnableRequestDraft, type EnableSubmission } from '@/services/accountEnableRequest'
 
