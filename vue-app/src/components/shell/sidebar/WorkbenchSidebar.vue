@@ -151,6 +151,15 @@ const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
   {
+    time: '2026-10-30',
+    releaseKey: 'workbench-demo-login-direct-20261030',
+    title: '内部演示账号直接进入对应场景',
+    changePoint: '选择内部演示账号后直接进入对应模拟流程，省去重复的 ADFS 登录表单。',
+    detail: '首次访问和账号禁用场景继续按原审批与启用状态分流；异常时可重试或返回选择。直接点击内网 ADFS 登录、管理员正常验证及外部登录保持原流程。演示与真实账号继续隔离，不调整任何权限规则。',
+    deployTargets: [],
+    status: '发布状态以环境记录为准'
+  },
+  {
     time: '2026-10-29',
     releaseKey: 'workbench-scenario-guidance-20261029',
     title: '场景技能包角色与状态说明补全',

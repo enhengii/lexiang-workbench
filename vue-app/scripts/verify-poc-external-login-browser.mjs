@@ -70,7 +70,6 @@ try {
 
   const { context, page } = await setup()
   await page.goto(base + '/adfs-login?pocAccount=noaccess')
-  await page.getByRole('button', { name: 'Submit', exact: true }).click()
   await page.waitForURL('**/access-denied?**')
   await page.getByRole('heading', { name: '当前账号暂无工作台权限，请申请访问权限。', exact: true }).waitFor()
   assert.equal(await page.getByRole('button', { name: '组织管理', exact: true }).count(), 0)

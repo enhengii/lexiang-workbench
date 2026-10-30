@@ -10,7 +10,15 @@
     </section>
 
     <section class="adfs-panel" aria-label="Lenovo ADFS 登录">
-      <form class="adfs-form" @submit.prevent="submitAdfsLogin">
+      <div v-if="directPocAccount" class="adfs-direct-entry" :aria-busy="pocEntryBusy">
+        <p v-if="!errorMsg" role="status">正在进入演示场景…</p>
+        <p v-else class="adfs-error" role="alert">{{ errorMsg }}</p>
+        <div class="adfs-direct-actions">
+          <button v-if="errorMsg" class="btn btn-primary" type="button" :disabled="pocEntryBusy" @click="enterPocScenario">重试</button>
+          <button class="btn btn-secondary" type="button" :disabled="pocEntryBusy" @click="returnToPocSelection">返回选择</button>
+        </div>
+      </div>
+      <form v-else class="adfs-form" @submit.prevent="submitAdfsLogin">
         <h1>Lenovo Corporation</h1>
         <p>{{ passwordlessLogin ? '本地演示账号，无需密码，点击 Submit 继续。' : 'Please login with your ITCode / Password and OTP code (if required).' }}</p>
 
@@ -43,7 +51,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { allowPocLogin, allowPocSimulation, isPocSandbox, permissionLabEnabled } from '@/config/runtimeMode'
@@ -51,7 +59,7 @@ import { isPasswordlessLabAccount, labHeaders } from '@/services/permissionLab'
 import { pocLocalStorage, pocSessionStorage } from '@/services/pocStorage'
 import PocLoginAccountPicker from '@/components/auth/PocLoginAccountPicker.vue'
 import { POC_ACCOUNT_REQUESTS_KEY, POC_EXTERNAL_PASSWORD, findPocLoginAccount, resolvePocLogin } from '@/services/pocExternalLogin'
-import { navigatePocChoice, type PocLoginChoice } from '@/services/pocLoginChoices'
+import { findPocLoginChoice, navigatePocChoice, type PocLoginChoice } from '@/services/pocLoginChoices'
 import { APPROVAL_MAIL_ROWS_KEY } from '@/services/approvalMailReview'
 
 const route = useRoute()
@@ -66,13 +74,16 @@ const rememberMe = ref(false)
 const errorMsg = ref('')
 const disabledAccount = ref('')
 const initialPocAccount = findPocLoginAccount(route.query.pocAccount, allowPocLogin)
+const initialPocChoice = findPocLoginChoice(route.query.pocAccount)
+const directPocAccount = ref(allowPocSimulation && initialPocChoice?.loginType === 'internal' ? initialPocChoice.username : '')
+const pocEntryBusy = ref(false)
 if (initialPocAccount) navigatePocChoice(initialPocAccount)
 if (initialPocAccount?.loginType === 'internal') {
   itcode.value = initialPocAccount.username
   password.value = POC_EXTERNAL_PASSWORD
 }
 
-function selectPocAccount(account: PocLoginChoice) {
+async function selectPocAccount(account: PocLoginChoice) {
   if (!allowPocLogin || navigatePocChoice(account)) return
   errorMsg.value = ''
   disabledAccount.value = ''
@@ -83,7 +94,31 @@ function selectPocAccount(account: PocLoginChoice) {
   itcode.value = account.username
   password.value = POC_EXTERNAL_PASSWORD
   otpCode.value = ''
+  if (allowPocSimulation && findPocLoginChoice(account.username)?.loginType === 'internal') {
+    directPocAccount.value = account.username
+    await enterPocScenario()
+  }
 }
+
+async function enterPocScenario() {
+  const choice = findPocLoginChoice(directPocAccount.value)
+  if (!allowPocSimulation || choice?.loginType !== 'internal' || pocEntryBusy.value) return
+  pocEntryBusy.value = true
+  itcode.value = choice.username
+  password.value = POC_EXTERNAL_PASSWORD
+  try {
+    await submitAdfsLogin()
+    if (!errorMsg.value && route.path === '/adfs-login') errorMsg.value = '未能进入演示场景，请重试或返回选择。'
+  } finally {
+    pocEntryBusy.value = false
+  }
+}
+
+function returnToPocSelection() {
+  return router.replace({ path: '/login', query: { redirect: String(route.query.redirect || '/') } })
+}
+
+onMounted(enterPocScenario)
 
 function isDisabledLoginResponse(status: number, data: any) {
   return status === 423 || data?.code === 'ACCOUNT_DISABLED' || data?.error === '账号已禁用'
@@ -239,6 +274,18 @@ async function submitAdfsLogin() {
   justify-content: space-between;
   padding: 66px 66px 34px;
   background: #fff;
+}
+
+.adfs-direct-entry {
+  font-size: var(--text-base, 14px);
+  line-height: 1.65;
+}
+
+.adfs-direct-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+  margin-top: var(--space-4, 16px);
 }
 
 .adfs-form h1 {
