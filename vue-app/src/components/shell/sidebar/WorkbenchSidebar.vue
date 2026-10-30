@@ -152,10 +152,10 @@ const pocReleaseLedger = ref({ records: {} })
 const basePocLogRecords = [
   {
     time: '2026-10-30',
-    releaseKey: 'workbench-readable-entry-20261030',
-    title: '工作台字体调整与演示入口简化',
-    changePoint: '提高菜单、表格和详情文字的可读性；POC 默认入口直接进入演示工作台。',
-    detail: '主要内容使用 14px，操作与状态至少 13px，关键业务说明加深。POC 默认入口直接进入现有权限演示工作台，特殊账号场景可从选择演示场景进入；正常登录和真实权限保持原流程。',
+    releaseKey: 'workbench-style-restore-20261030',
+    title: '恢复既有样式，保留演示直达',
+    changePoint: '撤销上一轮字号与文字颜色调整，恢复既有设计；保留 POC 默认入口直达功能。',
+    detail: '字号、文字颜色和共享样式恢复到上一轮调整前。保留 POC 默认入口直接进入现有权限演示工作台，以及选择演示场景入口；正常登录、审批、角色和权限功能不变。',
     deployTargets: [],
     status: '发布状态以环境记录为准'
   },
