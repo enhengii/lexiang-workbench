@@ -2,6 +2,76 @@
   "schemaVersion": 1,
   "pages": [
     {
+      "pageId": "points.deductionRules",
+      "label": "积分抵现规则",
+      "route": "/points/deduction-rules",
+      "pageType": "T7",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["仅模拟配置维护与历史快照，未执行真实抵现", "本轮交互与响应式验收见独立证据"]
+    },
+    {
+      "pageId": "points.channels",
+      "label": "渠道管理",
+      "route": "/points/channels",
+      "pageType": "T7",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["仅保存演示渠道，未接入真实渠道及发放限制", "本轮交互与响应式验收见独立证据"]
+    },
+    {
+      "pageId": "points.accounts",
+      "label": "账户查询",
+      "route": "/points/accounts",
+      "pageType": "T2",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["账户数据由活动积分成功流水派生，未接入真实余额", "本轮交互与响应式验收见独立证据"]
+    },
+    {
+      "pageId": "points.currencies",
+      "label": "虚拟币管理",
+      "route": "/points/currencies",
+      "pageType": "T7",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["仅保存演示币种配置，未接入真实账本与兑率结算", "本轮交互与响应式验收见独立证据"]
+    },
+    {
+      "pageId": "points.rules",
+      "label": "积分规则",
+      "route": "/points/rules",
+      "pageType": "T7",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["原页面新增表单不可用，仅迁入已核对列表与筛选", "积分发放沿用独立活动积分配置，未接入真实账本"]
+    },
+    {
+      "pageId": "points.detailExport",
+      "label": "积分明细导出",
+      "route": "/points/detail-export",
+      "pageType": "T2",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["本轮筛选、分页及导出交互见独立验证", "仅使用合成活动积分数据，未接入真实账本"]
+    },
+    {
+      "pageId": "points.accountDetails",
+      "label": "积分账户明细",
+      "route": "/points/account-details",
+      "pageType": "T2",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["本轮账户查询与流水联动见独立验证", "仅使用合成活动积分数据，未接入真实账本"]
+    },
+    {
       "pageId": "agent.scenarioPackageCreate",
       "label": "场景技能包创建",
       "route": "/agent/scenario-package-create",

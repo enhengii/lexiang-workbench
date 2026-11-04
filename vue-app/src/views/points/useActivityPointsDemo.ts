@@ -35,6 +35,10 @@ function load(): DemoState {
         (row) =>
           typeof row.key !== 'string' ||
           typeof row.orderId !== 'string' ||
+          typeof row.account !== 'string' ||
+          typeof row.time !== 'string' ||
+          typeof row.transaction !== 'string' ||
+          typeof row.batch !== 'string' ||
           !Array.isArray(row.history) ||
           !['成功', '失败'].includes(row.status) ||
           !Number.isFinite(row.points)

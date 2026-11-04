@@ -61,6 +61,11 @@ const records = computed(() =>
   props.records.filter((row) => row.key.startsWith(`${props.activity.id}:`))
 )
 const status = computed(() => activityStatus(props.activity, props.date))
+const orderPointsLabel = computed(() => status.value === '已结束' ? '应获得活动积分' : '预计活动积分')
+const orderPoints = (row: Calculated) =>
+  !row.eligible ? '不适用' : row.issue ? '待核对' : n(row.delta)
+const orderStatus = (row: Calculated) =>
+  !row.eligible ? '不参与' : row.issue ? '待核对' : status.value === '已结束' ? '可计算' : '累计中'
 const sum = (data: Calculated[], key: 'target' | 'paid' | 'delta') =>
   data.filter((row) => row.eligible && !row.issue).reduce((total, row) => total + row[key], 0)
 const eligible = computed(() => rows.value.filter((row) => row.eligible))
@@ -128,10 +133,8 @@ const orderRows = computed(() =>
     enterprise: row.enterprise,
     quantity: n(row.netQuantity),
     amount: `¥ ${n(row.netReceipt)}`,
-    multiplier: row.multiplier ? `${row.multiplier} 倍` : '—',
-    target: row.issue ? '—' : n(row.target),
-    paid: row.paidBase === null || row.paidMember === null ? '缺失' : n(row.paid),
-    points: row.issue ? '待核对' : n(row.delta),
+    points: orderPoints(row),
+    status: orderStatus(row),
     issue: row.issue
   }))
 )
@@ -212,13 +215,11 @@ const columns = computed<Column[]>(() => {
     { key: 'name', label: '订单号 / Lenovo ID' },
     { key: 'product', label: '商品' },
     { key: 'enterprise', label: '企业' },
+    numeric('amount', '有效金额'),
     numeric('quantity', '有效台数'),
-    numeric('amount', '实际净收款'),
-    numeric('multiplier', '企业倍数'),
-    numeric('target', '应发总积分'),
-    numeric('paid', '实际已发'),
-    numeric('points', '活动应补'),
-    { key: 'actions', label: '计算依据' }
+    numeric('points', orderPointsLabel.value),
+    { key: 'status', label: '核对状态' },
+    { key: 'actions', label: '操作' }
   ]
 })
 const tableRows = computed<Array<Record<string, unknown>>>(() =>
@@ -300,7 +301,7 @@ function download() {
     const exportRows =
       tab.value === '排除与异常' ? visible.value.filter((row) => row.issue) : visible.value
     exportPointsCsv(
-      `${props.activity.name}-订单计算明细`,
+      `${props.activity.name}-订单明细`,
       [
         '活动编号',
         '活动名称',
@@ -310,16 +311,10 @@ function download() {
         'Lenovo ID',
         '订单',
         '商品编码',
-        '购买数量',
-        '退货件数',
-        '收款金额',
-        '退款金额',
-        '实际净收款',
-        '企业倍数',
-        '应发总积分',
-        '实际已发',
-        '活动应补',
-        '已成功补发',
+        '有效金额',
+        '有效台数',
+        orderPointsLabel.value,
+        '核对状态',
         '原因'
       ],
       exportRows.map((row) => [
@@ -331,17 +326,10 @@ function download() {
         row.account,
         row.id,
         row.sku,
-        row.quantity,
-        row.returned,
-        row.receipt,
-        row.refund,
         row.netReceipt,
-        row.multiplier,
-        row.issue ? '' : row.target,
-        row.paidBase === null || row.paidMember === null ? '' : row.paid,
-        row.issue ? '' : row.delta,
-        records.value.find((record) => record.orderId === row.id && record.status === '成功')
-          ?.points || 0,
+        row.netQuantity,
+        !row.eligible ? '不适用' : row.issue ? '待核对' : row.delta,
+        orderStatus(row),
         row.issue
       ])
     )
@@ -463,7 +451,7 @@ watch(
           <template #cell-status="{ value }"><StatusTag :tone="tone(value)">{{ value }}</StatusTag></template>
           <template #cell-points="{ value }"><span class="points-highlight points-numeric">{{ value }}</span></template>
           <template #cell-actions="{ row }"><button class="points-link" @click="action(String(row.id))">
-            {{ tab === '企业统计' ? '查看账号' : tab === '账号明细' ? '查看订单' : '查看依据' }}
+            {{ tab === '企业统计' ? '查看账号' : tab === '账号明细' ? '查看订单' : '查看详情' }}
           </button></template>
         </DataTable>
         <FeedbackState
@@ -563,7 +551,7 @@ watch(
     </ListSurface>
     <PointsDialog
       v-if="order"
-      title="订单计算明细"
+      :title="tab === '发放记录' ? '发放记录详情' : '订单积分详情'"
       :description="`${order.id} · ${order.account}`"
       wide
       @close="orderId = ''"
@@ -576,55 +564,16 @@ watch(
           {{ order.issue }}，不生成补发入账。
         </p>
         <section class="points-section">
-          <SectionHeader title="有效交易与企业达档" />
           <dl class="points-definition">
-            <dt>支付 / 签收</dt>
-            <dd>{{ order.date }} / {{ order.signed ? '已签收' : '未签收' }}</dd>
-            <dt>有效数量</dt>
-            <dd>{{ order.quantity }} − {{ order.returned }} = {{ order.netQuantity }} 台</dd>
-            <dt>实际净收款</dt>
-            <dd>
-              ¥ {{ n(order.receipt) }} − ¥ {{ n(order.refund) }} = ¥ {{ n(order.netReceipt) }}
-            </dd>
-            <dt>企业累计</dt>
-            <dd>{{ n(order.enterpriseQuantity) }} 台 / ¥ {{ n(order.enterpriseAmount) }}</dd>
-            <dt>企业最终倍数</dt>
-            <dd>{{ order.multiplier ? `${order.multiplier} 倍` : '未适用档位' }}</dd>
+            <dt>有效金额</dt>
+            <dd>¥ {{ n(order.netReceipt) }}</dd>
+            <dt>有效台数</dt>
+            <dd>{{ n(order.netQuantity) }} 台</dd>
+            <dt>{{ orderPointsLabel }}</dt>
+            <dd>{{ orderPoints(order) }}<template v-if="order.eligible && !order.issue"> 分</template></dd>
           </dl>
         </section>
-        <section class="points-section">
-          <SectionHeader title="应发与补差" />
-          <div v-if="!order.issue && order.multiplier > 0" class="points-calculation">
-            <p>
-              基础积分计算值：{{ n(order.netReceipt) }} ÷ 100 = {{ order.netReceipt / 100
-              }}<span class="points-secondary">保留小数，不提前取整</span>
-            </p>
-            <p>
-              应发总积分：⌊{{ order.netReceipt / 100 }} × {{ order.multiplier }}⌋ =
-              {{ n(order.target) }}
-            </p>
-            <p>
-              订单实际已发：{{ n(order.paid) }} 分（基础 {{ n(order.paidBase || 0) }} + 会员
-              {{ n(order.paidMember || 0) }}）
-            </p>
-            <strong>{{ n(order.target) }} − {{ n(order.paid) }} = {{ n(order.delta) }} 分</strong>
-          </div>
-          <div v-else class="points-notice">
-            {{
-              order.issue
-                ? '该订单暂停或不参与补发。'
-                : '企业未达档，本活动补发为 0 分，原已发积分保留。'
-            }}
-            <p>
-              实际已发：{{
-                order.paidBase === null || order.paidMember === null
-                  ? '记录缺失'
-                  : `${n(order.paid)} 分`
-              }}{{ order.delta < 0 ? `；差额 ${n(order.delta)} 分，不自动扣款` : '' }}
-            </p>
-          </div>
-        </section>
-        <section class="points-section">
+        <section v-if="tab === '发放记录'" class="points-section">
           <SectionHeader title="发放追溯" />
           <dl v-if="orderRecord" class="points-definition">
             <dt>发放状态</dt>

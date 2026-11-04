@@ -89,7 +89,6 @@ test('an explicit server mode still overrides the development preview default', 
   assert.equal(state.allowPreviewAuth, false)
   assert.equal(state.allowApprovalMailDemo, true)
 })
-
 for (const hostname of ['new.leaibot.cn', 'leaibot.cn']) {
   test(`normal server approval remains available with the demo picker disabled on ${hostname}`, () => {
     const state = runtime({ mode: 'server', hostname, pocLogin: 'false' })

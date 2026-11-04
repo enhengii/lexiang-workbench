@@ -20,7 +20,7 @@
         <span class="status-eyebrow">{{ loading ? '正在查询' : '未找到申请' }}</span>
         <h1>{{ loading ? '正在查询申请进度' : '无法查询该申请进度' }}</h1>
         <p role="status">{{ loading ? '正在读取最新状态，请稍候…' : loadError || '请确认邮件中的申请单号和查询链接是否完整。该 POC 页面只展示当前浏览器本地生成的 mock 申请。' }}</p>
-        <RouterLink to="/login">返回登录页</RouterLink>
+        <RouterLink :to="allowPocSimulation ? '/login?mode=scenarios' : '/login'">返回登录页</RouterLink>
       </div>
     </section>
   </main>
@@ -30,7 +30,7 @@
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { pocLocalStorage, pocStorageEventKey } from '@/services/pocStorage'
-import { permissionLabEnabled } from '@/config/runtimeMode'
+import { allowPocSimulation, permissionLabEnabled } from '@/config/runtimeMode'
 import { labApi } from '@/services/permissionLab'
 import ApplicationProgressSummary from '@/components/auth/ApplicationProgressSummary.vue'
 import { applicationProgress, readApplicantProgress, APPLICANT_PROGRESS_KEY, PROGRESS_APPROVAL_ROWS_KEY } from '@/services/applicationProgress'

@@ -151,6 +151,24 @@ const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
   {
+    time: '2026-10-30',
+    releaseKey: 'workbench-style-restore-20261030',
+    title: '恢复既有样式，保留演示直达',
+    changePoint: '撤销上一轮字号与文字颜色调整，恢复既有设计；保留 POC 默认入口直达功能。',
+    detail: '字号、文字颜色和共享样式恢复到上一轮调整前。保留 POC 默认入口直接进入现有权限演示工作台，以及选择演示场景入口；正常登录、审批、角色和权限功能不变。',
+    deployTargets: [],
+    status: '发布状态以环境记录为准'
+  },
+  {
+    time: '2026-10-29',
+    releaseKey: 'workbench-scenario-guidance-20261029',
+    title: '场景技能包角色与状态说明补全',
+    changePoint: '编辑说明按内容状态、账号身份和实际可用操作展示，补齐已禁用等状态的不同角色提示。',
+    detail: '区分首次草稿和驳回、已发布后的修订、待审核、已发布、已禁用、已暂停与待升级；说明创建者、提交人、参与编辑者、独立审核管理员及无编辑权限账号的操作边界。明确原创建者不变、参与修改者不能自审、禁用修订审核通过后仍保持禁用，说明与现有按钮共用权限判断。未调整业务权限或其他模块，发布情况分别以各环境实际记录为准。',
+    deployTargets: [],
+    status: '发布状态以环境记录为准'
+  },
+  {
     time: '2026-10-26',
     releaseKey: 'workbench-score-ai-notice-20261026',
     title: '打分模型与 AI 助手使用提示',

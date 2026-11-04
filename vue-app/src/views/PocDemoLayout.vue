@@ -3,7 +3,7 @@
     <nav class="poc-demo-banner" aria-label="POC 演示导航">
       <span>POC 演示：仅使用模拟数据，不改变真实账号及权限。</span>
       <div class="poc-demo-actions">
-        <RouterLink to="/login">选择演示场景</RouterLink>
+        <RouterLink to="/login?mode=scenarios">选择演示场景</RouterLink>
         <RouterLink to="/agent/permissions?module=approval">演示审批工作台</RouterLink>
         <a :href="normalAppBase + 'login?loginType=external&pocAccount=admin'">返回正常登录</a>
       </div>

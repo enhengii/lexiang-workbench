@@ -170,11 +170,11 @@ test('editing guidance follows actual owner and revision actions without changin
     seedDraft(context.store, context.recordId)
   } })
   assert.match(revision.state.packageEditGuidance(revision.record).detail, /当前账号可编辑该技能包的修订/)
-  assert.match(revision.state.packageEditGuidance(revision.record).detail, /线上版本保持原状态/)
+  assert.match(revision.state.packageEditGuidance(revision.record).detail, /已审核线上版本保持启用/)
   revision.account.user = revision.record.ownerId
   revision.account.permissions = []
   await nextTick()
-  assert.match(revision.state.packageEditGuidance(revision.record).detail, /当前账号是创建者，但缺少所需的编辑权限/)
+  assert.match(revision.state.packageEditGuidance(revision.record).detail, /你是创建者，但当前账号没有编辑权限/)
 })
 
 test('pending guidance distinguishes withdrawal, independent review, contributors and lost permissions', async () => {
@@ -199,12 +199,12 @@ test('pending guidance distinguishes withdrawal, independent review, contributor
       }
       seedScenarioPackagesForTest(store, records)
     } })
-    assert.match(current.dialog, submitted ? /你是本轮提交人，可先撤回审核/ : /你参与了本轮编辑，不能审核自己的修改/)
+    assert.match(current.dialog, submitted ? /你是非创建者的管理员，也是本轮提交人，可先撤回审核/ : /参与了本轮编辑，不能审核自己的修改/)
     current.account.permissions = []
     await nextTick()
     const updated = await current.renderCurrent()
     assert.match(updated.dialog, /当前账号没有撤回或审核权限/)
-    assert.doesNotMatch(updated.dialog, /当前账号可审批或驳回|你是本轮提交人，可先撤回审核/)
+    assert.doesNotMatch(updated.dialog, /当前账号可审批或驳回|可先撤回审核/)
     assert.deepEqual(rowManagementActions(updated.html, current.record.id), ['详情'])
   }
 })
