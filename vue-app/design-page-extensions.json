@@ -2,6 +2,19 @@
   "schemaVersion": 1,
   "pages": [
     {
+      "pageId": "agent.usageDashboard",
+      "label": "使用数据看板",
+      "route": "/agent/usage-dashboard",
+      "pageType": "T3",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": [
+        "当前只展示固定样例数据，真实统计采集与运营权限未接入",
+        "本轮日期、筛选、导出和内容槽适配验证见独立浏览器证据"
+      ]
+    },
+    {
       "pageId": "points.deductionRules",
       "label": "积分抵现规则",
       "route": "/points/deduction-rules",

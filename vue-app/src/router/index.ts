@@ -43,6 +43,7 @@ const ReviewAssist = () => import('@/views/reviews/ReviewAssistView.vue')
 const AgentSkills = () => import('@/views/agent/AgentSkillsView.vue')
 const AgentSkillCreate = () => import('@/views/agent/AgentSkillCreateView.vue')
 const AgentPermissions = () => import('@/views/agent/AgentPermissionsView.vue')
+const UsageDashboard = () => import('@/views/agent/UsageDashboardView.vue')
 const AdminCleanupEmailMock = () => import('@/views/agent/AdminCleanupEmailMockView.vue')
 const AccountEnableRequest = () => import('@/views/AccountEnableRequestView.vue')
 
@@ -144,6 +145,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'agent/scenario-package-create', component: AgentSkills, meta: { pageId: 'agent.scenarioPackageCreate' } },
       { path: 'agent/skill-create',   component: AgentSkillCreate, meta: { pageId: 'agent.skillCreate' } },
       { path: 'agent/permissions',    component: AgentPermissions, meta: { pageId: 'agent.permissions' } },
+      { path: 'agent/usage-dashboard', component: UsageDashboard, meta: { pageId: 'agent.usageDashboard' } },
       { path: 'agent/permissions/admin-cleanup-email', component: AdminCleanupEmailMock, meta: { pageId: 'agent.permissions' } },
 
       // 封板项目中的隐藏/详情/二级流程页：不进左导航，但需要支持 switchPage 内部跳转

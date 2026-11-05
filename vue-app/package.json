@@ -12,6 +12,7 @@
     "typecheck": "vue-tsc --noEmit",
     "lint": "eslint .",
     "test:product-contract": "node --test scripts/product-contract-regression.test.mjs",
+    "test:usage-dashboard": "node --test scripts/usage-dashboard.test.mjs",
     "test:design-skill-guard": "node --test scripts/design-skill-guard.test.mjs",
     "test:scenario-skill-packages": "node --test scripts/scenario-skill-packages.test.mjs scripts/scenario-skill-package-graph.test.mjs",
     "test:application-info": "node scripts/test-application-info.mjs",

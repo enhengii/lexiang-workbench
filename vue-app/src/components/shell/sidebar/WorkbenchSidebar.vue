@@ -43,6 +43,7 @@
       @open-scenario-package-create="openScenarioPackageCreatePage"
       @open-skill-manager="openSkillManagerPage"
       @open-permission-manager="openPermissionManagerPage"
+      @open-usage-dashboard="openUsageDashboardPage"
       @open-poc-log="openPocAdjustmentLog"
     />
   </div>
@@ -150,6 +151,15 @@ const pocLogVisible = ref(false)
 const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
+  {
+    time: '2026-11-05',
+    releaseKey: 'workbench-usage-dashboard-20261105',
+    title: '工作台使用数据看板',
+    changePoint: '从左下角个人入口查看使用概览与 Skill 分析，支持时间筛选、明细查看和样例统计导出。',
+    detail: '按已讨论的内部授权用户、平台访问、AI 助手互动和 Skill 运行指标搭建看板基本框架。全页使用明确标注的固定样例；人数按周期去重，卡片、趋势和 Skill 明细来自同一数据集。业务模块与搜索仅筛选 Skill 聚合明细，导出不包含用户名单、原始提问或调用结果正文。Badcase、解决率与节省时效继续后置，真实数据采集及全平台统计权限尚未接入。沿用现有工作台外壳、样式和 Agent；各环境发布状态分别以实际记录为准。',
+    deployTargets: [],
+    status: '发布状态以环境记录为准'
+  },
   {
     time: '2026-10-30',
     releaseKey: 'workbench-style-restore-20261030',
@@ -1092,6 +1102,12 @@ function openPermissionManagerPage() {
   appStore.ensureStaticTab('agent.permissions')
   appStore.setActiveStaticTab('agent.permissions')
   router.push('/agent/permissions')
+}
+function openUsageDashboardPage() {
+  closeUserMenu()
+  appStore.ensureStaticTab('agent.usageDashboard')
+  appStore.setActiveStaticTab('agent.usageDashboard')
+  router.push('/agent/usage-dashboard')
 }
 async function refreshPocReleaseLedger() {
   pocReleaseLedger.value = await loadPocReleaseLedger()

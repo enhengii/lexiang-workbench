@@ -61,6 +61,23 @@ const commonContentStyles = {
 
 export const CONTENT_SLOT_GROUPS = [
   {
+    key: 'workbenchUsage',
+    label: '工作台使用数据',
+    ownership: 'Vue native page; fixed synthetic demonstration dataset',
+    defaultLayout: CONTENT_SLOT_LAYOUTS.analysisDashboard,
+    pages: [{
+      pageId: 'agent.usageDashboard',
+      label: '使用数据看板',
+      path: '/agent/usage-dashboard',
+      layout: CONTENT_SLOT_LAYOUTS.analysisDashboard,
+      sourceRenderer: 'src/views/agent/UsageDashboardView.vue',
+      fixedStyles: ['shared ContentPageHeader', 'one PageFlow', 'shared metric grid and content tabs'],
+      sharedCandidates: ['ContentPageHeader', 'MetricGrid', 'MetricCard', 'SectionHeader', 'ContentTabs', 'DataTable', 'FeedbackState'],
+      customAreas: ['date-window deduplication', 'assistant and Skill sample aggregation', 'page-local chart options'],
+      interactions: ['enter from account menu', 'switch overview and Skill analysis', 'filter dates and Skill rows', 'inspect aggregate Skill details', 'export filtered synthetic statistics']
+    }]
+  },
+  {
     key: 'points',
     label: '积分管理',
     ownership: 'Vue native page; isolated demonstration data',
