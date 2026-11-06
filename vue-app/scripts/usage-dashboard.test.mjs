@@ -181,3 +181,224 @@ test('usage dashboard computes an internally consistent synthetic report', async
     }
   })
 })
+
+test('usage analysis keeps Skill and creator quality views in one filtered scope', async (t) => {
+  const api = await import('../src/domain/usageDashboard.js')
+  assert.equal(typeof api.getUsageAnalysis, 'function', 'the dimension analysis API must exist')
+  const { getUsageAnalysis, getUsageReport, usageRowsToCsv, usageCreatorsToCsv, usageCallsToCsv } = api
+
+  await t.test('preserves the existing sample call and Query counts while sharing their source', () => {
+    const legacy = getUsageReport()
+    assert.deepEqual(
+      ['queries', 'calls', 'success', 'failed', 'likes', 'dislikes'].map((key) => legacy.summary[key]),
+      [217, 180, 172, 8, 22, 10],
+    )
+    const report = getUsageAnalysis()
+    assert.equal(report.startDate, legacy.startDate)
+    assert.equal(report.endDate, legacy.endDate)
+    for (const key of ['calls', 'success', 'failed', 'likes', 'dislikes', 'newSkills', 'calledSkills']) {
+      assert.equal(report.summary[key], legacy.summary[key])
+    }
+    assert.equal(report.summary.skillCount, 10)
+    assert.equal(report.summary.creatorCount, 5)
+    assert.equal(report.skills.length, 10)
+    assert.equal(report.creators.length, 5)
+    assert.ok(report.creators.every((creator) => creator.skillCount === 2))
+  })
+
+  await t.test('aggregates quality from calls instead of averaging Skill percentages or durations', () => {
+    const report = getUsageAnalysis()
+    assert.equal(report.summary.calls, report.calls.length)
+    assert.equal(report.summary.success, report.calls.filter((call) => call.status === 'success').length)
+    assert.equal(report.summary.failed, report.calls.filter((call) => call.status === 'failed').length)
+    assert.equal(report.summary.likes, report.calls.filter((call) => call.feedback === 'like').length)
+    assert.equal(report.summary.dislikes, report.calls.filter((call) => call.feedback === 'dislike').length)
+    assert.equal(report.summary.feedbackCount, report.summary.likes + report.summary.dislikes)
+    closeTo(report.summary.successRate, 172 / 180)
+    closeTo(report.summary.likeRate, 22 / 32)
+    closeTo(report.summary.avgDurationSeconds, sum(report.calls, 'durationSeconds') / report.calls.length)
+    for (const creator of report.creators) {
+      const calls = report.calls.filter((call) => call.creatorId === creator.id)
+      closeTo(creator.avgDurationSeconds, sum(calls, 'durationSeconds') / calls.length)
+      closeTo(creator.successRate, calls.filter((call) => call.status === 'success').length / calls.length)
+      const feedback = calls.filter((call) => call.feedback !== null)
+      if (feedback.length) closeTo(creator.likeRate, feedback.filter((call) => call.feedback === 'like').length / feedback.length)
+    }
+    const unweightedSuccess = sum(report.skills, 'successRate') / report.skills.length
+    assert.ok(Math.abs(unweightedSuccess - report.summary.successRate) > 1e-6, 'unequal volumes must expose an unweighted success-rate bug')
+    const unweightedDuration = sum(report.skills, 'avgDurationSeconds') / report.skills.length
+    assert.ok(Math.abs(unweightedDuration - report.summary.avgDurationSeconds) > 1e-6, 'unequal volumes must expose an unweighted duration bug')
+  })
+
+  await t.test('deduplicates users across Skills and creators instead of adding row user counts', () => {
+    const report = getUsageAnalysis()
+    assert.ok(report.summary.users > 0 && report.summary.users <= 50)
+    assert.ok(report.summary.users < sum(report.skills, 'users'))
+    assert.ok(report.summary.users < sum(report.creators, 'users'))
+    assert.ok(report.creators.some((creator) => creator.users < sum(report.skills.filter((skill) => skill.creatorId === creator.id), 'users')))
+    for (const creator of report.creators) {
+      const scoped = getUsageAnalysis({ creatorId: creator.id })
+      assert.equal(scoped.summary.users, creator.users)
+      assert.equal(scoped.summary.calls, creator.calls)
+      assert.equal(scoped.summary.skillCount, creator.skillCount)
+      for (const skill of scoped.skills) {
+        const single = getUsageAnalysis({ creatorId: creator.id, skillId: skill.id })
+        assert.equal(single.summary.users, skill.users)
+        assert.equal(single.summary.calls, skill.calls)
+      }
+    }
+  })
+
+  await t.test('keeps already-published zero-call Skills and their creator, with null denominators', () => {
+    const report = getUsageAnalysis({ startDate: '2026-11-03', endDate: '2026-11-03', creatorId: 'sample.creator-a' })
+    assert.equal(report.summary.skillCount, 2)
+    assert.equal(report.summary.creatorCount, 1)
+    assert.equal(report.summary.calledSkills, 0)
+    assert.equal(report.summary.calls, 0)
+    assert.equal(report.summary.users, 0)
+    assert.equal(report.skills.length, 2)
+    assert.equal(report.creators.length, 1)
+    assert.deepEqual(report.calls, [])
+    for (const row of [report.summary, ...report.skills, ...report.creators]) {
+      assert.equal(row.successRate, null)
+      assert.equal(row.likeRate, null)
+      assert.equal(row.avgDurationSeconds, null)
+    }
+    assert.deepEqual(report.trend, [{ date: '2026-11-03', users: 0, calls: 0, success: 0, failed: 0, likes: 0, dislikes: 0, successRate: null, likeRate: null }])
+    const unreviewed = getUsageAnalysis({ startDate: '2026-11-03', endDate: '2026-11-03', skillId: 'sample.order-status' })
+    assert.equal(unreviewed.summary.calls, 5)
+    assert.equal(unreviewed.summary.feedbackCount, 0)
+    assert.equal(unreviewed.summary.likeRate, null)
+    assert.ok(unreviewed.summary.successRate !== null)
+  })
+
+  await t.test('uses the cutoff catalog, inclusive publication dates and complete daily trends', () => {
+    const report = getUsageAnalysis({ startDate: '2026-11-02', endDate: '2026-11-03' })
+    assert.equal(report.summary.skillCount, 9)
+    assert.equal(report.summary.newSkills, 1)
+    assert.ok(!report.skills.some((skill) => skill.id === 'sample.operation-summary'))
+    assert.ok(report.skills.every((skill) => skill.publishedAt <= '2026-11-03'))
+    assert.deepEqual(report.trend.map(({ date }) => date), ['2026-11-02', '2026-11-03'])
+    for (const key of ['calls', 'success', 'failed', 'likes', 'dislikes']) {
+      assert.equal(sum(report.trend, key), report.summary[key])
+      assert.equal(sum(report.skills, key), report.summary[key])
+      assert.equal(sum(report.creators, key), report.summary[key])
+    }
+    assert.ok(report.calls.every((call) => call.date >= '2026-11-02' && call.date <= '2026-11-03'))
+    const publication = getUsageAnalysis({ startDate: '2026-11-04', endDate: '2026-11-04', skillId: 'sample.operation-summary' })
+    assert.equal(publication.summary.newSkills, 1)
+    assert.equal(publication.summary.skillCount, 1)
+    assert.equal(getUsageAnalysis({ endDate: '2026-11-03' }).startDate, '2026-10-28')
+  })
+
+  await t.test('applies catalog filters to every analysis region while leaving the legacy report global', () => {
+    const baseline = getUsageReport()
+    const report = getUsageAnalysis({ module: '企业客户管理', creatorId: 'sample.creator-a', skillId: 'sample.customer-query' })
+    assert.equal(report.summary.skillCount, 1)
+    assert.equal(report.summary.creatorCount, 1)
+    assert.ok(report.calls.length > 0)
+    assert.ok(report.skills.every((skill) => skill.id === 'sample.customer-query'))
+    assert.ok(report.calls.every((call) => call.skillId === 'sample.customer-query' && call.creatorId === 'sample.creator-a' && call.module === '企业客户管理'))
+    assert.equal(sum(report.trend, 'calls'), report.summary.calls)
+    assert.deepEqual(getUsageReport(), baseline)
+    const wrongOwner = getUsageAnalysis({ creatorId: 'sample.creator-b', skillId: 'sample.customer-query' })
+    assert.equal(wrongOwner.summary.skillCount, 0)
+    assert.equal(wrongOwner.summary.calls, 0)
+    assert.equal(wrongOwner.trend.length, 7, 'a valid empty scope keeps the selected calendar days')
+  })
+
+  await t.test('searches the active dimension and preserves scope when drilling down', () => {
+    for (const search of ['客户信息查询', 'SAMPLE.CUSTOMER-QUERY']) {
+      const skills = getUsageAnalysis({ dimension: 'skills', search: ` ${search} ` })
+      assert.equal(skills.summary.skillCount, 1)
+      assert.equal(skills.skills[0].id, 'sample.customer-query')
+    }
+    for (const search of ['样例创建者 A', 'SAMPLE.CREATOR-A']) {
+      const creator = getUsageAnalysis({ dimension: 'creators', search })
+      assert.equal(creator.summary.creatorCount, 1)
+      assert.equal(creator.summary.skillCount, 2)
+      assert.equal(creator.creators[0].id, 'sample.creator-a')
+    }
+    assert.equal(getUsageAnalysis({ dimension: 'creators', search: '客户信息查询' }).summary.skillCount, 0)
+    const byName = getUsageAnalysis({ dimension: 'skills', search: '样例创建者 A' })
+    assert.equal(byName.summary.skillCount, 2)
+    const detail = getUsageAnalysis({ dimension: 'creators', search: '样例创建者 A', creatorId: 'sample.creator-a', skillId: 'sample.product-query' })
+    assert.equal(detail.summary.skillCount, 1)
+    assert.ok(detail.calls.every((call) => call.skillId === 'sample.product-query'))
+  })
+
+  await t.test('returns only safe, stable sample call details in Beijing calendar time', () => {
+    const report = getUsageAnalysis()
+    const expectedKeys = ['creatorId', 'creatorName', 'date', 'durationSeconds', 'failureReason', 'feedback', 'id', 'module', 'occurredAt', 'skillId', 'skillName', 'status']
+    assert.equal(new Set(report.calls.map((call) => call.id)).size, report.calls.length)
+    for (const call of report.calls) {
+      assert.deepEqual(Object.keys(call).sort(), expectedKeys)
+      assert.match(call.occurredAt, /^\d{4}-\d{2}-\d{2} (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/)
+      assert.equal(call.occurredAt.slice(0, 10), call.date)
+      assert.ok(call.durationSeconds > 0)
+      assert.ok(['success', 'failed'].includes(call.status))
+      assert.ok(['like', 'dislike', null].includes(call.feedback))
+      if (call.status === 'failed') assert.match(call.failureReason, /样例/)
+      else assert.equal(call.failureReason, '')
+      const skill = report.skills.find(({ id }) => id === call.skillId)
+      assert.equal(call.creatorId, skill.creatorId)
+      assert.equal(call.creatorName, skill.creator)
+    }
+    const skillId = report.calls[0].skillId
+    assert.deepEqual(getUsageAnalysis({ skillId }).calls, report.calls.filter((call) => call.skillId === skillId))
+  })
+
+  await t.test('keeps invalid ranges empty and returned objects isolated from future reports', () => {
+    for (const [startDate, endDate] of [['2026-02-30', '2026-11-04'], ['2026-11-04', '2026-11-03'], ['2026-11-05', '2026-11-05']]) {
+      const report = getUsageAnalysis({ startDate, endDate })
+      assert.deepEqual(report.skills, [])
+      assert.deepEqual(report.creators, [])
+      assert.deepEqual(report.calls, [])
+      assert.deepEqual(report.trend, [])
+      assert.equal(report.summary.calls, 0)
+      assert.equal(report.summary.successRate, null)
+      assert.equal(report.summary.likeRate, null)
+      assert.equal(report.summary.avgDurationSeconds, null)
+    }
+    const report = getUsageAnalysis()
+    const snapshot = structuredClone(report)
+    report.summary.calls = -1
+    report.skills[0].creatorId = 'changed'
+    report.creators[0].name = 'changed'
+    report.calls[0].failureReason = 'changed'
+    report.trend.pop()
+    assert.deepEqual(getUsageAnalysis(), snapshot)
+  })
+
+  await t.test('exports precisely the passed filtered creator and safe-call rows', () => {
+    const report = getUsageAnalysis({ creatorId: 'sample.creator-a', skillId: 'sample.customer-query' })
+    const creators = usageCreatorsToCsv(report.creators)
+    const calls = usageCallsToCsv(report.calls)
+    assert.ok(creators.startsWith('\uFEFF创建人ID,创建人,'))
+    assert.ok(calls.startsWith('\uFEFF调用ID,调用时间（北京时间）,'))
+    assert.equal(creators.split('\r\n').length, report.creators.length + 1)
+    assert.equal(calls.split('\r\n').length, report.calls.length + 1)
+    assert.ok(creators.includes('sample.creator-a'))
+    assert.ok(!creators.includes('sample.creator-b'))
+    assert.ok(!calls.includes('sample.order-status'))
+    assert.ok(!calls.includes('userId'))
+    assert.ok(!calls.includes('prompt'))
+    assert.equal(usageCreatorsToCsv([]).split('\r\n').length, 1)
+    assert.equal(usageCallsToCsv([]).split('\r\n').length, 1)
+    assert.ok(usageRowsToCsv(report.skills).includes('客户信息查询'))
+  })
+
+  await t.test('protects the new CSV text fields against formulas and escapes punctuation', () => {
+    const report = getUsageAnalysis()
+    for (const value of ['=1+1', '+SUM(A1)', '-1+2', '@SUM(A1)', '  =1+1', '\t=1+1']) {
+      assert.ok(usageCreatorsToCsv([{ ...report.creators[0], name: value }]).includes(`'${value}`))
+      assert.ok(usageCallsToCsv([{ ...report.calls[0], failureReason: value }]).includes(`'${value}`))
+    }
+    assert.ok(usageCreatorsToCsv([{ ...report.creators[0], name: '创建者,"A"\nB' }]).includes('"创建者,""A""\nB"'))
+    const zero = getUsageAnalysis({ startDate: '2026-11-03', endDate: '2026-11-03', creatorId: 'sample.creator-a' }).creators[0]
+    const cells = usageCreatorsToCsv([zero]).split('\r\n')[1].split(',')
+    assert.equal(cells[9], '')
+    assert.equal(cells[13], '')
+    assert.equal(cells[14], '')
+  })
+})

@@ -6,45 +6,46 @@ import MetricGrid from '@/components/content/MetricGrid.vue'
 import MetricCard from '@/components/content/MetricCard.vue'
 import SectionHeader from '@/components/content/SectionHeader.vue'
 import FilterField from '@/components/content/FilterField.vue'
-import DataTable from '@/components/content/DataTable.vue'
-import ListSurface from '@/components/content/ListSurface.vue'
-import Pagination from '@/components/content/Pagination.vue'
 import FeedbackState from '@/components/content/FeedbackState.vue'
 import UsageTrendChart from './usage/UsageTrendChart.vue'
-import UsageSkillDetails from './usage/UsageSkillDetails.vue'
-import { USAGE_ANCHOR_DATE, USAGE_MODULES, getUsageReport, usageRowsToCsv } from '@/domain/usageDashboard.js'
+import UsageDimensionPanel from './usage/UsageDimensionPanel.vue'
+import UsageAnalysisDetails from './usage/UsageAnalysisDetails.vue'
+import UsageDailyReportPanel from './usage/UsageDailyReportPanel.vue'
+import { USAGE_ANCHOR_DATE, getUsageReport, getUsageAnalysis, usageRowsToCsv, usageCreatorsToCsv } from '@/domain/usageDashboard.js'
+import { USAGE_DAILY_START_DATE, USAGE_DAILY_END_DATE } from '@/domain/usageDailyReport.js'
 
 const SAMPLE_START = '2026-08-07'
 type UsageReport = ReturnType<typeof getUsageReport>
 type SkillRow = UsageReport['skills'][number]
 const tab = ref('overview')
-const tabs = [{ key: 'overview', label: '使用概览' }, { key: 'skills', label: 'Skill 分析' }]
+const source = ref<'daily' | 'sample'>('daily')
+const rangeStart = computed(() => source.value === 'daily' ? USAGE_DAILY_START_DATE : SAMPLE_START)
+const rangeEnd = computed(() => source.value === 'daily' ? USAGE_DAILY_END_DATE : USAGE_ANCHOR_DATE)
+const tabs = [{ key: 'overview', label: '使用概览' }, { key: 'skills', label: 'Skill 分析' }, { key: 'creators', label: '创建人分析' }]
 const dateBefore = (date: string, days: number) => {
   const value = new Date(`${date}T00:00:00Z`)
   value.setUTCDate(value.getUTCDate() - days)
   return value.toISOString().slice(0, 10)
 }
-const startDate = ref(dateBefore(USAGE_ANCHOR_DATE, 6))
-const endDate = ref(USAGE_ANCHOR_DATE)
+const startDate = ref(dateBefore(USAGE_DAILY_END_DATE, 6))
+const endDate = ref(USAGE_DAILY_END_DATE)
 const module = ref('all')
 const search = ref('')
 const trendMode = ref<'users' | 'calls'>('users')
-const page = ref(1)
-const pageSize = 8
-const selectedSkillId = ref('')
+const detailTarget = ref<{ dimension: 'skills' | 'creators'; id: string } | null>(null)
 const exportNotice = ref('')
-const presets = [{ days: 1, label: '昨日' }, { days: 7, label: '近7天' }, { days: 30, label: '近30天' }]
+const presets = [{ days: 1, label: '最新一天' }, { days: 7, label: '近7天' }, { days: 30, label: '近30天' }]
 const validDate = (value: string) => /^\d{4}-\d{2}-\d{2}$/.test(value)
   && Number.isFinite(Date.parse(`${value}T00:00:00Z`))
   && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value
 const dateError = computed(() => {
   if (!validDate(startDate.value) || !validDate(endDate.value)) return '请填写完整的起始日期和截止日期。'
   if (startDate.value > endDate.value) return '起始日期不能晚于截止日期，请调整日期区间。'
-  if (startDate.value < SAMPLE_START || endDate.value > USAGE_ANCHOR_DATE) return `样例数据范围为 ${SAMPLE_START} 至 ${USAGE_ANCHOR_DATE}，请在此范围内选择。`
+  if (startDate.value < rangeStart.value || endDate.value > rangeEnd.value) return `${source.value === 'daily' ? '日报' : '样例'}数据范围为 ${rangeStart.value} 至 ${rangeEnd.value}，请在此范围内选择。`
   return ''
 })
 const result = computed<{ report: UsageReport | null; error: string }>(() => {
-  if (dateError.value) return { report: null, error: '' }
+  if (dateError.value || source.value === 'daily') return { report: null, error: '' }
   try {
     return { report: getUsageReport({ startDate: startDate.value, endDate: endDate.value, module: module.value, search: search.value }), error: '' }
   } catch {
@@ -52,86 +53,81 @@ const result = computed<{ report: UsageReport | null; error: string }>(() => {
   }
 })
 const report = computed(() => result.value.report)
-const rows = computed(() => [...(report.value?.filteredSkills || [])].sort((a, b) => b.calls - a.calls))
-const pageRows = computed(() => rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
+const analysisDimension = computed(() => tab.value === 'creators' ? 'creators' as const : 'skills' as const)
+const analysis = computed(() => {
+  if (dateError.value || source.value === 'daily') return null
+  try {
+    return getUsageAnalysis({ startDate: startDate.value, endDate: endDate.value, module: module.value, search: search.value, dimension: analysisDimension.value })
+  } catch { return null }
+})
+const analysisRowsCount = computed(() => tab.value === 'creators' ? analysis.value?.creators.length || 0 : analysis.value?.skills.length || 0)
 const ranking = computed(() => [...(report.value?.skills || [])].filter(row => row.calls > 0).sort((a, b) => b.calls - a.calls).slice(0, 5))
-const filteredCalls = computed(() => rows.value.reduce((sum, row) => sum + row.calls, 0))
-const selectedSkill = computed(() => report.value?.skills.find(row => row.id === selectedSkillId.value))
 const n = (value: number) => value.toLocaleString('zh-CN')
 const rate = (value: number | null) => value == null ? '—' : `${(value * 100).toFixed(1)}%`
 const penetration = computed(() => report.value?.summary.totalUsers
   ? report.value.summary.aiUsers / report.value.summary.totalUsers : null)
 const firstToken = computed(() => report.value?.summary.firstTokenSeconds == null ? '—' : `${report.value.summary.firstTokenSeconds.toFixed(2)} 秒`)
-const columns = [
-  { key: 'name', label: 'Skill / 创建人', width: '220px' },
-  { key: 'module', label: '业务模块', width: '120px' },
-  { key: 'users', label: '使用人数', width: '92px', align: 'right' as const },
-  { key: 'calls', label: '调用次数', width: '92px', align: 'right' as const },
-  { key: 'outcomes', label: '成功 / 失败', width: '112px', align: 'right' as const },
-  { key: 'successRate', label: '成功率', width: '92px', align: 'right' as const },
-  { key: 'feedback', label: '赞 / 踩', width: '92px', align: 'right' as const },
-  { key: 'actions', label: '操作', width: '92px' }
-]
 
 function selectPeriod(days: number) {
-  startDate.value = dateBefore(USAGE_ANCHOR_DATE, days - 1)
-  endDate.value = USAGE_ANCHOR_DATE
+  startDate.value = dateBefore(rangeEnd.value, days - 1)
+  endDate.value = rangeEnd.value
 }
 function isPreset(days: number) {
-  return endDate.value === USAGE_ANCHOR_DATE && startDate.value === dateBefore(USAGE_ANCHOR_DATE, days - 1)
+  return endDate.value === rangeEnd.value && startDate.value === dateBefore(rangeEnd.value, days - 1)
 }
-function resetSkillFilters() { module.value = 'all'; search.value = '' }
-function showSkill(row: SkillRow) { selectedSkillId.value = row.id }
+function showSkill(row: SkillRow) { detailTarget.value = { dimension: 'skills', id: row.id } }
+function openDimensionDetail(id: string) { detailTarget.value = { dimension: analysisDimension.value, id } }
 function rankWidth(calls: number) {
   const maximum = ranking.value[0]?.calls || 1
   return `${(calls / maximum) * 100}%`
 }
 function exportSample() {
-  if (!report.value || dateError.value) return
-  const currentRows = rows.value
-  if (!currentRows.length) return
+  if (!analysis.value || dateError.value || tab.value === 'overview' || !analysisRowsCount.value) return
   try {
-    const blob = new Blob([usageRowsToCsv(currentRows)], { type: 'text/csv;charset=utf-8' })
+    const csv = tab.value === 'creators' ? usageCreatorsToCsv(analysis.value.creators) : usageRowsToCsv(analysis.value.skills)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `使用数据样例_Skill聚合_${startDate.value}_${endDate.value}.csv`
+    link.download = `使用数据样例_${tab.value === 'creators' ? '创建人贡献' : 'Skill聚合'}_${startDate.value}_${endDate.value}.csv`
     document.body.append(link)
     link.click()
     link.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 0)
-    exportNotice.value = `已导出当前筛选下的 ${currentRows.length} 个 Skill 聚合统计，不含原始 Query 或使用人名单。`
+    exportNotice.value = `已导出当前筛选下的 ${analysisRowsCount.value} ${tab.value === 'creators' ? '位创建人贡献' : '个Skill'}聚合统计，不含原始Query或使用人名单。`
   } catch {
     exportNotice.value = '导出失败，请重试。'
   }
 }
-watch([startDate, endDate, module, search], () => { page.value = 1; selectedSkillId.value = ''; exportNotice.value = '' })
-watch(tab, () => { selectedSkillId.value = ''; exportNotice.value = '' })
-onDeactivated(() => { selectedSkillId.value = '' })
+watch([startDate, endDate, module, search], () => { detailTarget.value = null; exportNotice.value = '' })
+watch(tab, () => { detailTarget.value = null; exportNotice.value = ''; module.value = 'all'; search.value = '' })
+watch(source, () => { selectPeriod(7); detailTarget.value = null; exportNotice.value = ''; module.value = 'all'; search.value = '' })
+onDeactivated(() => { detailTarget.value = null })
 </script>
 
 <template>
   <div class="usage-dashboard" data-page="usage-dashboard">
     <div class="usage-page-flow">
-      <ContentPageHeader title="使用数据看板" description="全平台范围 · 示例数据未接入正式统计">
-        <template v-if="tab === 'skills'" #actions>
-          <button type="button" class="btn btn-secondary" :disabled="!report || !rows.length" title="导出当前周期及筛选条件下的 Skill 聚合统计" @click="exportSample">导出样例数据</button>
+      <ContentPageHeader title="使用数据看板" :description="source === 'daily' ? `全平台范围 · 邮件日报数据 · 截至${rangeEnd}` : '全平台范围 · 示例数据未接入正式统计'">
+        <template v-if="source === 'sample' && tab !== 'overview'" #actions>
+          <button type="button" class="btn btn-secondary" :disabled="!analysis || !analysisRowsCount" title="导出当前周期及筛选条件下的聚合统计" @click="exportSample">导出样例数据</button>
         </template>
       </ContentPageHeader>
 
       <section class="usage-period usage-surface" data-flow-role="filters" aria-label="统计周期">
+        <div class="usage-quick-period" role="group" aria-label="数据来源"><span class="usage-filter-label">数据来源</span><button type="button" :class="{ selected: source === 'daily' }" :aria-pressed="source === 'daily'" @click="source = 'daily'">日报数据</button><button type="button" :class="{ selected: source === 'sample' }" :aria-pressed="source === 'sample'" @click="source = 'sample'">样例演示</button></div>
         <div class="usage-period-main">
           <div class="usage-quick-period" role="group" aria-label="快捷统计周期">
             <span class="usage-filter-label">统计周期</span>
             <button v-for="preset in presets" :key="preset.days" type="button" :class="{ selected: isPreset(preset.days) }" :aria-pressed="isPreset(preset.days)" @click="selectPeriod(preset.days)">{{ preset.label }}</button>
           </div>
           <div class="usage-date-range">
-            <FilterField label="起始日期" layout="inset"><input v-model="startDate" type="date" :min="SAMPLE_START" :max="USAGE_ANCHOR_DATE" aria-label="起始日期" :aria-invalid="!!dateError" :aria-describedby="dateError ? 'usage-date-error' : undefined" /></FilterField>
+            <FilterField label="起始日期" layout="inset"><input v-model="startDate" type="date" :min="rangeStart" :max="rangeEnd" aria-label="起始日期" :aria-invalid="!!dateError" :aria-describedby="dateError ? 'usage-date-error' : undefined" /></FilterField>
             <span aria-hidden="true">至</span>
-            <FilterField label="截止日期" layout="inset"><input v-model="endDate" type="date" :min="SAMPLE_START" :max="USAGE_ANCHOR_DATE" aria-label="截止日期" :aria-invalid="!!dateError" :aria-describedby="dateError ? 'usage-date-error' : undefined" /></FilterField>
+            <FilterField label="截止日期" layout="inset"><input v-model="endDate" type="date" :min="rangeStart" :max="rangeEnd" aria-label="截止日期" :aria-invalid="!!dateError" :aria-describedby="dateError ? 'usage-date-error' : undefined" /></FilterField>
           </div>
         </div>
-        <p class="usage-period-hint">样例截止 {{ USAGE_ANCHOR_DATE }}，支持 {{ SAMPLE_START }} 起的区间；按北京时间自然日统计。</p>
+        <p class="usage-period-hint">{{ source === 'daily' ? '日报快照' : '样例数据' }}截止 {{ rangeEnd }}，支持 {{ rangeStart }} 起的区间；快捷周期以数据截止日为准。</p>
       </section>
 
       <ContentTabs v-model="tab" :items="tabs" label="使用数据视图" data-flow-role="filters" />
@@ -139,6 +135,7 @@ onDeactivated(() => { selectedSkillId.value = '' })
       <FeedbackState v-if="dateError" id="usage-date-error" state="error" title="请检查统计周期" :description="dateError" data-flow-role="notice">
         <template #action><button type="button" class="btn btn-secondary" @click="selectPeriod(7)">恢复近7天</button></template>
       </FeedbackState>
+      <UsageDailyReportPanel v-else-if="source === 'daily'" :view="tab" :start-date="startDate" :end-date="endDate" />
       <FeedbackState v-else-if="result.error" state="error" title="读取失败" :description="result.error" data-flow-role="notice" />
       <FeedbackState v-else-if="!report || !report.trend.length" state="empty" title="所选周期暂无数据" description="请选择样例范围内的其他日期。" data-flow-role="notice" />
 
@@ -210,44 +207,22 @@ onDeactivated(() => { selectedSkillId.value = '' })
         </div>
       </template>
 
-      <section v-else class="usage-list-workspace" data-flow-role="list-workspace" aria-label="Skill分析">
-        <div class="usage-skill-filters usage-surface">
-          <FilterField label="搜索Skill"><input v-model="search" type="search" placeholder="名称 / ID / 创建人" /></FilterField>
-          <FilterField label="业务模块"><select v-model="module"><option value="all">全部模块</option><option v-for="item in USAGE_MODULES" :key="item" :value="item">{{ item }}</option></select></FilterField>
-          <button type="button" class="btn btn-secondary usage-reset" @click="resetSkillFilters">重置</button>
-        </div>
-        <ListSurface>
-          <template #toolbar>
-            <div class="usage-table-toolbar"><strong>Skill聚合统计</strong><span>共 {{ rows.length }} 个 Skill · 调用 {{ n(filteredCalls) }} 次 · 人数按周期去重</span></div>
-          </template>
-          <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" caption="所选周期及筛选条件下的Skill使用聚合统计，示例数据" density="two-line">
-            <template #cell-name="{ row }"><div class="usage-skill-name">{{ row.name }}</div><div class="usage-skill-meta"><span class="usage-code">{{ row.id }}</span> · {{ row.creator }}</div></template>
-            <template #cell-users="{ row }">{{ n(row.users) }}</template>
-            <template #cell-calls="{ row }">{{ n(row.calls) }}</template>
-            <template #cell-outcomes="{ row }">{{ n(row.success) }} / {{ n(row.failed) }}</template>
-            <template #cell-successRate="{ row }">{{ rate(row.successRate) }}</template>
-            <template #cell-feedback="{ row }">{{ n(row.likes) }} / {{ n(row.dislikes) }}</template>
-            <template #cell-actions="{ row }"><button type="button" class="usage-text-button" :aria-label="`查看${row.name}聚合详情`" @click="showSkill(row)">查看详情</button></template>
-          </DataTable>
-          <FeedbackState v-else state="filtered-empty" title="没有匹配的Skill" description="请调整业务模块或搜索名称、ID、创建人。">
-            <template #action><button type="button" class="btn btn-secondary" @click="resetSkillFilters">清除筛选</button></template>
-          </FeedbackState>
-          <template #pagination><Pagination v-model:page="page" :page-size="pageSize" :total="rows.length" /></template>
-        </ListSurface>
-      </section>
+      <UsageDimensionPanel v-else-if="analysis" v-model:module="module" v-model:search="search" :key="analysisDimension" :analysis="analysis" :dimension="analysisDimension" data-flow-role="main" @open-detail="openDimensionDetail" />
+      <FeedbackState v-else state="error" title="分析数据暂时无法读取" description="请调整筛选条件后重试。" data-flow-role="notice" />
 
-      <details class="usage-definitions usage-surface" data-flow-role="notice">
+      <details v-if="source === 'sample'" class="usage-definitions usage-surface" data-flow-role="notice">
         <summary>统计口径与样例说明</summary>
         <dl>
           <div><dt>统计范围</dt><dd>全平台示例数据，覆盖 {{ SAMPLE_START }} 至 {{ USAGE_ANCHOR_DATE }}。所有人数按账号去重；周期用户数不能由每日用户数相加得到。</dd></div>
           <div><dt>活跃与渗透</dt><dd>登录DAU为截止日访问人数；AI DAU为截止日主动发送Query的人数。WAU、MAU包含截止日及此前6、29个自然日，独立于所选周期起始日；历史样例不足完整窗口时按已有天数统计。AI授权渗透率为周期AI互动人数 / 截止日授权用户总数，正式授权分母待业务封板。</dd></div>
           <div><dt>Query与调用</dt><dd>AI互动及Query只统计全局助手，排除Skill创建中的需求澄清与AI微调对话。Skill按实际调用次数计数，一条Query可产生多次调用；成功率为成功调用 / 总调用，无调用时不计算。平均首字响应统计Query请求至首个响应的耗时。</dd></div>
-          <div><dt>Skill与反馈</dt><dd>已上线数量为截止日存量，新增为周期内首次上线数量；被调用为周期内有调用的Skill数。好评率为点赞 /（点赞 + 点踩），无反馈时不计算。模块与搜索仅筛选Skill聚合表，不改变全平台概览。</dd></div>
-          <div><dt>数据边界</dt><dd>当前样例只含最终成功/失败记录；生产成功、失败、超时、取消、部分成功及重试的计数口径待确认。导出仅含当前筛选聚合统计，不含原始Query、使用人名单或结果正文。</dd></div>
+          <div><dt>Skill与反馈</dt><dd>已上线为截止日存量，新增为周期内首次上线数量；被调用为周期内有调用的Skill数。好评率为点赞 /（点赞 + 点踩），无反馈时不计算。模块与搜索联动当前维度的看板、排行、表格与详情，不改变使用概览。</dd></div>
+          <div><dt>创建人贡献</dt><dd>按创建人旗下Skill的使用贡献聚合，非创建人本人使用。使用人数在所选范围跨Skill去重，不能将分行人数直接相加；成功率、好评率分别用合计调用和合计反馈计算，不平均各Skill比率。</dd></div>
+          <div><dt>质量与明细</dt><dd>运行成功≠业务解决，不生成综合质量评分。当前样例只含最终成功/失败记录；生产超时、取消、部分成功及重试口径待确认。明细只含样例调用ID、时间、状态、耗时、赞踩和失败原因，不含用户原始标识或输入输出正文。</dd></div>
         </dl>
       </details>
     </div>
-    <UsageSkillDetails v-if="selectedSkill" :row="selectedSkill" :start-date="startDate" :end-date="endDate" @close="selectedSkillId = ''" />
+    <UsageAnalysisDetails v-if="detailTarget" :dimension="detailTarget.dimension" :target-id="detailTarget.id" :scope-dimension="analysisDimension" :start-date="startDate" :end-date="endDate" :module="tab === 'overview' ? 'all' : module" :search="tab === 'overview' ? '' : search" @close="detailTarget = null" />
   </div>
 </template>
 

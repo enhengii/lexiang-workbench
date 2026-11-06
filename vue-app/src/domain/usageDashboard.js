@@ -8,10 +8,18 @@
  * @typedef {{ date: string, loginUsers: number, aiUsers: number, queries: number, calls: number, success: number, failed: number }} UsageTrendRow
  * @typedef {{ dau: number, wau: number, mau: number }} UsageWindow
  * @typedef {{ startDate: string, endDate: string, summary: UsageSummary, trend: UsageTrendRow[], skills: UsageSkillRow[], filteredSkills: UsageSkillRow[], windows: { login: UsageWindow, ai: UsageWindow } }} UsageReport
- * @typedef {{ id: string, name: string, module: string, creator: string, publishedAt: string }} SampleSkill
+ * @typedef {UsageReportOptions & { dimension?: 'skills'|'creators', creatorId?: string, skillId?: string }} UsageAnalysisOptions
+ * @typedef {{ users: number, calls: number, success: number, failed: number, successRate: number|null, likes: number, dislikes: number, feedbackCount: number, likeRate: number|null, avgDurationSeconds: number|null }} UsageQuality
+ * @typedef {UsageSkillRow & { creatorId: string, publishedAt: string, avgDurationSeconds: number|null }} UsageAnalysisSkillRow
+ * @typedef {UsageQuality & { id: string, name: string, skillCount: number, calledSkills: number, newSkills: number }} UsageCreatorRow
+ * @typedef {UsageQuality & { skillCount: number, creatorCount: number, calledSkills: number, newSkills: number }} UsageAnalysisSummary
+ * @typedef {{ date: string, users: number, calls: number, success: number, failed: number, likes: number, dislikes: number, successRate: number|null, likeRate: number|null }} UsageAnalysisTrendRow
+ * @typedef {{ id: string, occurredAt: string, date: string, skillId: string, skillName: string, creatorId: string, creatorName: string, module: string, status: 'success'|'failed', feedback: 'like'|'dislike'|null, durationSeconds: number, failureReason: string }} UsageCallRow
+ * @typedef {{ startDate: string, endDate: string, summary: UsageAnalysisSummary, trend: UsageAnalysisTrendRow[], skills: UsageAnalysisSkillRow[], creators: UsageCreatorRow[], calls: UsageCallRow[] }} UsageAnalysis
+ * @typedef {{ id: string, name: string, module: string, creatorId: string, creator: string, publishedAt: string }} SampleSkill
  * @typedef {{ date: string, userId: string }} SampleVisit
  * @typedef {{ date: string, userId: string, firstTokenMs: number }} SampleQuery
- * @typedef {{ date: string, userId: string, skillId: string, succeeded: boolean, feedback: 'like'|'dislike'|null }} SampleCall
+ * @typedef {{ id: string, occurredAt: string, date: string, userId: string, skillId: string, succeeded: boolean, feedback: 'like'|'dislike'|null, durationSeconds: number, failureReason: string }} SampleCall
  */
 
 export const USAGE_ANCHOR_DATE = '2026-11-04'
@@ -30,16 +38,16 @@ const SAMPLE_START_DATE = shiftDate(USAGE_ANCHOR_DATE, -89)
 
 /** @type {SampleSkill[]} */
 const SAMPLE_SKILLS = [
-  { id: 'sample.customer-query', name: '客户信息查询', module: '企业客户管理', creator: '样例创建者 A', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -100) },
-  { id: 'sample.order-status', name: '订单进度查询', module: '订单管理', creator: '样例创建者 B', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -87) },
-  { id: 'sample.member-benefits', name: '会员权益查询', module: '会员管理', creator: '样例创建者 C', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -73) },
-  { id: 'sample.product-query', name: '商品信息查询', module: '商品管理', creator: '样例创建者 D', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -60) },
-  { id: 'sample.campaign-query', name: '活动配置查询', module: '营销运营', creator: '样例创建者 E', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -42) },
-  { id: 'sample.customer-groups', name: '客户分组统计', module: '企业客户管理', creator: '样例创建者 F', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -28) },
-  { id: 'sample.order-summary', name: '订单明细汇总', module: '订单管理', creator: '样例创建者 G', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -14) },
-  { id: 'sample.member-levels', name: '会员等级分布', module: '会员管理', creator: '样例创建者 H', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -6) },
-  { id: 'sample.product-stock', name: '商品库存查询', module: '商品管理', creator: '样例创建者 I', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -2) },
-  { id: 'sample.operation-summary', name: '运营数据汇总', module: '营销运营', creator: '样例创建者 J', publishedAt: USAGE_ANCHOR_DATE },
+  { id: 'sample.customer-query', name: '客户信息查询', module: '企业客户管理', creatorId: 'sample.creator-a', creator: '样例创建者 A', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -100) },
+  { id: 'sample.order-status', name: '订单进度查询', module: '订单管理', creatorId: 'sample.creator-b', creator: '样例创建者 B', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -87) },
+  { id: 'sample.member-benefits', name: '会员权益查询', module: '会员管理', creatorId: 'sample.creator-c', creator: '样例创建者 C', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -73) },
+  { id: 'sample.product-query', name: '商品信息查询', module: '商品管理', creatorId: 'sample.creator-a', creator: '样例创建者 A', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -60) },
+  { id: 'sample.campaign-query', name: '活动配置查询', module: '营销运营', creatorId: 'sample.creator-d', creator: '样例创建者 D', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -42) },
+  { id: 'sample.customer-groups', name: '客户分组统计', module: '企业客户管理', creatorId: 'sample.creator-e', creator: '样例创建者 E', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -28) },
+  { id: 'sample.order-summary', name: '订单明细汇总', module: '订单管理', creatorId: 'sample.creator-b', creator: '样例创建者 B', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -14) },
+  { id: 'sample.member-levels', name: '会员等级分布', module: '会员管理', creatorId: 'sample.creator-c', creator: '样例创建者 C', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -6) },
+  { id: 'sample.product-stock', name: '商品库存查询', module: '商品管理', creatorId: 'sample.creator-d', creator: '样例创建者 D', publishedAt: shiftDate(USAGE_ANCHOR_DATE, -2) },
+  { id: 'sample.operation-summary', name: '运营数据汇总', module: '营销运营', creatorId: 'sample.creator-e', creator: '样例创建者 E', publishedAt: USAGE_ANCHOR_DATE },
 ]
 
 /**
@@ -79,12 +87,20 @@ function createSampleRecords() {
         for (let callIndex = 0; callIndex < callCount; callIndex += 1) {
           const skill = availableSkills[(userIndex * 3 + dayIndex + queryIndex + callIndex) % availableSkills.length]
           const feedbackSeed = userIndex + dayIndex * 3 + queryIndex + callIndex
+          const succeeded = feedbackSeed % 19 !== 0
+          const seconds = 9 * 3600 + (userIndex * 617 + queryIndex * 73 + dayIndex * 113 + callIndex * 17) % (10 * 3600)
+          const clock = [Math.floor(seconds / 3600), Math.floor(seconds / 60) % 60, seconds % 60]
+            .map((part) => String(part).padStart(2, '0')).join(':')
           calls.push({
+            id: `sample-call-${String(calls.length + 1).padStart(6, '0')}`,
+            occurredAt: `${date} ${clock}`,
             date,
             userId,
             skillId: skill.id,
-            succeeded: feedbackSeed % 19 !== 0,
+            succeeded,
             feedback: feedbackSeed % 6 === 0 ? 'like' : feedbackSeed % 17 === 0 ? 'dislike' : null,
+            durationSeconds: (1200 + (userIndex * 137 + dayIndex * 97 + queryIndex * 251 + callIndex * 557) % 16000) / 1000,
+            failureReason: succeeded ? '' : feedbackSeed % 2 === 0 ? '样例执行超时' : '样例接口返回异常',
           })
         }
       }
@@ -232,6 +248,129 @@ export function getUsageReport({ startDate, endDate, module = 'all', search = ''
   return report
 }
 
+/** @param {SampleCall[]} calls @returns {UsageQuality} */
+function callQuality(calls) {
+  const success = calls.filter((call) => call.succeeded).length
+  const likes = calls.filter((call) => call.feedback === 'like').length
+  const dislikes = calls.filter((call) => call.feedback === 'dislike').length
+  return {
+    users: uniqueUsers(calls),
+    calls: calls.length,
+    success,
+    failed: calls.length - success,
+    successRate: ratio(success, calls.length),
+    likes,
+    dislikes,
+    feedbackCount: likes + dislikes,
+    likeRate: ratio(likes, likes + dislikes),
+    avgDurationSeconds: calls.length === 0 ? null : calls.reduce((total, call) => total + call.durationSeconds, 0) / calls.length,
+  }
+}
+
+/** @param {string} startDate @param {string} endDate @returns {UsageAnalysis} */
+function emptyAnalysis(startDate, endDate) {
+  return {
+    startDate,
+    endDate,
+    summary: { skillCount: 0, creatorCount: 0, calledSkills: 0, newSkills: 0, ...callQuality([]) },
+    trend: [],
+    skills: [],
+    creators: [],
+    calls: [],
+  }
+}
+
+/**
+ * Analyze the synthetic published catalog by Skill or stable creator ID.
+ * Every filter scopes the catalog first, and the same selected calls feed all
+ * cards, rows, daily trend and safe call details. Published zero-call entities
+ * remain visible. Creator ownership belongs only to this fictional sample.
+ * Duration is the full sample call duration, not Query first-token latency.
+ * @param {UsageAnalysisOptions} [options]
+ * @returns {UsageAnalysis}
+ */
+export function getUsageAnalysis({ startDate, endDate, module = 'all', search = '', dimension = 'skills', creatorId, skillId } = {}) {
+  const to = endDate === undefined ? USAGE_ANCHOR_DATE : endDate
+  const from = startDate === undefined ? isCalendarDate(to) ? shiftDate(to, -6) : '' : startDate
+  const report = emptyAnalysis(typeof from === 'string' ? from : '', typeof to === 'string' ? to : '')
+  if (!isCalendarDate(from) || !isCalendarDate(to) || from > to || from < SAMPLE_START_DATE || to > USAGE_ANCHOR_DATE) return report
+
+  const keyword = typeof search === 'string' ? search.trim().toLocaleLowerCase() : ''
+  const catalog = SAMPLE_SKILLS.filter((skill) => {
+    if (skill.publishedAt > to || (module !== 'all' && skill.module !== module)) return false
+    if (creatorId && skill.creatorId !== creatorId) return false
+    if (skillId && skill.id !== skillId) return false
+    const searchable = dimension === 'creators' ? [skill.creator, skill.creatorId] : [skill.name, skill.id, skill.creator]
+    return !keyword || searchable.some((value) => value.toLocaleLowerCase().includes(keyword))
+  })
+  const catalogById = new Map(catalog.map((skill) => [skill.id, skill]))
+  const selectedCalls = SAMPLE_RECORDS.calls.filter((call) => call.date >= from && call.date <= to && catalogById.has(call.skillId))
+
+  report.skills = catalog.map((skill) => ({
+    id: skill.id,
+    name: skill.name,
+    module: skill.module,
+    creatorId: skill.creatorId,
+    creator: skill.creator,
+    publishedAt: skill.publishedAt,
+    ...callQuality(selectedCalls.filter((call) => call.skillId === skill.id)),
+  })).sort((left, right) => right.calls - left.calls || left.id.localeCompare(right.id))
+
+  report.creators = [...new Set(catalog.map((skill) => skill.creatorId))].map((id) => {
+    const creatorSkills = catalog.filter((skill) => skill.creatorId === id)
+    const creatorSkillIds = new Set(creatorSkills.map((skill) => skill.id))
+    const calls = selectedCalls.filter((call) => creatorSkillIds.has(call.skillId))
+    return {
+      id,
+      name: creatorSkills[0].creator,
+      skillCount: creatorSkills.length,
+      calledSkills: new Set(calls.map((call) => call.skillId)).size,
+      newSkills: creatorSkills.filter((skill) => skill.publishedAt >= from).length,
+      ...callQuality(calls),
+    }
+  }).sort((left, right) => right.calls - left.calls || left.id.localeCompare(right.id))
+
+  report.summary = {
+    skillCount: catalog.length,
+    creatorCount: report.creators.length,
+    calledSkills: report.skills.filter((skill) => skill.calls > 0).length,
+    newSkills: catalog.filter((skill) => skill.publishedAt >= from).length,
+    ...callQuality(selectedCalls),
+  }
+  for (let date = from; date <= to; date = shiftDate(date, 1)) {
+    const quality = callQuality(selectedCalls.filter((call) => call.date === date))
+    report.trend.push({
+      date,
+      users: quality.users,
+      calls: quality.calls,
+      success: quality.success,
+      failed: quality.failed,
+      likes: quality.likes,
+      dislikes: quality.dislikes,
+      successRate: quality.successRate,
+      likeRate: quality.likeRate,
+    })
+  }
+  report.calls = selectedCalls.map((call) => {
+    const skill = catalogById.get(call.skillId)
+    return {
+      id: call.id,
+      occurredAt: call.occurredAt,
+      date: call.date,
+      skillId: skill.id,
+      skillName: skill.name,
+      creatorId: skill.creatorId,
+      creatorName: skill.creator,
+      module: skill.module,
+      status: /** @type {'success'|'failed'} */ (call.succeeded ? 'success' : 'failed'),
+      feedback: call.feedback,
+      durationSeconds: call.durationSeconds,
+      failureReason: call.failureReason,
+    }
+  }).sort((left, right) => right.occurredAt.localeCompare(left.occurredAt) || left.id.localeCompare(right.id))
+  return report
+}
+
 /** @param {unknown} value @returns {string} */
 function csvCell(value) {
   let text = value === null || value === undefined ? '' : String(value)
@@ -254,6 +393,41 @@ export function usageRowsToCsv(rows = []) {
     row.id, row.name, row.module, row.creator, row.users, row.calls,
     row.success, row.failed, percentage(row.successRate), row.likes,
     row.dislikes, row.feedbackCount, percentage(row.likeRate),
+  ].map(csvCell).join(','))
+  return `\uFEFF${[header.join(','), ...lines].join('\r\n')}`
+}
+
+/** @param {number|null} value @returns {string} */
+const csvPercentage = (value) => value === null || value === undefined ? '' : `${(value * 100).toFixed(2)}%`
+
+/**
+ * Export exactly the supplied creator aggregation, including zero-call rows.
+ * @param {ReadonlyArray<UsageCreatorRow>} [rows]
+ * @returns {string}
+ */
+export function usageCreatorsToCsv(rows = []) {
+  const header = ['创建人ID', '创建人', 'Skill数', '被调用Skill数', '新增Skill数', '调用用户数', '调用次数', '成功次数', '失败次数', '成功率', '点赞次数', '点踩次数', '评价次数', '点赞率', '平均调用耗时（秒）']
+  const lines = rows.map((row) => [
+    row.id, row.name, row.skillCount, row.calledSkills, row.newSkills, row.users,
+    row.calls, row.success, row.failed, csvPercentage(row.successRate), row.likes,
+    row.dislikes, row.feedbackCount, csvPercentage(row.likeRate), row.avgDurationSeconds,
+  ].map(csvCell).join(','))
+  return `\uFEFF${[header.join(','), ...lines].join('\r\n')}`
+}
+
+/**
+ * Export only safe synthetic call fields, with no caller identity or payloads.
+ * The provided rows are already scoped; this exporter never re-queries data.
+ * @param {ReadonlyArray<UsageCallRow>} [rows]
+ * @returns {string}
+ */
+export function usageCallsToCsv(rows = []) {
+  const header = ['调用ID', '调用时间（北京时间）', '日期', 'Skill ID', 'Skill名称', '创建人ID', '创建人', '所属模块', '调用状态', '用户反馈', '调用耗时（秒）', '失败原因']
+  const lines = rows.map((row) => [
+    row.id, row.occurredAt, row.date, row.skillId, row.skillName, row.creatorId,
+    row.creatorName, row.module, row.status === 'success' ? '成功' : '失败',
+    row.feedback === 'like' ? '点赞' : row.feedback === 'dislike' ? '点踩' : '',
+    row.durationSeconds, row.failureReason,
   ].map(csvCell).join(','))
   return `\uFEFF${[header.join(','), ...lines].join('\r\n')}`
 }
