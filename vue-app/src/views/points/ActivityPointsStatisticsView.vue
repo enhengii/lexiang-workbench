@@ -24,7 +24,8 @@ import {
   statisticsStatuses,
   type StatisticsFilters,
   type StatisticsRow,
-  type StatisticsGroup
+  type StatisticsGroup,
+  type StatisticsStatus
 } from '@/services/activityPointsStatistics'
 
 const app = useAppStore()
@@ -102,7 +103,17 @@ const orderPoints = (row: StatisticsRow) =>
   !row.eligible ? '不适用' : row.issue ? '待核对' : p(row.requiredPoints)
 const tierLabel = (group: StatisticsGroup) =>
   group.multiplier ? `${group.multiplier} 倍` : '未达档'
-const tableRows = computed<Array<Record<string, unknown>>>(() =>
+const statusTone = (status: StatisticsStatus) =>
+  status === '待自动发放' ? 'primary'
+    : status === '已发放' ? 'success'
+      : status === '发放失败' ? 'danger'
+        : status === '计算异常' ? 'warning' : 'neutral'
+const statusNote = (row: StatisticsRow) =>
+  row.status === '待自动发放' ? `计划发放：${plannedDate.value}`
+    : row.status === '已发放' && row.record ? `发放时间：${row.record.time}` : row.reason
+type StatusMarker = { status: StatisticsStatus; count?: number }
+type StatisticsTableRow = Record<string, unknown> & { markers: StatusMarker[] }
+const tableRows = computed<StatisticsTableRow[]>(() =>
   tab.value === '订单明细'
     ? rows.value.map((row) => ({
         key: row.key,
@@ -115,7 +126,8 @@ const tableRows = computed<Array<Record<string, unknown>>>(() =>
         amount: money(row.netReceipt),
         required: orderPoints(row),
         status: row.status,
-        reason: row.reason
+        reason: statusNote(row),
+        markers: [{ status: row.status }]
       }))
     : groups.value.map((group) => ({
         key: group.id,
@@ -132,7 +144,10 @@ const tableRows = computed<Array<Record<string, unknown>>>(() =>
         posted: n(group.summary.posted),
         pending: n(group.summary.pending),
         failed: n(group.summary.failed),
-        exceptions: group.summary.exceptionCount
+        exceptions: group.summary.exceptionCount,
+        markers: statisticsStatuses
+          .map((status) => ({ status, count: group.rows.filter((row) => row.status === status).length }))
+          .filter((marker) => marker.count > 0)
       }))
 )
 const paged = computed(() => tableRows.value.slice((page.value - 1) * 10, page.value * 10))
@@ -164,6 +179,7 @@ const columns = computed<Column[]>(() =>
         numeric('pending', pendingPointsLabel.value),
         numeric('failed', '失败积分'),
         numeric('exceptions', '计算异常'),
+        { key: 'status', label: '发放状态 / 明细笔数' },
         { key: 'actions', label: '操作' }
       ]
 )
@@ -449,19 +465,14 @@ watch(
                 <template #cell-name="{ row }"><button class="points-link points-name" @click="openRow(row.key)">
                   {{ row.name }}</button><small class="points-secondary">{{ row.secondary }}</small></template>
                 <template #cell-multiplier="{ row }"><span class="points-numeric">{{ row.multiplier }}</span><small v-if="row.tierContext" class="points-secondary">活动累计 {{ row.tierContext }}</small></template>
-                <template #cell-status="{ row }"><StatusTag
-                  :tone="
-                    row.status === '已发放'
-                      ? 'success'
-                      : row.status === '发放失败'
-                        ? 'danger'
-                        : row.status === '计算异常'
-                          ? 'warning'
-                          : 'neutral'
-                  "
-                >{{ row.status }}</StatusTag><small v-if="row.reason" class="points-secondary">{{
-                  row.reason
-                }}</small></template>
+                <template #cell-status="{ row }">
+                  <div class="points-status-tags">
+                    <StatusTag v-for="marker in row.markers" :key="marker.status" :tone="statusTone(marker.status)">
+                      {{ marker.status }}<template v-if="marker.count != null"> {{ marker.count }} 笔</template>
+                    </StatusTag>
+                  </div>
+                  <small v-if="row.reason" class="points-secondary">{{ row.reason }}</small>
+                </template>
                 <template #cell-actions="{ row }"><button class="points-link" @click="openRow(row.key)">
                   {{
                     tab === '企业统计' ? '查看账号' : tab === '账号明细' ? '查看订单' : '查看详情'
@@ -490,12 +501,10 @@ watch(
       @close="detailKey = ''"
     >
       <div class="points-form-flow">
-        <StatusTag
-          :tone="
-            detail.status === '计算异常' || detail.status === '发放失败' ? 'warning' : 'primary'
-          "
-        >{{ detail.status }}</StatusTag>
-        <p v-if="detail.reason" class="points-notice points-warning">{{ detail.reason }}</p>
+        <div>
+          <StatusTag :tone="statusTone(detail.status)">{{ detail.status }}</StatusTag>
+          <p v-if="statusNote(detail)" class="points-secondary">{{ statusNote(detail) }}</p>
+        </div>
         <dl class="points-definition">
           <dt>企业 / 标识</dt>
           <dd>{{ detail.enterprise }} / {{ detail.enterpriseId }}</dd>
@@ -509,6 +518,12 @@ watch(
           <dd>{{ n(detail.netQuantity) }} 台</dd>
           <dt>{{ orderPointsLabel }}</dt>
           <dd>{{ orderPoints(detail) }}<template v-if="detail.eligible && !detail.issue && detail.requiredPoints != null"> 分</template></dd>
+          <template v-if="detail.record">
+            <dt>发放记录时间</dt>
+            <dd>{{ detail.record.time }}</dd>
+            <dt>积分流水号</dt>
+            <dd>{{ detail.record.transaction || '暂无成功流水' }}</dd>
+          </template>
         </dl>
       </div>
       <template #actions><button class="btn btn-secondary" @click="detailKey = ''">关闭</button></template>
