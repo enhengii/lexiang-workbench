@@ -45,8 +45,8 @@ const coreColumns = computed(() => [
       : [numberColumn('totalUsers', '授权用户'), { key: 'loginWauRate', label: '登录周覆盖率', align: 'right' as const, format: (value: unknown) => rate(typeof value === 'number' ? value : null) }, { key: 'aiWauRate', label: '互动周覆盖率', align: 'right' as const, format: (value: unknown) => rate(typeof value === 'number' ? value : null) }, { key: 'firstTokenSeconds', label: '当日首字等待（秒）', align: 'right' as const, format: (value: unknown) => typeof value === 'number' ? value.toFixed(2) : '—' }])
 ])
 const columns = computed(() => [
-  { key: 'name', label: creators.value ? '创建人 IT Code' : 'Skill / 创建人', width: '240px' },
-  ...(creators.value ? [numberColumn('skillCount', '有明细Skill')] : [{ key: 'module', label: '菜单', width: '130px' }, numberColumn('users', '当日使用人数')]),
+  { key: 'name', label: creators.value ? '创建人 IT Code' : 'Skill', width: '240px' },
+  ...(creators.value ? [numberColumn('skillCount', '有明细Skill')] : [{ key: 'creator', label: '创建人', width: '140px' }, { key: 'module', label: '菜单', width: '130px' }, numberColumn('users', '当日使用人数')]),
   numberColumn('calls', '调用次数'),
   { key: 'outcomes', label: '成功 / 失败', align: 'right' as const, width: '110px' },
   { key: 'successRate', label: '成功率', align: 'right' as const, width: '92px' },
@@ -130,7 +130,7 @@ watch(coreGroup, () => { page.value = 1 })
       </div>
       <ListSurface data-flow-role="list-workspace"><template #toolbar><div class="daily-toolbar"><SectionHeader :title="creators ? '创建人聚合明细' : 'Skill聚合明细'" :description="`当前筛选 ${rows.length} 条 · 仅含日报中已有的明细`" /><button type="button" class="btn btn-secondary" :disabled="!rows.length" @click="download">导出当前统计</button></div></template>
         <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人归属下Skill调用与质量统计' : 'Skill日统计按当前周期汇总'" density="two-line">
-          <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? (row.id === 'unattributed' ? '原日报未标注，保留此分组' : `当前范围涵盖 ${row.skillCount} 个Skill`) : `${row.id} · ${row.creator}` }}</div></template>
+          <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? (row.id === 'unattributed' ? '原日报未标注，保留此分组' : `当前范围涵盖 ${row.skillCount} 个Skill`) : row.id }}</div></template>
           <template #cell-users="{ row }"><span :title="row.users == null ? '日报只有日去重人数，无法跨日去重' : '当天该Skill去重人数'">{{ n(row.users) }}</span></template>
           <template #cell-outcomes="{ row }">{{ n(row.success) }} / {{ n(row.failed) }}</template><template #cell-successRate="{ row }">{{ rate(row.successRate) }}</template><template #cell-feedback="{ row }">{{ n(row.likes) }} / {{ n(row.dislikes) }}</template><template #cell-likeRate="{ row }">{{ rate(row.likeRate) }}</template>
           <template #cell-actions="{ row }"><button type="button" class="daily-link" :aria-label="`查看${row.name}日报明细`" @click="targetId = row.id">查看明细</button></template>

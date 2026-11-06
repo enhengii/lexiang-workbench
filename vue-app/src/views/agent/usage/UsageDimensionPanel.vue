@@ -45,10 +45,10 @@ const baseColumns = [
   { key: 'actions', label: '操作', width: '100px' }
 ]
 const columns = computed(() => [
-  { key: 'name', label: creators.value ? '创建人' : 'Skill / 创建人', width: creators.value ? '170px' : '220px' },
+  { key: 'name', label: creators.value ? '创建人' : 'Skill', width: creators.value ? '170px' : '220px' },
   ...(creators.value
     ? [{ key: 'skillCount', label: '旗下Skill', width: '92px', align: 'right' as const }, { key: 'calledSkills', label: '被用Skill', width: '92px', align: 'right' as const }]
-    : [{ key: 'module', label: '业务模块', width: '120px' }]),
+    : [{ key: 'creator', label: '创建人', width: '140px' }, { key: 'module', label: '业务模块', width: '120px' }]),
   ...baseColumns
 ])
 function reset() { selectedModule.value = 'all'; keyword.value = '' }
@@ -103,7 +103,7 @@ watch(() => [props.module, props.search, props.dimension, props.analysis.startDa
     <ListSurface>
       <template #toolbar><div class="usage-dimension-toolbar"><strong>{{ creators ? '创建人贡献明细' : 'Skill使用明细' }}</strong><span>{{ rows.length }} {{ creators ? '位创建人' : '个Skill' }} · 平均调用耗时 {{ duration(summary.avgDurationSeconds) }}</span></div></template>
       <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人旗下Skill贡献聚合统计，示例数据' : 'Skill调用与质量聚合统计，示例数据'" density="two-line">
-        <template #cell-name="{ row }"><div class="usage-analysis-name">{{ row.name }}</div><div class="usage-analysis-meta"><span class="usage-analysis-code">{{ row.id }}</span><span v-if="row.creator"> · {{ row.creator }}</span></div></template>
+        <template #cell-name="{ row }"><div class="usage-analysis-name">{{ row.name }}</div><div class="usage-analysis-meta"><span class="usage-analysis-code">{{ row.id }}</span></div></template>
         <template #cell-skillCount="{ row }">{{ n(row.skillCount) }}</template>
         <template #cell-calledSkills="{ row }">{{ n(row.calledSkills) }}</template>
         <template #cell-users="{ row }">{{ n(row.users) }}</template>
