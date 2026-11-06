@@ -8,6 +8,8 @@ import {
   checkProductCodes,
   checkExcludedProductCodes,
   products,
+  invoiceTypeOptions,
+  enterpriseGroupOptions,
   payoutDate,
   validateActivity,
   type Activity,
@@ -27,6 +29,11 @@ const filteredProductCount = computed(() => {
   return result.error ? null : activeProducts({ ...activity.value, excluded: result.codes }).length
 })
 const error = ref('')
+const eligibilitySubmitted = ref(false)
+const invoiceChoices = ref<HTMLFieldSetElement | null>(null)
+const groupChoices = ref<HTMLFieldSetElement | null>(null)
+const invoiceError = computed(() => eligibilitySubmitted.value && !activity.value.invoiceTypes.length)
+const groupError = computed(() => eligibilitySubmitted.value && !activity.value.enterpriseGroupIds.length)
 const discard = ref(false)
 const dirty = computed(
   () =>
@@ -79,6 +86,12 @@ function changeMode() {
 }
 function save(draft: boolean) {
   error.value = ''
+  eligibilitySubmitted.value = true
+  if (invoiceError.value || groupError.value) {
+    const field = invoiceError.value ? invoiceChoices.value : groupChoices.value
+    field?.querySelector('input')?.focus()
+    return
+  }
   let codes = activity.value.codes
   let excluded = activity.value.excluded
   if (activity.value.productMode === 'codes') {
@@ -150,7 +163,33 @@ function save(draft: boolean) {
         </div>
       </section>
       <section class="points-section">
-        <SectionHeader title="参与商品" />
+        <SectionHeader title="条件1—发票" />
+        <fieldset ref="invoiceChoices" class="points-options" :aria-invalid="invoiceError" aria-describedby="points-invoice-help">
+          <legend><span class="points-required" aria-hidden="true">*</span> 选择发放积分的发票类型（必填）</legend>
+          <label v-for="option in invoiceTypeOptions" :key="option.value" class="points-check">
+            <input v-model="activity.invoiceTypes" type="checkbox" :value="option.value" />
+            <span>{{ option.label }}</span>
+          </label>
+        </fieldset>
+        <p id="points-invoice-help" :class="invoiceError ? 'points-code-error' : 'points-muted'" aria-live="polite">
+          {{ invoiceError ? '请至少选择一种发票类型' : '可多选，订单发票类型须命中所选类型之一。' }}
+        </p>
+      </section>
+      <section class="points-section">
+        <SectionHeader title="条件2—用户" />
+        <fieldset ref="groupChoices" class="points-options points-eligibility-groups" :aria-invalid="groupError" aria-describedby="points-group-help">
+          <legend><span class="points-required" aria-hidden="true">*</span> 选择发放积分的企业组（必填）</legend>
+          <label v-for="option in enterpriseGroupOptions" :key="option.value" class="points-check">
+            <input v-model="activity.enterpriseGroupIds" type="checkbox" :value="option.value" />
+            <span>{{ option.label }}</span>
+          </label>
+        </fieldset>
+        <p id="points-group-help" :class="groupError ? 'points-code-error' : 'points-muted'" aria-live="polite">
+          {{ groupError ? '请至少选择一个企业组' : '可多选，下单用户须属于所选企业组之一。' }}
+        </p>
+      </section>
+      <section class="points-section">
+        <SectionHeader title="条件3—商品" />
         <PointsSelect
           :model-value="activity.productMode"
           label="商品选择方式"
@@ -234,8 +273,7 @@ function save(draft: boolean) {
             : `最终参与 ${filteredProductCount} 个商品，重复命中只计一次。` }}
         </p>
         <div class="points-notice">
-          沿用既有发放资格。演示含黑名单、CTO
-          和签收校验；发票、经销商等条件清单及判断时点待业务确认。
+          发票类型、用户企业组与商品条件取交集，仅符合全部条件的订单计入有效累计并计算活动积分；同时沿用黑名单、CTO 和签收校验。
         </div>
       </section>
       <section class="points-section">
@@ -318,3 +356,26 @@ function save(draft: boolean) {
   </PointsDialog>
 </template>
 <style scoped src="./points.css"></style>
+<style scoped>
+.points-required {
+  color: var(--color-danger);
+}
+.points-eligibility-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+}
+.points-options[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+.points-options input[type='checkbox'] {
+  width: var(--space-4, 16px);
+  height: var(--space-4, 16px);
+  min-height: 0;
+  flex: 0 0 var(--space-4, 16px);
+  margin-block-start: var(--space-1, 4px);
+}
+.points-options input:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+</style>

@@ -171,6 +171,8 @@ function edit(activity?: Activity) {
         ...structuredClone(seedActivities[3]),
         id: `ACT${Date.now()}`,
         name: '',
+        invoiceTypes: [],
+        enterpriseGroupIds: [],
         start: state.date,
         end: future.toISOString().slice(0, 10),
         draft: true,

@@ -16,6 +16,8 @@ import {
   activityStatus,
   payoutDate,
   activeProducts,
+  invoiceTypeOptions,
+  enterpriseGroupOptions,
   number as n,
   type Activity,
   type Calculated,
@@ -63,9 +65,9 @@ const records = computed(() =>
 const status = computed(() => activityStatus(props.activity, props.date))
 const orderPointsLabel = computed(() => status.value === '已结束' ? '应获得活动积分' : '预计活动积分')
 const orderPoints = (row: Calculated) =>
-  !row.eligible ? '不适用' : row.issue ? '待核对' : n(row.delta)
+  row.calculationError ? '待核对' : !row.eligible ? '不适用' : row.issue ? '待核对' : n(row.delta)
 const orderStatus = (row: Calculated) =>
-  !row.eligible ? '不参与' : row.issue ? '待核对' : status.value === '已结束' ? '可计算' : '累计中'
+  row.calculationError ? '计算异常' : !row.eligible ? '不参与' : row.issue ? '待核对' : status.value === '已结束' ? '可计算' : '累计中'
 const sum = (data: Calculated[], key: 'target' | 'paid' | 'delta') =>
   data.filter((row) => row.eligible && !row.issue).reduce((total, row) => total + row[key], 0)
 const eligible = computed(() => rows.value.filter((row) => row.eligible))
@@ -160,9 +162,9 @@ const issueRows = computed(() =>
       name: row.id,
       secondary: row.account,
       enterprise: row.enterprise,
-      status: row.eligible ? '计算异常' : '已排除',
+      status: row.calculationError || row.eligible ? '计算异常' : '已排除',
       issue: row.issue,
-      handling: row.eligible ? '暂停补发，待核对' : '不参与本次补发'
+      handling: row.calculationError || row.eligible ? '暂停发放，待核对' : '不参与本次发放'
     }))
 )
 type Column = { key: string; label: string; align?: 'left' | 'right' }
@@ -402,7 +404,7 @@ watch(
             .reduce((total, row) => total + row.points, 0)
         )
       "
-      :meta="`${records.filter((row) => row.status === '失败').length} 笔发放失败 · ${rows.filter((row) => row.eligible && row.issue).length} 笔计算异常`"
+      :meta="`${records.filter((row) => row.status === '失败').length} 笔发放失败 · ${rows.filter((row) => row.calculationError || (row.eligible && row.issue)).length} 笔计算异常`"
     /></MetricGrid>
     <p class="points-muted" data-flow-role="notice">
       活动期间按企业累计，结束后按订单核算，系统于 {{ payoutDate(activity) }} 自动发放至下单账号；异常单独核对，不自动扣减负差额。
@@ -488,6 +490,17 @@ watch(
             <dd>企业购积分 / 企业维度跨账号累计</dd>
             <dt>累计方式</dt>
             <dd>{{ activity.mode === 'quantity' ? '满台数' : '满金额' }}</dd>
+          </dl>
+        </section>
+        <section class="points-section">
+          <SectionHeader title="发票与用户条件" />
+          <dl class="points-definition">
+            <dt>条件1—发票</dt>
+            <dd>{{ activity.invoiceTypes.map((value) => invoiceTypeOptions.find((option) => option.value === value)?.label || value).join('、') || '未配置，需补齐' }}</dd>
+            <dt>条件2—用户</dt>
+            <dd>{{ activity.enterpriseGroupIds.map((value) => enterpriseGroupOptions.find((option) => option.value === value)?.label || value).join('、') || '未配置，需补齐' }}</dd>
+            <dt>参与资格</dt>
+            <dd>各条件内任一选项匹配，发票、企业组与商品条件须同时满足；不符合的订单不计入有效累计，不获得活动积分。</dd>
           </dl>
         </section>
         <section class="points-section">

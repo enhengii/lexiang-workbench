@@ -4,6 +4,10 @@ import {
   initialRecords,
   TODAY,
   validateActivity,
+  validateEligibilityConditions,
+  migrateActivityEligibility,
+  invoiceTypeOptions,
+  enterpriseGroupOptions,
   type Activity,
   type RecordItem
 } from '@/services/activityPoints'
@@ -29,7 +33,19 @@ function load(): DemoState {
       !/^\d{4}-\d{2}-\d{2}$/.test(data.date)
     )
       throw new Error('invalid')
-    if (data.activities.some((a) => validateActivity(a))) throw new Error('invalid')
+    data.activities = data.activities.map(migrateActivityEligibility)
+    // An old custom activity with missing qualification fields must remain editable;
+    // do not discard it or its ledger just because the new mandatory fields are absent.
+    if (
+      data.activities.some((a) =>
+        validateActivity({
+          ...a,
+          invoiceTypes: invoiceTypeOptions.map((option) => option.value),
+          enterpriseGroupIds: enterpriseGroupOptions.map((option) => option.value)
+        })
+      )
+    )
+      throw new Error('invalid')
     if (
       data.records.some(
         (row) =>
@@ -41,6 +57,8 @@ function load(): DemoState {
       )
     )
       throw new Error('invalid')
+    if (data.activities.some((a) => validateEligibilityConditions(a)))
+      storageNotice.message = '部分活动尚未配置完整的发票类型或企业组，请补齐后使用；已有发放记录已保留。'
     return data
   } catch {
     storageNotice.message = '本地演示记录不可读取，已载入初始示例。'

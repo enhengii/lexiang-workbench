@@ -102,6 +102,7 @@ function latestRecords(activityId: string, records: RecordItem[]) {
 
 function markException(row: StatisticsRow, reason: string) {
   row.status = '计算异常'
+  row.calculationError = true
   row.reason = row.issue ? `${row.issue}；${reason}` : reason
   row.issue = row.reason
   row.pendingPoints = 0
@@ -137,15 +138,17 @@ export function buildActivityStatistics(
           .sort((left, right) => right.threshold - left.threshold)
           .find((tier) => metric >= tier.threshold)?.multiplier || 0
       const requiredPoints = participating && actualPaid !== null ? row.delta : null
-      const status: StatisticsStatus = !participating
-        ? '不参与'
-        : issue
-          ? '计算异常'
-          : cutoff <= activity.end
-            ? '累计中'
-            : row.delta > 0
-              ? '待自动发放'
-              : '无需发放'
+      const status: StatisticsStatus = row.calculationError
+        ? '计算异常'
+        : !participating
+          ? '不参与'
+          : issue
+            ? '计算异常'
+            : cutoff <= activity.end
+              ? '累计中'
+              : row.delta > 0
+                ? '待自动发放'
+                : '无需发放'
       return {
         ...row,
         eligible: participating,

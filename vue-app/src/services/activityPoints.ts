@@ -7,6 +7,8 @@ export type Activity = {
   mode: 'quantity' | 'amount'
   tiers: Tier[]
   draft: boolean
+  invoiceTypes: string[]
+  enterpriseGroupIds: string[]
   productMode: 'codes' | 'filter'
   codes: string[]
   fa: string
@@ -32,6 +34,8 @@ export type Order = {
   paidMember: number | null
   date: string
   signed: boolean
+  invoiceType?: string
+  enterpriseGroupIds?: string[]
   exclusion?: string
 }
 export type RecordItem = {
@@ -49,6 +53,37 @@ export type RecordItem = {
 }
 // Fixed demo date: this does not drive real settlement jobs.
 export const TODAY = '2026-09-16'
+export const invoiceTypeOptions = [
+  { value: 'ELECTRONIC', label: '电子票' },
+  { value: 'VAT', label: '增值税发票' }
+]
+// Labels mirror the existing rule form. These IDs are local demo identifiers, not production IDs.
+export const enterpriseGroupOptions = [
+  { value: 'DEMO-GROUP-001', label: '高新企业组' },
+  { value: 'DEMO-GROUP-002', label: '伊利组' },
+  { value: 'DEMO-GROUP-003', label: '商会组' },
+  { value: 'DEMO-GROUP-004', label: 'Think 嗨购权益用户' },
+  { value: 'DEMO-GROUP-005', label: 'thinkplus尊享会员组' },
+  { value: 'DEMO-GROUP-006', label: '中国移动尊享会员组' },
+  { value: 'DEMO-GROUP-007', label: '中国移动大市场活动组' },
+  { value: 'DEMO-GROUP-008', label: '中国移动历史会员组' },
+  { value: 'DEMO-GROUP-009', label: 'SMB中国移动尊享会员组' },
+  { value: 'DEMO-GROUP-010', label: '大客户组' },
+  { value: 'DEMO-GROUP-011', label: '钻石plus组' },
+  { value: 'DEMO-GROUP-012', label: '留资组' },
+  { value: 'DEMO-GROUP-013', label: '资产管理默认组' },
+  { value: 'DEMO-GROUP-014', label: '企业组' },
+  { value: 'DEMO-GROUP-015', label: 'SMB中国移动组' },
+  { value: 'DEMO-GROUP-016', label: '钻石组' },
+  { value: 'DEMO-GROUP-017', label: '铂金组' },
+  { value: 'DEMO-GROUP-018', label: '奇迹创坛' },
+  { value: 'DEMO-GROUP-019', label: '记者组' },
+  { value: 'DEMO-GROUP-020', label: '测试回归组-请勿使用' },
+  { value: 'DEMO-GROUP-021', label: '联想员工组' },
+  { value: 'DEMO-GROUP-022', label: '企业普通组' },
+  { value: 'DEMO-GROUP-023', label: '企业采购组-默认' },
+  { value: 'DEMO-GROUP-024', label: '企业采购组' }
+]
 export const products = [
   { code: 'DEMO-TP14', name: 'ThinkPad T14 商用笔记本', fa: 'ThinkPad', group: '笔记本' },
   { code: 'DEMO-TC90', name: 'ThinkCentre M90 商用台式机', fa: 'ThinkCentre', group: '台式机' },
@@ -78,6 +113,8 @@ export function checkExcludedProductCodes(input: string): ProductCodeCheck {
   return input === '' ? { codes: [], duplicateCount: 0, error: '' } : checkProductCodes(input)
 }
 const common = {
+  invoiceTypes: invoiceTypeOptions.map((option) => option.value),
+  enterpriseGroupIds: enterpriseGroupOptions.map((option) => option.value),
   productMode: 'codes' as const,
   codes: ['DEMO-TP14', 'DEMO-TC90', 'DEMO-TB16'],
   fa: '全部',
@@ -146,6 +183,34 @@ export const seedActivities: Activity[] = [
     draft: true
   }
 ]
+type EligibilityConditions = Pick<Activity, 'invoiceTypes' | 'enterpriseGroupIds'>
+export function validateEligibilityConditions(a: Partial<EligibilityConditions>) {
+  if (!Array.isArray(a.invoiceTypes) || !a.invoiceTypes.length)
+    return '请至少选择一种发票类型'
+  if (a.invoiceTypes.some((value) => !invoiceTypeOptions.some((option) => option.value === value)))
+    return '发票类型无效，请重新选择'
+  if (!Array.isArray(a.enterpriseGroupIds) || !a.enterpriseGroupIds.length)
+    return '请至少选择一个企业组'
+  if (
+    a.enterpriseGroupIds.some(
+      (value) => !enterpriseGroupOptions.some((option) => option.value === value)
+    )
+  )
+    return '企业组无效，请重新选择'
+  return ''
+}
+export function migrateActivityEligibility(
+  a: Omit<Activity, keyof EligibilityConditions> & Partial<EligibilityConditions>
+): Activity {
+  const seed = seedActivities.find((item) => item.id === a.id)
+  const restore = (value: string[] | undefined, fallback: string[] | undefined) =>
+    Array.isArray(value) ? [...new Set(value)] : value === undefined ? [...(fallback || [])] : []
+  return {
+    ...a,
+    invoiceTypes: restore(a.invoiceTypes, seed?.invoiceTypes),
+    enterpriseGroupIds: restore(a.enterpriseGroupIds, seed?.enterpriseGroupIds)
+  }
+}
 export function activityStatus(a: Activity, date = TODAY) {
   return a.draft ? '草稿' : date < a.start ? '待开始' : date <= a.end ? '进行中' : '已结束'
 }
@@ -179,6 +244,8 @@ export function validateActivity(a: Activity) {
   if (!a.name.trim()) return '请填写活动名称'
   if (!validDate(a.start) || !validDate(a.end) || a.start >= a.end)
     return '请填写有效日期，活动开始日期必须早于结束日期'
+  const eligibilityError = validateEligibilityConditions(a)
+  if (eligibilityError) return eligibilityError
   if (a.productMode === 'codes') {
     const { error } = checkProductCodes(a.codes.join(','))
     if (error) return error
@@ -257,6 +324,13 @@ export function ordersFor(a: Activity): Order[] {
     sku: n % 2 ? 'DEMO-TP14' : 'DEMO-TC90',
     date: day(n === 1 ? 0 : Math.min(n - 1, 4)),
     signed: true,
+    invoiceType: n % 2 ? 'ELECTRONIC' : 'VAT',
+    enterpriseGroupIds:
+      enterpriseId === 'ENT-DEMO-001'
+        ? ['DEMO-GROUP-023']
+        : enterpriseId === 'ENT-DEMO-002'
+          ? ['DEMO-GROUP-010', 'DEMO-GROUP-024']
+          : ['DEMO-GROUP-022'],
     ...extras
   })
   return [
@@ -293,14 +367,42 @@ export type Calculated = Order & {
   paid: number
   delta: number
   eligible: boolean
+  calculationError: boolean
   issue: string
   enterpriseQuantity: number
   enterpriseAmount: number
 }
 export function calculate(a: Activity, orders: Order[], cutoff = '9999-12-31'): Calculated[] {
   const codes = new Set(activeProducts(a).map((x) => x.code))
+  const configurationError = validateEligibilityConditions(a)
   const prepared = orders.map((o) => {
-    let issue = o.exclusion || ''
+    let issue = configurationError ? `活动参与条件待补齐：${configurationError}` : o.exclusion || ''
+    let calculationError = !!configurationError
+    if (!issue && !o.invoiceType) {
+      issue = '缺少订单发票类型'
+      calculationError = true
+    }
+    if (!issue && !invoiceTypeOptions.some((option) => option.value === o.invoiceType)) {
+      issue = '订单发票类型无效，请核对订单资料'
+      calculationError = true
+    }
+    if (!issue && !a.invoiceTypes.includes(o.invoiceType!)) issue = '发票类型不符合活动条件'
+    if (!issue && !Array.isArray(o.enterpriseGroupIds)) {
+      issue = '缺少或无法读取下单用户企业组信息'
+      calculationError = true
+    }
+    if (
+      !issue &&
+      o.enterpriseGroupIds!.some(
+        (group) => !enterpriseGroupOptions.some((option) => option.value === group)
+      )
+    ) {
+      issue = '下单用户企业组信息无效，请核对用户资料'
+      calculationError = true
+    }
+    if (!issue && !o.enterpriseGroupIds!.length) issue = '下单用户未归属任何企业组'
+    if (!issue && !o.enterpriseGroupIds!.some((group) => a.enterpriseGroupIds.includes(group)))
+      issue = '下单用户企业组不符合活动条件'
     if (!issue && !codes.has(o.sku)) issue = '不在活动商品范围'
     if (!issue && (o.date < a.start || o.date > a.end || o.date > cutoff))
       issue = '不在统计时间范围'
@@ -316,7 +418,7 @@ export function calculate(a: Activity, orders: Order[], cutoff = '9999-12-31'): 
     )
       issue = '订单数量或金额异常'
     if (!issue && (netQuantity === 0 || netReceipt === 0)) issue = '已全额退货退款'
-    return { ...o, netQuantity, netReceipt, issue, eligible: !issue }
+    return { ...o, netQuantity, netReceipt, issue, eligible: !issue, calculationError }
   })
   const totals = new Map<string, { quantity: number; amount: number }>()
   for (const o of prepared) {
@@ -351,6 +453,7 @@ export function calculate(a: Activity, orders: Order[], cutoff = '9999-12-31'): 
       paid,
       delta,
       issue,
+      calculationError: o.calculationError || (o.eligible && !!issue),
       enterpriseQuantity: t.quantity,
       enterpriseAmount: t.amount
     }
@@ -363,9 +466,12 @@ export function settle(
   date: string,
   failOrderId?: string
 ): RecordItem[] {
+  const configurationError = validateActivity(a)
+  if (configurationError) throw new Error(configurationError)
   if (a.draft || date < payoutDate(a)) throw new Error('尚未到计划发放日期')
   const next = records.map((r) => ({ ...r }))
-  for (const r of rows) {
+  // Re-evaluate the same source orders so stale rows cannot bypass changed eligibility or totals.
+  for (const r of calculate(a, rows, date)) {
     if (!r.eligible || r.issue || r.delta <= 0) continue
     const key = `${a.id}:${r.id}`,
       index = next.findIndex((x) => x.key === key),
