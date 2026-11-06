@@ -241,6 +241,11 @@ function validDate(s: string) {
     new Date(s).toISOString().slice(0, 10) === s
   )
 }
+export function validatePayoutDelay(delay: number) {
+  if (delay < 15) return '活动结束后延迟天数不能小于15天'
+  if (!Number.isInteger(delay) || delay > 90) return '活动结束后延迟天数请输入15–90的整数'
+  return ''
+}
 export function validateActivity(a: Activity) {
   if (!a.name.trim()) return '请填写活动名称'
   if (!validDate(a.start) || !validDate(a.end) || a.start >= a.end)
@@ -257,7 +262,8 @@ export function validateActivity(a: Activity) {
     if (error) return error
   }
   if (!activeProducts(a).length) return '请至少选择一个参与商品'
-  if (!Number.isInteger(a.delay) || a.delay < 1 || a.delay > 90) return '发放延迟请输入 1–90 的整数'
+  const delayError = validatePayoutDelay(a.delay)
+  if (delayError) return delayError
   if (!a.tiers.length) return '请至少配置一个档位'
   for (let i = 0; i < a.tiers.length; i++) {
     const t = a.tiers[i],

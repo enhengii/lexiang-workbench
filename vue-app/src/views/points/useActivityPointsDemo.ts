@@ -34,12 +34,13 @@ function load(): DemoState {
     )
       throw new Error('invalid')
     data.activities = data.activities.map(migrateActivityEligibility)
-    // An old custom activity with missing qualification fields must remain editable;
-    // do not discard it or its ledger just because the new mandatory fields are absent.
+    // Preserve legacy qualifications and 1–14 day delays on read. Substitute only
+    // in this validation copy; never rewrite stored settings or discard their ledger.
     if (
       data.activities.some((a) =>
         validateActivity({
           ...a,
+          delay: Number.isInteger(a.delay) && a.delay >= 1 && a.delay < 15 ? 15 : a.delay,
           invoiceTypes: invoiceTypeOptions.map((option) => option.value),
           enterpriseGroupIds: enterpriseGroupOptions.map((option) => option.value)
         })
@@ -57,8 +58,13 @@ function load(): DemoState {
       )
     )
       throw new Error('invalid')
+    const configurationIssues: string[] = []
     if (data.activities.some((a) => validateEligibilityConditions(a)))
-      storageNotice.message = '部分活动尚未配置完整的发票类型或企业组，请补齐后使用；已有发放记录已保留。'
+      configurationIssues.push('发票类型或企业组尚未配置完整')
+    if (data.activities.some((a) => a.delay < 15))
+      configurationIssues.push('活动结束后延迟天数不足15天')
+    if (configurationIssues.length)
+      storageNotice.message = `部分活动${configurationIssues.join('、')}，请补齐或调整后使用；已有发放记录已保留。`
     return data
   } catch {
     storageNotice.message = '本地演示记录不可读取，已载入初始示例。'

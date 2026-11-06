@@ -12,6 +12,7 @@ import {
   enterpriseGroupOptions,
   payoutDate,
   validateActivity,
+  validatePayoutDelay,
   type Activity,
   type ProductCodeCheck
 } from '@/services/activityPoints'
@@ -29,6 +30,9 @@ const filteredProductCount = computed(() => {
   return result.error ? null : activeProducts({ ...activity.value, excluded: result.codes }).length
 })
 const error = ref('')
+const delayField = ref<HTMLInputElement | null>(null)
+const delayTouched = ref(false)
+const delayError = computed(() => validatePayoutDelay(activity.value.delay))
 const eligibilitySubmitted = ref(false)
 const invoiceChoices = ref<HTMLFieldSetElement | null>(null)
 const groupChoices = ref<HTMLFieldSetElement | null>(null)
@@ -68,7 +72,7 @@ const draftTiers: Record<Activity['mode'], Activity['tiers']> = {
 }
 const planned = computed(() => {
   try {
-    return activity.value.end && activity.value.delay > 0 && activity.value.delay <= 90
+    return activity.value.end && !delayError.value
       ? payoutDate(activity.value)
       : '待填写'
   } catch {
@@ -86,6 +90,7 @@ function changeMode() {
 }
 function save(draft: boolean) {
   error.value = ''
+  delayTouched.value = true
   eligibilitySubmitted.value = true
   if (invoiceError.value || groupError.value) {
     const field = invoiceError.value ? invoiceChoices.value : groupChoices.value
@@ -108,6 +113,10 @@ function save(draft: boolean) {
       return
     }
     excluded = result.codes
+  }
+  if (delayError.value) {
+    delayField.value?.focus()
+    return
   }
   const value: Activity = {
     ...activity.value,
@@ -325,12 +334,21 @@ function save(draft: boolean) {
         <SectionHeader title="发放安排" />
         <div class="points-fields">
           <label class="points-field">活动结束后延迟天数<input
+            ref="delayField"
             v-model.number="activity.delay"
             class="form-input"
             type="number"
-            min="1"
+            min="15"
             max="90"
-          /></label>
+            step="1"
+            aria-label="活动结束后延迟天数"
+            :aria-invalid="delayTouched && Boolean(delayError)"
+            :aria-describedby="delayTouched && delayError ? 'points-delay-help points-delay-error' : 'points-delay-help'"
+            @blur="delayTouched = true"
+          />
+            <small id="points-delay-help" class="points-muted">请输入15–90的整数，不得小于15天。</small>
+            <small v-if="delayTouched && delayError" id="points-delay-error" class="points-required" role="alert">{{ delayError }}</small>
+          </label>
           <PointsSelect
             :model-value="activity.calendar"
             label="日历类型"
@@ -339,7 +357,7 @@ function save(draft: boolean) {
           />
         </div>
         <div class="points-notice">
-          <strong>计划发放：{{ planned }} 10:00</strong>
+          <strong>计划发放：{{ delayError ? '待填写有效延迟天数' : `${planned} 10:00` }}</strong>
           <p>第 N 日统一处理仅为演示口径；实际发放时间、节假日与调休日历待业务确认。</p>
         </div>
         <label class="points-field">发放说明<input v-model="activity.description" class="form-input" maxlength="200"/></label>

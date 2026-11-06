@@ -123,13 +123,14 @@ await test('演示选项与默认数据完整且既有示例金额不变', () =>
   assert.equal(points.initialRecords().filter(record => record.status === '成功').reduce((sum, record) => sum + record.points, 0), 22541)
 })
 
-await test('旧缓存仅为已知示例补缺失条件，自定义活动需要补齐且已发记录保留', async () => {
+await test('旧缓存保留缺失条件和低于15天的活动及已发记录，保存与发放仍要求补齐', async () => {
   const legacy = structuredClone(points.seedActivities[2]) as Partial<Activity>
   delete legacy.invoiceTypes
   delete legacy.enterpriseGroupIds
   const custom = { ...legacy, id: 'CUSTOM-OLD-001', name: '旧自定义活动' }
   const records = points.initialRecords()
-  const saved = { version: 1, activities: [legacy, custom], records, date: points.TODAY }
+  const legacyDelay = { ...structuredClone(points.seedActivities[2]), id: 'LEGACY-DELAY-001', delay: 14 }
+  const saved = { version: 1, activities: [legacy, custom, legacyDelay], records, date: points.TODAY }
   const memory = new Map([['portal.activity-points.demo.v1', JSON.stringify(saved)]])
   globalThis.localStorage = {
     getItem: (key: string) => memory.get(key) || null,
@@ -139,12 +140,16 @@ await test('旧缓存仅为已知示例补缺失条件，自定义活动需要�
   } as Storage
   const { useActivityPointsDemo } = await import('../src/views/points/useActivityPointsDemo.ts')
   const { state, storageNotice } = useActivityPointsDemo()
-  assert.equal(state.activities.length, 2)
+  assert.equal(state.activities.length, 3)
   assert.equal(points.validateActivity(state.activities[0]), '')
   assert.deepEqual([...state.activities[1].invoiceTypes], [])
   assert.deepEqual([...state.activities[1].enterpriseGroupIds], [])
   assert.match(points.validateActivity(state.activities[1]), /发票/)
   assert.match(storageNotice.message, /补齐|补充/)
+  assert.match(storageNotice.message, /15/)
+  assert.equal(state.activities[2].delay, 14)
+  assert.match(points.validateActivity(state.activities[2]), /不能小于15天/)
+  assert.throws(() => points.settle(state.activities[2], [], records, '2026-12-01'), /不能小于15天/)
   assert.deepEqual(JSON.parse(JSON.stringify(state.records)), records)
   const rows = points.calculate(state.activities[1], points.ordersFor(state.activities[1]))
   assert(rows.every(row => !row.eligible && row.calculationError))
