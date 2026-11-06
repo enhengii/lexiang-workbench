@@ -66,6 +66,11 @@ const emptyFilters = (): StatisticsFilters => ({
   status: ''
 })
 const filters = reactive<StatisticsFilters>(emptyFilters())
+const appliedFilters = ref<StatisticsFilters>(emptyFilters())
+const hasUnappliedFilters = computed(() =>
+  (Object.keys(emptyFilters()) as Array<keyof StatisticsFilters>)
+    .some((key) => filters[key] !== appliedFilters.value[key])
+)
 const drillEnterprise = ref('')
 const drillAccount = ref('')
 const advanced = ref(false)
@@ -83,13 +88,11 @@ const allRows = computed(() =>
     : []
 )
 const rows = computed(() =>
-  dateError.value
-    ? []
-    : filterStatistics(allRows.value, {
-        ...filters,
-        exactEnterprise: drillEnterprise.value,
-        exactAccount: drillAccount.value
-      })
+  filterStatistics(allRows.value, {
+    ...appliedFilters.value,
+    exactEnterprise: drillEnterprise.value,
+    exactAccount: drillAccount.value
+  })
 )
 const summary = computed(() => summarizeStatistics(rows.value))
 const groups = computed(() =>
@@ -183,12 +186,22 @@ const columns = computed<Column[]>(() =>
         { key: 'actions', label: '操作' }
       ]
 )
-function resetFilters() {
-  Object.assign(filters, emptyFilters())
+function query() {
+  if (!canView.value || !activity.value) return
+  if (dateError.value) {
+    advanced.value = true
+    return
+  }
+  appliedFilters.value = { ...filters }
   drillEnterprise.value = ''
   drillAccount.value = ''
   page.value = 1
+  detailKey.value = ''
   notice.value = ''
+}
+function resetFilters() {
+  Object.assign(filters, emptyFilters())
+  query()
 }
 function openRow(key: unknown) {
   if (tab.value === '订单明细') {
@@ -215,7 +228,7 @@ function exportDetails() {
     notice.value = '当前账号没有明细导出权限。'
     return
   }
-  if (!activity.value || dateError.value || !rows.value.length) return
+  if (!activity.value || !rows.value.length) return
   exportPointsCsv(
     `${activity.value.name}-活动积分明细`,
     [
@@ -265,7 +278,7 @@ function exportDetails() {
       state.date
     ])
   )
-  notice.value = `已导出当前筛选的全部 ${rows.value.length} 条订单明细，可用 Excel 打开。`
+  notice.value = `已导出当前查询结果的全部 ${rows.value.length} 条订单明细，可用 Excel 打开。`
 }
 watch(
   () => route.query.activity,
@@ -286,7 +299,7 @@ watch(tab, (value) => {
   } else if (value === '账号明细') drillAccount.value = ''
 })
 watch(
-  [filters, drillEnterprise, drillAccount, tab],
+  [appliedFilters, drillEnterprise, drillAccount, tab],
   () => {
     page.value = 1
     notice.value = ''
@@ -312,7 +325,7 @@ watch(
           <button
             v-if="canExport"
             class="btn btn-primary"
-            :disabled="!rows.length || !!dateError"
+            :disabled="!rows.length"
             @click="exportDetails"
           >
             导出明细
@@ -337,7 +350,7 @@ watch(
           {{ storageNotice.message }}
         </p>
         <div class="points-list-workspace" data-flow-role="list-workspace">
-          <div class="points-filter">
+          <form class="points-filter" @submit.prevent="query">
             <div class="points-filter-grid">
               <PointsSelect
                 v-model="activityId"
@@ -381,15 +394,16 @@ watch(
                 />
               </template>
               <div class="points-actions points-filter-actions">
-                <span class="points-muted">条件变更后实时筛选</span>
-                <button class="points-link" :aria-expanded="advanced" @click="advanced = !advanced">
+                <span v-if="hasUnappliedFilters" class="points-muted" role="status">筛选条件已修改，点击查询后生效</span>
+                <button class="btn btn-primary" type="submit">查询</button>
+                <button class="points-link" type="button" :aria-expanded="advanced" @click="advanced = !advanced">
                   {{ advanced ? '收起筛选' : '更多筛选' }}
                 </button>
-                <button class="btn btn-secondary" @click="resetFilters">重置筛选</button>
+                <button class="btn btn-secondary" type="button" @click="resetFilters">重置筛选</button>
               </div>
             </div>
-            <p v-if="dateError" class="points-code-error" role="alert">{{ dateError }}</p>
-          </div>
+            <p v-if="dateError" class="points-code-error" role="alert">{{ dateError }}，请调整后查询；当前仍显示上次查询结果。</p>
+          </form>
           <MetricGrid data-flow-role="summary">
             <MetricCard
               :label="activityPointsLabel"
@@ -481,8 +495,8 @@ watch(
               </DataTable>
               <FeedbackState
                 v-else
-                :state="dateError ? 'error' : 'filtered-empty'"
-                :title="dateError || '暂无符合条件的积分明细'"
+                state="filtered-empty"
+                title="暂无符合条件的积分明细"
                 description="请调整活动或筛选条件。待开始活动尚无统计期内订单。"
               ><template #action><button class="btn btn-secondary" @click="resetFilters">
                 重置筛选
