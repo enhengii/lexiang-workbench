@@ -135,7 +135,7 @@ const tableRows = computed<StatisticsTableRow[]>(() =>
     : groups.value.map((group) => ({
         key: group.id,
         name: tab.value === '企业统计' ? group.enterprise : group.account,
-        secondary: tab.value === '企业统计' ? group.enterpriseId : group.enterprise,
+        secondary: tab.value === '企业统计' ? (group.enterpriseTaxNo || '—') : group.enterprise,
         count: `${group.summary.orderCount} 单 / ${group.summary.accountCount} 个账号`,
         quantity: n(group.summary.quantity),
         amount: money(group.summary.amount),
@@ -170,7 +170,7 @@ const columns = computed<Column[]>(() =>
         { key: 'actions', label: '操作' }
       ]
     : [
-        { key: 'name', label: tab.value === '企业统计' ? '企业名称 / 标识' : 'Lenovo ID / 企业' },
+        { key: 'name', label: tab.value === '企业统计' ? '企业名称 / 税号' : 'Lenovo ID / 企业' },
         { key: 'count', label: '订单 / 账号' },
         numeric('quantity', '有效台数'),
         numeric('amount', '实际收款金额'),
@@ -234,7 +234,7 @@ function exportDetails() {
     [
       '活动编号',
       '活动名称',
-      '企业标识',
+      '税号',
       '企业名称',
       '订单号',
       '商品编码',
@@ -257,7 +257,7 @@ function exportDetails() {
     rows.value.map((row) => [
       row.activityId,
       row.activityName,
-      row.enterpriseId,
+      row.enterpriseTaxNo || '',
       row.enterprise,
       row.id,
       row.sku,
@@ -359,11 +359,11 @@ watch(
                 searchable
                 placeholder="输入活动名称或编号检索"
               />
-              <label class="points-field">企业名称 / 标识<input
+              <label class="points-field">企业名称 / 税号<input
                 v-model="filters.enterprise"
                 class="form-input"
                 type="search"
-                placeholder="输入企业名称或标识"
+                placeholder="输入企业名称或税号"
               /></label>
               <label class="points-field">Lenovo ID<input
                 v-model="filters.account"
@@ -520,8 +520,8 @@ watch(
           <p v-if="statusNote(detail)" class="points-secondary">{{ statusNote(detail) }}</p>
         </div>
         <dl class="points-definition">
-          <dt>企业 / 标识</dt>
-          <dd>{{ detail.enterprise }} / {{ detail.enterpriseId }}</dd>
+          <dt>企业名称 / 税号</dt>
+          <dd>{{ detail.enterprise }} / {{ detail.enterpriseTaxNo || '—' }}</dd>
           <dt>Lenovo ID</dt>
           <dd>{{ detail.account }}</dd>
           <dt>订单号 / 商品编码</dt>

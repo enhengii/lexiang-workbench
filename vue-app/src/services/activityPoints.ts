@@ -24,6 +24,7 @@ export type Order = {
   id: string
   enterprise: string
   enterpriseId: string
+  enterpriseTaxNo?: string
   account: string
   sku: string
   quantity: number
@@ -314,6 +315,7 @@ export function ordersFor(a: Activity): Order[] {
     id: `D-${a.id.slice(-6)}-${String(n).padStart(3, '0')}`,
     enterprise,
     enterpriseId,
+    enterpriseTaxNo: `DEMO-TAX-${enterpriseId.slice(-3)}`,
     account,
     quantity,
     receipt,

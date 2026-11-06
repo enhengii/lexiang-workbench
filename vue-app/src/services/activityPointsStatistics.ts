@@ -64,6 +64,7 @@ export type StatisticsSummary = {
 export type StatisticsGroup = {
   id: string
   enterpriseId: string
+  enterpriseTaxNo: string
   enterprise: string
   account: string
   rows: StatisticsRow[]
@@ -250,7 +251,7 @@ export function filterStatistics(
     !query?.trim() || value.toLowerCase().includes(query.trim().toLowerCase())
   return rows.filter(
     (row) =>
-      includes(`${row.enterprise} ${row.enterpriseId}`, filters.enterprise) &&
+      includes(`${row.enterprise} ${row.enterpriseTaxNo || ''}`, filters.enterprise) &&
       includes(row.account, filters.account) &&
       includes(row.id, filters.orderId) &&
       includes(row.sku, filters.sku) &&
@@ -307,6 +308,7 @@ export function groupStatistics(
   return [...groups].map(([id, items]) => ({
     id,
     enterpriseId: items[0].enterpriseId,
+    enterpriseTaxNo: items[0].enterpriseTaxNo || '',
     enterprise: items[0].enterprise,
     account: dimension === 'account' ? items[0].account : '',
     rows: items,
