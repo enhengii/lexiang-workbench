@@ -44,6 +44,7 @@
       @open-skill-manager="openSkillManagerPage"
       @open-permission-manager="openPermissionManagerPage"
       @open-usage-dashboard="openUsageDashboardPage"
+      @open-usage-creators="openUsageDashboardPage('creators')"
       @open-poc-log="openPocAdjustmentLog"
     />
   </div>
@@ -152,10 +153,10 @@ const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
   {
-    time: '2026-11-06',
+    time: '2026-11-09',
     releaseKey: 'workbench-usage-dashboard-20261105',
     title: '工作台使用数据看板',
-    changePoint: '融合邮件日报，补齐 Skill 与创建人两个维度的调用量、质量看板与日统计明细；Skill聚合表的创建人独立成列。',
+    changePoint: '融合邮件日报，补齐 Skill 与创建人两个维度的调用量、质量看板与日统计明细；创建人独立成列，并新增创建人分析直达入口，刷新后保留所选视图。',
     detail: '保留使用概览和左下角个人入口，默认展示用户提供的11月5日日报快照。核心80天与Skill明细148行按原表导入，任务和Skill分别统计；创建人按IT Code汇总其Skill贡献，支持时间、菜单、搜索、质量比较、创建人到Skill下钻及日统计导出。真实日报只有日期×Skill汇总，不生成逐次调用日志或跨日/跨Skill去重人数；未知归属和缺失指标保留，成功率与好评率从原始计数计算。样例演示单独切换，提供调用级交互框架，不与日报混合。当前为文件快照，未接入邮件自动同步和实时统计权限；不含真实用户清单或输入输出正文。沿用现有外壳、共享样式和Agent，各环境发布状态以实际记录为准。',
     deployTargets: [],
     status: '发布状态以环境记录为准'
@@ -1103,11 +1104,12 @@ function openPermissionManagerPage() {
   appStore.setActiveStaticTab('agent.permissions')
   router.push('/agent/permissions')
 }
-function openUsageDashboardPage() {
+function openUsageDashboardPage(view = 'overview') {
   closeUserMenu()
+  appStore.setActiveTempTab(null)
   appStore.ensureStaticTab('agent.usageDashboard')
   appStore.setActiveStaticTab('agent.usageDashboard')
-  router.push('/agent/usage-dashboard')
+  router.push({ path: '/agent/usage-dashboard', query: view === 'creators' ? { view } : {} })
 }
 async function refreshPocReleaseLedger() {
   pocReleaseLedger.value = await loadPocReleaseLedger()

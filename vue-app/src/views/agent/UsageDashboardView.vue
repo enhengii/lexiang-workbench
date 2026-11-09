@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onDeactivated, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import ContentPageHeader from '@/components/content/ContentPageHeader.vue'
 import ContentTabs from '@/components/content/ContentTabs.vue'
 import MetricGrid from '@/components/content/MetricGrid.vue'
@@ -17,7 +18,12 @@ import { USAGE_DAILY_START_DATE, USAGE_DAILY_END_DATE } from '@/domain/usageDail
 const SAMPLE_START = '2026-08-07'
 type UsageReport = ReturnType<typeof getUsageReport>
 type SkillRow = UsageReport['skills'][number]
-const tab = ref('overview')
+const route = useRoute()
+const router = useRouter()
+const tab = computed<string>({
+  get: () => route.query.view === 'creators' || route.query.view === 'skills' ? route.query.view : 'overview',
+  set: view => { void router.replace({ query: { ...route.query, view: view === 'overview' ? undefined : view } }) }
+})
 const source = ref<'daily' | 'sample'>('daily')
 const rangeStart = computed(() => source.value === 'daily' ? USAGE_DAILY_START_DATE : SAMPLE_START)
 const rangeEnd = computed(() => source.value === 'daily' ? USAGE_DAILY_END_DATE : USAGE_ANCHOR_DATE)
@@ -108,9 +114,10 @@ onDeactivated(() => { detailTarget.value = null })
 <template>
   <div class="usage-dashboard" data-page="usage-dashboard">
     <div class="usage-page-flow">
-      <ContentPageHeader title="使用数据看板" :description="source === 'daily' ? `全平台范围 · 邮件日报数据 · 截至${rangeEnd}` : '全平台范围 · 示例数据未接入正式统计'">
-        <template v-if="source === 'sample' && tab !== 'overview'" #actions>
-          <button type="button" class="btn btn-secondary" :disabled="!analysis || !analysisRowsCount" title="导出当前周期及筛选条件下的聚合统计" @click="exportSample">导出样例数据</button>
+      <ContentPageHeader :title="tab === 'creators' ? '创建人分析' : '使用数据看板'" :description="source === 'daily' ? `全平台范围 · 邮件日报数据 · 截至${rangeEnd}` : '全平台范围 · 示例数据未接入正式统计'">
+        <template #actions>
+          <button v-if="tab !== 'creators'" type="button" class="btn btn-secondary" @click="tab = 'creators'">创建人分析</button>
+          <button v-if="source === 'sample' && tab !== 'overview'" type="button" class="btn btn-secondary" :disabled="!analysis || !analysisRowsCount" title="导出当前周期及筛选条件下的聚合统计" @click="exportSample">导出样例数据</button>
         </template>
       </ContentPageHeader>
 

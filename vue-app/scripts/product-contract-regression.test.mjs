@@ -152,8 +152,9 @@ test('account workspace separates creation and management rows responsively', as
   const narrowStyles = css.slice(narrowStylesStart, narrowStylesEnd)
 
   assert.equal((footer.match(/account-hub-card-create/g) ?? []).length, 2)
-  assert.equal((footer.match(/account-hub-card-manage/g) ?? []).length, 4)
+  assert.equal((footer.match(/account-hub-card-manage/g) ?? []).length, 5)
   assert.match(footer, /@click="\$emit\('open-usage-dashboard'\)"[\s\S]*?<b>使用数据看板<\/b>/)
+  assert.match(footer, /@click="\$emit\('open-usage-creators'\)"[\s\S]*?<b>创建人分析<\/b>/)
   assert.match(footer, /account-hub-card-log/)
   assert.match(footer, /<button type="button" class="account-hub-card account-hub-card-create primary"[^>]*>\s*<span[^>]*aria-hidden="true"[^>]*><svg[\s\S]*?<\/svg><\/span>\s*<b>创建 Skill<\/b>/)
   assert.match(footer, /<button type="button" class="account-hub-card account-hub-card-manage account-hub-card-log"[^>]*>[\s\S]*?<b>调整日志<\/b>/)
