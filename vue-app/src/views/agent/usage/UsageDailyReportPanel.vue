@@ -17,6 +17,7 @@ const props = defineProps<{ view: string; startDate: string; endDate: string }>(
 const module = ref('all')
 const search = ref('')
 const page = ref(1)
+const showAll = ref(false)
 const trendMode = ref<'users' | 'calls'>('calls')
 const coreGroup = ref('usage')
 const qualityKey = ref<'successRate' | 'likeRate'>('successRate')
@@ -27,7 +28,7 @@ const creators = computed(() => props.view === 'creators')
 const overview = computed(() => getDailyOverview({ startDate: props.startDate, endDate: props.endDate }))
 const analysis = computed(() => getDailyAnalysis({ startDate: props.startDate, endDate: props.endDate, module: module.value, search: search.value, dimension: creators.value ? 'creators' : 'skills' }))
 const rows = computed(() => creators.value ? analysis.value.creators : analysis.value.skills)
-const pageRows = computed(() => rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
+const pageRows = computed(() => showAll.value ? rows.value : rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
 const coreRows = computed(() => [...overview.value.dailyRows].reverse().slice((page.value - 1) * pageSize, page.value * pageSize))
 const top = computed(() => rows.value.filter(row => (row.calls ?? 0) > 0).slice(0, 5))
 const qualityRows = computed(() => rows.value.filter(row => row[qualityKey.value] != null).sort((a, b) => (b[qualityKey.value] || 0) - (a[qualityKey.value] || 0) || (b.calls ?? 0) - (a.calls ?? 0)).slice(0, 5))
@@ -55,6 +56,7 @@ const columns = computed(() => [
   { key: 'actions', label: '操作', width: '100px' }
 ])
 function reset() { module.value = 'all'; search.value = '' }
+function toggleAll() { showAll.value = !showAll.value }
 function download() {
   const csv = props.view === 'overview' ? dailyOverviewToCsv(overview.value.dailyRows) : creators.value ? dailyCreatorRowsToCsv(analysis.value.creators) : dailySkillRowsToCsv(analysis.value.skills)
   const total = props.view === 'overview' ? overview.value.dailyRows.length : rows.value.length
@@ -69,7 +71,7 @@ function download() {
   } catch { notice.value = '导出失败，请重试。' }
 }
 watch(() => [props.startDate, props.endDate, props.view, module.value, search.value], () => { page.value = 1; targetId.value = ''; notice.value = '' })
-watch(() => props.view, reset)
+watch(() => props.view, () => { reset(); showAll.value = false })
 watch(coreGroup, () => { page.value = 1 })
 </script>
 
@@ -128,7 +130,7 @@ watch(coreGroup, () => { page.value = 1 })
           <FeedbackState v-else state="empty" :title="qualityKey === 'likeRate' ? '暂无赞踩反馈' : '暂无调用记录'" description="分母为零时显示“—”，不计入排行。" />
         </section>
       </div>
-      <ListSurface data-flow-role="list-workspace"><template #toolbar><div class="daily-toolbar"><SectionHeader :title="creators ? '创建人聚合明细' : 'Skill聚合明细'" :description="`当前筛选 ${rows.length} 条 · 仅含日报中已有的明细`" /><button type="button" class="btn btn-secondary" :disabled="!rows.length" @click="download">导出当前统计</button></div></template>
+      <ListSurface data-flow-role="list-workspace"><template #toolbar><SectionHeader :title="creators ? '创建人聚合明细' : 'Skill聚合明细'" :description="`当前筛选 ${rows.length} 条 · 仅含日报中已有的明细`"><template #actions><button v-if="rows.length > pageSize || showAll" type="button" class="btn btn-secondary" :aria-pressed="showAll" @click="toggleAll">{{ showAll ? '分页显示' : `查看全部（${rows.length}）` }}</button><button type="button" class="btn btn-secondary" :disabled="!rows.length" @click="download">导出当前统计</button></template></SectionHeader></template>
         <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人归属下Skill调用与质量统计' : 'Skill日统计按当前周期汇总'" density="two-line">
           <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? (row.id === 'unattributed' ? '原日报未标注，保留此分组' : `当前范围涵盖 ${row.skillCount} 个Skill`) : row.id }}</div></template>
           <template #cell-users="{ row }"><span :title="row.users == null ? '日报只有日去重人数，无法跨日去重' : '当天该Skill去重人数'">{{ n(row.users) }}</span></template>
@@ -136,7 +138,7 @@ watch(coreGroup, () => { page.value = 1 })
           <template #cell-actions="{ row }"><button type="button" class="daily-link" :aria-label="`查看${row.name}日报明细`" @click="targetId = row.id">查看明细</button></template>
         </DataTable>
         <FeedbackState v-else state="filtered-empty" title="没有匹配的日报明细" description="Skill明细从2026-10-08开始；请调整日期、菜单或搜索条件。"><template #action><button type="button" class="btn btn-secondary" @click="reset">清除筛选</button></template></FeedbackState>
-        <template #pagination><Pagination v-model:page="page" :page-size="pageSize" :total="rows.length" /></template>
+        <template #pagination><div v-if="showAll" class="daily-toolbar"><p class="daily-muted" role="status">已显示当前筛选全部 {{ rows.length }} 条</p><button type="button" class="btn btn-secondary" @click="toggleAll">分页显示</button></div><Pagination v-else v-model:page="page" :page-size="pageSize" :total="rows.length" /></template>
       </ListSurface>
     </template>
     <p v-if="notice" role="status" class="daily-source-note" data-flow-role="notice">{{ notice }}</p>

@@ -22,12 +22,13 @@ const emit = defineEmits<{ 'update:module': [value: string]; 'update:search': [v
 const selectedModule = computed({ get: () => props.module, set: value => emit('update:module', value) })
 const keyword = computed({ get: () => props.search, set: value => emit('update:search', value) })
 const page = ref(1)
+const showAll = ref(false)
 const pageSize = 8
 const quality = ref('successRate')
 const qualityTabs = [{ key: 'successRate', label: '运行成功率' }, { key: 'likeRate', label: '反馈好评率' }]
 const creators = computed(() => props.dimension === 'creators')
 const rows = computed<DimensionRow[]>(() => [...(creators.value ? props.analysis.creators : props.analysis.skills)].sort((a, b) => b.calls - a.calls || a.name.localeCompare(b.name, 'zh-CN')))
-const pageRows = computed(() => rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
+const pageRows = computed(() => showAll.value ? rows.value : rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
 const ranking = computed(() => rows.value.filter(row => row.calls > 0).slice(0, 5))
 const qualityRanking = computed(() => rows.value.filter(row => qualityValue(row) != null).sort((a, b) => (qualityValue(b) || 0) - (qualityValue(a) || 0) || b.calls - a.calls).slice(0, 5))
 const summary = computed(() => props.analysis.summary)
@@ -52,6 +53,7 @@ const columns = computed(() => [
   ...baseColumns
 ])
 function reset() { selectedModule.value = 'all'; keyword.value = '' }
+function toggleAll() { showAll.value = !showAll.value }
 function qualityValue(row: DimensionRow) { return quality.value === 'likeRate' ? row.likeRate : row.successRate }
 function qualityCount(row: DimensionRow) { return quality.value === 'likeRate' ? `${n(row.likes)} / ${n(row.feedbackCount)} 条反馈` : `${n(row.success)} / ${n(row.calls)} 次调用` }
 function callWidth(calls: number) { return `${calls / (ranking.value[0]?.calls || 1) * 100}%` }
@@ -101,7 +103,7 @@ watch(() => [props.module, props.search, props.dimension, props.analysis.startDa
       </section>
     </div>
     <ListSurface>
-      <template #toolbar><div class="usage-dimension-toolbar"><strong>{{ creators ? '创建人贡献明细' : 'Skill使用明细' }}</strong><span>{{ rows.length }} {{ creators ? '位创建人' : '个Skill' }} · 平均调用耗时 {{ duration(summary.avgDurationSeconds) }}</span></div></template>
+      <template #toolbar><div class="usage-dimension-toolbar"><strong>{{ creators ? '创建人贡献明细' : 'Skill使用明细' }}</strong><div class="usage-dimension-toolbar"><span>{{ rows.length }} {{ creators ? '位创建人' : '个Skill' }} · 平均调用耗时 {{ duration(summary.avgDurationSeconds) }}</span><button v-if="rows.length > pageSize || showAll" type="button" class="btn btn-secondary" :aria-pressed="showAll" @click="toggleAll">{{ showAll ? '分页显示' : `查看全部（${rows.length}）` }}</button></div></div></template>
       <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人旗下Skill贡献聚合统计，示例数据' : 'Skill调用与质量聚合统计，示例数据'" density="two-line">
         <template #cell-name="{ row }"><div class="usage-analysis-name">{{ row.name }}</div><div class="usage-analysis-meta"><span class="usage-analysis-code">{{ row.id }}</span></div></template>
         <template #cell-skillCount="{ row }">{{ n(row.skillCount) }}</template>
@@ -116,7 +118,7 @@ watch(() => [props.module, props.search, props.dimension, props.analysis.startDa
         <template #cell-actions="{ row }"><button type="button" class="usage-analysis-link" :aria-label="`查看${row.name}详情与调用明细`" @click="emit('open-detail', row.id)">查看详情</button></template>
       </DataTable>
       <FeedbackState v-else state="filtered-empty" :title="creators ? '没有匹配的创建人' : '没有匹配的Skill'" description="请调整业务模块或搜索条件。"><template #action><button type="button" class="btn btn-secondary" @click="reset">清除筛选</button></template></FeedbackState>
-      <template #pagination><Pagination v-model:page="page" :page-size="pageSize" :total="rows.length" /></template>
+      <template #pagination><div v-if="showAll" class="usage-dimension-toolbar"><p class="usage-dimension-hint" role="status">已显示当前筛选全部 {{ rows.length }} 条</p><button type="button" class="btn btn-secondary" @click="toggleAll">分页显示</button></div><Pagination v-else v-model:page="page" :page-size="pageSize" :total="rows.length" /></template>
     </ListSurface>
   </section>
 </template>
