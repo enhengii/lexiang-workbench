@@ -11,6 +11,7 @@ const AppLayout = () => import('@/components/AppLayout.vue')
 
 // 页面组件（懒加载，首屏不打包进去）
 const PortalHome      = () => import('@/views/PortalHomeView.vue')
+const SalesWorkbench = () => import('@/views/sales/SalesWorkbenchView.vue')
 const NativeWorkbenchPage = () => import('@/views/NativeWorkbenchPage.vue')
 const WIPView           = () => import('@/views/WIPView.vue')  // 开发中占位页
 const DashboardOverview = () => import('@/views/dashboard/DashboardOverviewView.vue')
@@ -90,6 +91,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '',              redirect: '/portal/home' },
       { path: 'portal/home',  component: PortalHome, meta: { pageId: 'portal.home' } },
+      { path: 'sales/workbench', component: SalesWorkbench, meta: { pageId: 'sales.workbench' } },
 
       // 乐享运营
       { path: 'dashboard/overview',   component: DashboardOverview, meta: { pageId: 'dashboard.overview',  group: 'dashboard' } },

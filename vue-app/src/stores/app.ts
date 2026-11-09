@@ -187,6 +187,7 @@ export const MENU_TREE: Record<MenuGroupKey, MenuGroup> = {
 // pageId → path 快速查表
 export function pageIdToPath(pageId: PageId) {
   const specials = {
+    'sales.workbench':   '/sales/workbench',
     'portal.home':       '/portal/home',
     'agent.skills':      '/agent/skills',
     'agent.skillCreate': '/agent/skill-create',
@@ -220,6 +221,7 @@ export function pageIdToPath(pageId: PageId) {
 // 对应原 getPageLabel()
 export function getPageLabel(pageId: PageId) {
   const map = {
+    'sales.workbench': '销售工作台',
     'agent.skills': 'Skill Hub',
     'agent.skillCreate': 'Skill 创建',
     'agent.scenarioPackageCreate': '场景技能包创建',
@@ -252,7 +254,7 @@ export function getPageLabel(pageId: PageId) {
 
 // 对应原 workspaceStaticGroupLabel()
 export function getGroupLabel(pageId: PageId) {
-  const groupLabelMap: Record<string, string> = { agent: 'AI 助手', portal: '首页' }
+  const groupLabelMap: Record<string, string> = { agent: 'AI 助手', portal: '首页', sales: '销售工作台' }
   for (const g of Object.values(MENU_TREE)) {
     if (g.children?.[pageId]) return [g.label, g.children[pageId].section].filter(Boolean).join(' / ')
   }

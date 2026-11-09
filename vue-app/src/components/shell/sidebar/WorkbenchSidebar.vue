@@ -28,6 +28,23 @@
         @toggle="toggleGroup"
         @navigate="navigateTo"
       />
+      <div v-if="user" class="nav-group" data-group="sales">
+        <div
+          class="nav-item"
+          :class="{ active: currentPageId === 'sales.workbench' }"
+          :aria-current="currentPageId === 'sales.workbench' ? 'page' : undefined"
+          data-tip="销售工作台"
+          aria-label="销售工作台"
+          role="button"
+          tabindex="0"
+          @click="navigateTo('/sales/workbench', 'sales.workbench')"
+          @keydown.enter.prevent="navigateTo('/sales/workbench', 'sales.workbench')"
+          @keydown.space.prevent="navigateTo('/sales/workbench', 'sales.workbench')"
+        >
+          <span class="ni" v-html="MENU_TREE.lead.icon"></span>
+          <span>销售工作台</span>
+        </div>
+      </div>
     </div>
 
     <SidebarFooter
@@ -151,6 +168,15 @@ const pocLogVisible = ref(false)
 const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
+  {
+    time: '2026-11-09',
+    releaseKey: 'workbench-sales-entry-20261109',
+    title: '销售工作台独立入口',
+    changePoint: '新增独立一级菜单“销售工作台”，可直接进入专属页面，保留其他菜单顺序和原有功能。',
+    detail: '本轮仅接入独立菜单、登录后的页面路由与静态页签；销售页面如实展示“销售内容待接入”，未接入销售数据或业务操作。原有运营总览、积分、使用数据看板、权限及 AI 助手保持当前实现。',
+    deployTargets: [],
+    status: '入口接入，销售内容待提供'
+  },
   {
     time: '2026-11-09',
     releaseKey: 'workbench-usage-dashboard-20261105',

@@ -150,6 +150,16 @@
         "本轮交互、响应式及键盘验证见独立浏览器证据",
         "使用附件演示数据，真实生成及评价发布服务未接入"
       ]
+    },
+    {
+      "pageId": "sales.workbench",
+      "label": "销售工作台",
+      "route": "/sales/workbench",
+      "pageType": "T7",
+      "components": ["C1", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["独立一级入口与登录守卫验收", "侧栏折叠和键盘操作验收", "Agent关闭、展开和最大宽度验收", "销售业务内容尚未提供"]
     }
   ]
 }
