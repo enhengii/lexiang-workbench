@@ -114,12 +114,13 @@ onDeactivated(() => { detailTarget.value = null })
 <template>
   <div class="usage-dashboard" data-page="usage-dashboard">
     <div class="usage-page-flow">
-      <ContentPageHeader :title="tab === 'creators' ? '创建人分析' : '使用数据看板'" :description="source === 'daily' ? `全平台范围 · 邮件日报数据 · 截至${rangeEnd}` : '全平台范围 · 示例数据未接入正式统计'">
-        <template #actions>
-          <button v-if="tab !== 'creators'" type="button" class="btn btn-secondary" @click="tab = 'creators'">创建人分析</button>
-          <button v-if="source === 'sample' && tab !== 'overview'" type="button" class="btn btn-secondary" :disabled="!analysis || !analysisRowsCount" title="导出当前周期及筛选条件下的聚合统计" @click="exportSample">导出样例数据</button>
+      <ContentPageHeader title="使用数据看板" :description="source === 'daily' ? `全平台范围 · 邮件日报数据 · 截至${rangeEnd}` : '全平台范围 · 示例数据未接入正式统计'">
+        <template v-if="source === 'sample' && tab !== 'overview'" #actions>
+          <button type="button" class="btn btn-secondary" :disabled="!analysis || !analysisRowsCount" title="导出当前周期及筛选条件下的聚合统计" @click="exportSample">导出样例数据</button>
         </template>
       </ContentPageHeader>
+
+      <ContentTabs v-model="tab" :items="tabs" label="使用数据视图" data-flow-role="filters" />
 
       <section class="usage-period usage-surface" data-flow-role="filters" aria-label="统计周期">
         <div class="usage-quick-period" role="group" aria-label="数据来源"><span class="usage-filter-label">数据来源</span><button type="button" :class="{ selected: source === 'daily' }" :aria-pressed="source === 'daily'" @click="source = 'daily'">日报数据</button><button type="button" :class="{ selected: source === 'sample' }" :aria-pressed="source === 'sample'" @click="source = 'sample'">样例演示</button></div>
@@ -137,7 +138,6 @@ onDeactivated(() => { detailTarget.value = null })
         <p class="usage-period-hint">{{ source === 'daily' ? '日报快照' : '样例数据' }}截止 {{ rangeEnd }}，支持 {{ rangeStart }} 起的区间；快捷周期以数据截止日为准。</p>
       </section>
 
-      <ContentTabs v-model="tab" :items="tabs" label="使用数据视图" data-flow-role="filters" />
       <p v-if="exportNotice" class="usage-export-notice" role="status" data-flow-role="notice">{{ exportNotice }}</p>
       <FeedbackState v-if="dateError" id="usage-date-error" state="error" title="请检查统计周期" :description="dateError" data-flow-role="notice">
         <template #action><button type="button" class="btn btn-secondary" @click="selectPeriod(7)">恢复近7天</button></template>

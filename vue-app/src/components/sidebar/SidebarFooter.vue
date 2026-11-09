@@ -50,12 +50,7 @@
           <button type="button" class="account-hub-card account-hub-card-manage" @click="$emit('open-usage-dashboard')">
             <span class="account-hub-icon account-hub-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16M8 15v-4M13 15V7M18 15V4"/></svg></span>
             <b>使用数据看板</b>
-            <small>查看平台访问、AI 互动与 Skill 运行统计。</small>
-          </button>
-          <button type="button" class="account-hub-card account-hub-card-manage" @click="$emit('open-usage-creators')">
-            <span class="account-hub-icon account-hub-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7" r="3"/><path d="M3 20v-2a6 6 0 0 1 12 0v2M17 4a3 3 0 0 1 0 6M18 14a5 5 0 0 1 3 4v2"/></svg></span>
-            <b>创建人分析</b>
-            <small>按创建人查看旗下 Skill 的调用、质量与明细。</small>
+            <small>查看平台访问、AI 互动、Skill 及创建人统计。</small>
           </button>
           <button type="button" class="account-hub-card account-hub-card-manage account-hub-card-log" @click="$emit('open-poc-log')">
             <span class="account-hub-icon">LOG</span>
@@ -101,7 +96,6 @@ defineEmits([
   'open-skill-manager',
   'open-permission-manager',
   'open-usage-dashboard',
-  'open-usage-creators',
   'open-poc-log'
 ])
 </script>
