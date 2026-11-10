@@ -28,6 +28,23 @@
         @toggle="toggleGroup"
         @navigate="navigateTo"
       />
+      <div v-if="user" class="nav-group" data-group="sales">
+        <div
+          class="nav-item"
+          :class="{ active: currentPageId === 'sales.workbench' }"
+          :aria-current="currentPageId === 'sales.workbench' ? 'page' : undefined"
+          data-tip="销售工作台"
+          aria-label="销售工作台"
+          role="button"
+          tabindex="0"
+          @click="navigateTo('/sales/workbench', 'sales.workbench')"
+          @keydown.enter.prevent="navigateTo('/sales/workbench', 'sales.workbench')"
+          @keydown.space.prevent="navigateTo('/sales/workbench', 'sales.workbench')"
+        >
+          <span class="ni" v-html="MENU_TREE.lead.icon"></span>
+          <span>销售工作台</span>
+        </div>
+      </div>
     </div>
 
     <SidebarFooter
@@ -43,6 +60,7 @@
       @open-scenario-package-create="openScenarioPackageCreatePage"
       @open-skill-manager="openSkillManagerPage"
       @open-permission-manager="openPermissionManagerPage"
+      @open-usage-dashboard="openUsageDashboardPage"
       @open-poc-log="openPocAdjustmentLog"
     />
   </div>
@@ -150,6 +168,33 @@ const pocLogVisible = ref(false)
 const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
+  {
+    time: '2026-11-10',
+    releaseKey: 'workbench-login-flow-20261110',
+    title: '管理员免密直达完整工作台',
+    changePoint: '管理员免密进入工作台首页，恢复完整菜单、顶部和 AI 助手，不再默认进入权限申请或显示顶部演示导航。',
+    detail: '复用当前全部工作台页面与本地业务数据，支持刷新恢复及退出；首次访问、禁用账号和外部密码登录保持原流程。当前身份仍按确认模拟 ADFS，不创建真实后台管理员会话，正常后台认证及运行文件保持不变。',
+    deployTargets: [],
+    status: '已修复，待验证发布'
+  },
+  {
+    time: '2026-11-09',
+    releaseKey: 'workbench-sales-entry-20261109',
+    title: '销售工作台独立入口',
+    changePoint: '新增独立一级菜单“销售工作台”，可直接进入专属页面，保留其他菜单顺序和原有功能。',
+    detail: '本轮仅接入独立菜单、登录后的页面路由与静态页签；销售页面如实展示“销售内容待接入”，未接入销售数据或业务操作。原有运营总览、积分、使用数据看板、权限及 AI 助手保持当前实现。',
+    deployTargets: [],
+    status: '入口接入，销售内容待提供'
+  },
+  {
+    time: '2026-11-10',
+    releaseKey: 'workbench-usage-dashboard-20261105',
+    title: '工作台使用数据看板',
+    changePoint: '活跃与覆盖统一为总授权用户、DAU、WAU、MAU四卡，分别展示登录与互动人数及占授权总用户的比例。Skill存量、所选周期新增与任务成功率归入上方使用及Skill指标，新增卡明确顶部起止日期。创建人分析移除未标注分组，同步调整调用汇总、排行、质量对比和导出；保留独立创建人列、明细下钻及当前筛选查看全部，切回分页保留原页码；刷新后保留所选视图。',
+    detail: '保留使用概览和左下角个人入口，默认展示用户提供的11月5日日报快照。核心80天与Skill明细148行按原表导入，任务和Skill分别统计；创建人按IT Code汇总其Skill贡献，仅统计已有明确创建人归属的数据，支持时间、菜单、搜索、质量比较、创建人到Skill下钻及日统计导出。真实日报只有日期×Skill汇总，不生成逐次调用日志或跨日/跨Skill去重人数；原始日报和Skill分析保留缺失归属信息，成功率与好评率从原始计数计算。样例演示单独切换，提供调用级交互框架，不与日报混合。当前为文件快照，未接入邮件自动同步和实时统计权限；不含真实用户清单或输入输出正文。沿用现有外壳、共享样式和Agent，各环境发布状态以实际记录为准。',
+    deployTargets: [],
+    status: '发布状态以环境记录为准'
+  },
   {
     time: '2026-10-30',
     releaseKey: 'workbench-style-restore-20261030',
@@ -322,11 +367,11 @@ const basePocLogRecords = [
     status: '发布状态以环境记录为准'
   },
   {
-    time: '2026-10-08',
+    time: '2026-11-06',
     releaseKey: 'workbench-activity-points-20260916',
     title: '企业购活动积分配置',
-    changePoint: '活动支持输入名称或编号后下拉检索、选中；统一积分配置与明细的下拉、输入框及表单状态。',
-    detail: '明细活动选择支持名称与编号检索，候选展示状态和编号；输入仅筛选候选，明确选中才切换统计，取消保留当前活动，无结果给出提示。配置、明细及编辑表单统一控件尺寸、边框和交互状态。促销中心 → 积分管理保留活动积分配置、活动积分明细两个独立入口及原积分规则，配置与明细不互设跳转按钮。参与及排除商品编码均支持输入、检测和去重；FA 与产品组模式可选填排除编码，按商品编码选择模式不使用排除配置。明细支持企业、账号和订单统计、下钻及全量筛选导出。活动期间金额标为预计；活动结束后由系统按计划自动发放，延期同步顺延日期，成功、失败和异常按实际记录展示。演示操作不产生真实积分。发布环境、人员、时间和版本分别以实际记录为准。',
+    changePoint: '活动结束后延迟天数不得小于15天，保存草稿与启用均校验。企业统计、查询、详情与导出统一展示税号。明细增加查询按钮，填写条件后点击查询或按回车生效，支持重置。统一标记待自动发放、已发放、发放失败和计算异常，企业及账号分别展示各状态明细笔数。补齐发票类型和用户企业组必填多选，保存后可回看；与商品条件共同筛选参与订单，统计仅累计符合条件的订单。',
+    detail: '新增发票类型（电子票、增值税发票）与企业组多选，均至少选一项；与商品条件取交集后累计，资格不符的订单展示原因。新增、编辑、配置详情保持所选条件，旧演示记录保留。明细活动选择支持名称与编号检索，候选展示状态和编号；输入仅筛选候选，明确选中才切换统计，取消保留当前活动，无结果给出提示。配置、明细及编辑表单统一控件尺寸、边框和交互状态。促销中心 → 积分管理保留活动积分配置、活动积分明细两个独立入口及原积分规则，配置与明细不互设跳转按钮。参与及排除商品编码均支持输入、检测和去重；FA 与产品组模式可选填排除编码，按商品编码选择模式不使用排除配置。明细支持企业、账号和订单统计、下钻及全量筛选导出。活动期间金额标为预计；活动结束后由系统按计划自动发放，延期同步顺延日期，成功、失败和异常按实际记录展示。演示操作不产生真实积分。发布环境、人员、时间和版本分别以实际记录为准。',
     deployTargets: [],
     status: '发布状态以环境记录为准'
   },
@@ -1092,6 +1137,13 @@ function openPermissionManagerPage() {
   appStore.ensureStaticTab('agent.permissions')
   appStore.setActiveStaticTab('agent.permissions')
   router.push('/agent/permissions')
+}
+function openUsageDashboardPage() {
+  closeUserMenu()
+  appStore.setActiveTempTab(null)
+  appStore.ensureStaticTab('agent.usageDashboard')
+  appStore.setActiveStaticTab('agent.usageDashboard')
+  router.push('/agent/usage-dashboard')
 }
 async function refreshPocReleaseLedger() {
   pocReleaseLedger.value = await loadPocReleaseLedger()

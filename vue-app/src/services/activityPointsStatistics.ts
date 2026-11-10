@@ -64,6 +64,7 @@ export type StatisticsSummary = {
 export type StatisticsGroup = {
   id: string
   enterpriseId: string
+  enterpriseTaxNo: string
   enterprise: string
   account: string
   rows: StatisticsRow[]
@@ -102,6 +103,7 @@ function latestRecords(activityId: string, records: RecordItem[]) {
 
 function markException(row: StatisticsRow, reason: string) {
   row.status = '计算异常'
+  row.calculationError = true
   row.reason = row.issue ? `${row.issue}；${reason}` : reason
   row.issue = row.reason
   row.pendingPoints = 0
@@ -137,15 +139,17 @@ export function buildActivityStatistics(
           .sort((left, right) => right.threshold - left.threshold)
           .find((tier) => metric >= tier.threshold)?.multiplier || 0
       const requiredPoints = participating && actualPaid !== null ? row.delta : null
-      const status: StatisticsStatus = !participating
-        ? '不参与'
-        : issue
-          ? '计算异常'
-          : cutoff <= activity.end
-            ? '累计中'
-            : row.delta > 0
-              ? '待自动发放'
-              : '无需发放'
+      const status: StatisticsStatus = row.calculationError
+        ? '计算异常'
+        : !participating
+          ? '不参与'
+          : issue
+            ? '计算异常'
+            : cutoff <= activity.end
+              ? '累计中'
+              : row.delta > 0
+                ? '待自动发放'
+                : '无需发放'
       return {
         ...row,
         eligible: participating,
@@ -247,7 +251,7 @@ export function filterStatistics(
     !query?.trim() || value.toLowerCase().includes(query.trim().toLowerCase())
   return rows.filter(
     (row) =>
-      includes(`${row.enterprise} ${row.enterpriseId}`, filters.enterprise) &&
+      includes(`${row.enterprise} ${row.enterpriseTaxNo || ''}`, filters.enterprise) &&
       includes(row.account, filters.account) &&
       includes(row.id, filters.orderId) &&
       includes(row.sku, filters.sku) &&
@@ -304,6 +308,7 @@ export function groupStatistics(
   return [...groups].map(([id, items]) => ({
     id,
     enterpriseId: items[0].enterpriseId,
+    enterpriseTaxNo: items[0].enterpriseTaxNo || '',
     enterprise: items[0].enterprise,
     account: dimension === 'account' ? items[0].account : '',
     rows: items,

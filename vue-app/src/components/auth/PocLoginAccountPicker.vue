@@ -18,7 +18,7 @@
       @click="showOptions"
       @keydown="onKeydown"
     />
-    <span :id="id + '-hint'" class="poc-account-hint">选择内部演示账号后直接进入对应场景，使用模拟数据；管理员正常登录仍需身份验证。</span>
+    <span :id="id + '-hint'" class="poc-account-hint">选择管理员直接进入工作台；首次访问或禁用账号进入对应申请流程。</span>
     <div v-if="open" class="poc-account-popup" :class="{ 'opens-above': opensAbove }">
       <ul :id="id + '-options'" :style="{ maxHeight: popupHeight + 'px' }" role="listbox" aria-label="POC 演示账号">
         <li

@@ -18,7 +18,8 @@ import { ref, computed } from 'vue'
 import { STORAGE_KEYS, clearBooleanStorage, readBooleanStorage, writeBooleanStorage } from '@/constants/storageKeys'
 import { syncThemeMode } from '@/composables/useThemeMode'
 import { showWorkbenchToast } from '@/services/toast'
-import { isPocSandbox, permissionLabEnabled } from '@/config/runtimeMode'
+import { isPocSandbox, isPocWorkbench, allowPocSimulation, permissionLabEnabled } from '@/config/runtimeMode'
+import { hasPocWorkbenchSession, POC_WORKBENCH_SESSION_KEY } from '@/services/pocWorkbenchSession'
 import { labHeaders } from '@/services/permissionLab'
 import { AI_INSPECT_MENU, withAiInspectMenu } from '@/services/aiInspectAccess'
 import { ACTIVITY_POINTS_MENU, withActivityPointsMenu } from '@/services/activityPointsAccess'
@@ -187,11 +188,13 @@ export const MENU_TREE: Record<MenuGroupKey, MenuGroup> = {
 // pageId → path 快速查表
 export function pageIdToPath(pageId: PageId) {
   const specials = {
+    'sales.workbench':   '/sales/workbench',
     'portal.home':       '/portal/home',
     'agent.skills':      '/agent/skills',
     'agent.skillCreate': '/agent/skill-create',
     'agent.scenarioPackageCreate': '/agent/scenario-package-create',
     'agent.permissions': '/agent/permissions',
+    'agent.usageDashboard': '/agent/usage-dashboard',
     'dashboard.query': '/hidden/dashboard/query',
     'dashboard.behavior': '/hidden/dashboard/behavior',
     'ops.queryBiz': '/hidden/ops/query-biz',
@@ -219,10 +222,12 @@ export function pageIdToPath(pageId: PageId) {
 // 对应原 getPageLabel()
 export function getPageLabel(pageId: PageId) {
   const map = {
+    'sales.workbench': '销售工作台',
     'agent.skills': 'Skill Hub',
     'agent.skillCreate': 'Skill 创建',
     'agent.scenarioPackageCreate': '场景技能包创建',
     'agent.permissions': '权限管理',
+    'agent.usageDashboard': '使用数据看板',
     'portal.home': '联想门户工作台',
     'dashboard.query': 'Query 明细',
     'dashboard.behavior': '用户行为',
@@ -250,7 +255,7 @@ export function getPageLabel(pageId: PageId) {
 
 // 对应原 workspaceStaticGroupLabel()
 export function getGroupLabel(pageId: PageId) {
-  const groupLabelMap: Record<string, string> = { agent: 'AI 助手', portal: '首页' }
+  const groupLabelMap: Record<string, string> = { agent: 'AI 助手', portal: '首页', sales: '销售工作台' }
   for (const g of Object.values(MENU_TREE)) {
     if (g.children?.[pageId]) return [g.label, g.children[pageId].section].filter(Boolean).join(' / ')
   }
@@ -312,7 +317,10 @@ export const useAppStore = defineStore('app', () => {
   // ===== 对应原 loadUserContext() =====
   async function loadUserContext() {
     // The isolated demo never reads a real session or its menu permissions.
-    if (isPocSandbox) return
+    if (isPocSandbox) {
+      if (isPocWorkbench) usePreviewSession('admin')
+      return
+    }
     // 先确认登录状态
     try {
       const meRes = await fetch('/api/admin/me')
@@ -374,12 +382,17 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function usePreviewSession(username = 'demo') {
+    if (!allowPocSimulation || !isPocWorkbench || username !== 'admin') return false
+    try { if (!hasPocWorkbenchSession(window.sessionStorage)) return false }
+    catch { return false }
     user.value = username
     _fallbackMenus()
+    return true
   }
 
   // ===== 登出（对应原 doLogout）=====
   async function logout() {
+    if (isPocWorkbench) window.sessionStorage.removeItem(POC_WORKBENCH_SESSION_KEY)
     if (!isPocSandbox) {
       try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', ...labHeaders() }, body: '{}' }) } catch {}
       localStorage.removeItem('preview_user')

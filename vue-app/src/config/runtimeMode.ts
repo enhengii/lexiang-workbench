@@ -11,6 +11,8 @@ export const allowPocLogin = !permissionLabEnabled && pocLoginEnabled(import.met
 const paths = runtimePaths(import.meta.env.BASE_URL, typeof window === 'undefined' ? '' : window.location?.pathname || '')
 export const normalAppBase = paths.normalBase
 export const pocAppBase = paths.demoBase
+export const pocWorkbenchBase = paths.workbenchBase
+export const isPocWorkbench = paths.workbench
 export const isPocSandbox = paths.sandbox
 export const appBase = paths.routerBase
 export const allowPocSimulation = allowPocLogin && isPocSandbox

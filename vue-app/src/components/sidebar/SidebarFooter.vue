@@ -47,6 +47,11 @@
             <b>权限管理</b>
             <small>管理菜单权限、Skill 权限、数据范围和审批边界。</small>
           </button>
+          <button type="button" class="account-hub-card account-hub-card-manage" @click="$emit('open-usage-dashboard')">
+            <span class="account-hub-icon account-hub-create-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16M8 15v-4M13 15V7M18 15V4"/></svg></span>
+            <b>使用数据看板</b>
+            <small>查看平台访问、AI 互动、Skill 及创建人统计。</small>
+          </button>
           <button type="button" class="account-hub-card account-hub-card-manage account-hub-card-log" @click="$emit('open-poc-log')">
             <span class="account-hub-icon">LOG</span>
             <b>调整日志</b>
@@ -90,6 +95,7 @@ defineEmits([
   'open-scenario-package-create',
   'open-skill-manager',
   'open-permission-manager',
+  'open-usage-dashboard',
   'open-poc-log'
 ])
 </script>
@@ -97,4 +103,5 @@ defineEmits([
 <style scoped>
 .account-hub-create-icon { width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 .account-hub-create-icon svg { width: 18px; height: 18px; }
+.account-hub-card-log { grid-column: 1 / -1; min-height: 0; padding: var(--space-4, 16px); }
 </style>

@@ -2,6 +2,21 @@
   "schemaVersion": 1,
   "pages": [
     {
+      "pageId": "agent.usageDashboard",
+      "label": "使用数据看板",
+      "route": "/agent/usage-dashboard",
+      "pageType": "T3",
+      "components": ["C1", "C2", "C3", "C8", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": [
+        "默认展示用户提供的邮件日报快照，尚未接入邮件自动同步、实时统计与全平台运营权限",
+        "Skill与创建人分析采用共享指标、筛选和表格组合；排行、质量比较与单一详情模态为page-local A组合",
+        "真实明细保留日期×Skill粒度及不可去重人数边界，逐次调用仅在独立样例演示提供",
+        "本轮两数据源、两维度、下钻、明细筛选、导出和内容槽适配验证见独立交付证据"
+      ]
+    },
+    {
       "pageId": "points.deductionRules",
       "label": "积分抵现规则",
       "route": "/points/deduction-rules",
@@ -135,6 +150,16 @@
         "本轮交互、响应式及键盘验证见独立浏览器证据",
         "使用附件演示数据，真实生成及评价发布服务未接入"
       ]
+    },
+    {
+      "pageId": "sales.workbench",
+      "label": "销售工作台",
+      "route": "/sales/workbench",
+      "pageType": "T7",
+      "components": ["C1", "C9"],
+      "implementation": "O1",
+      "visualStatus": "VA-0",
+      "remainingStates": ["独立一级入口与登录守卫验收", "侧栏折叠和键盘操作验收", "Agent关闭、展开和最大宽度验收", "销售业务内容尚未提供"]
     }
   ]
 }

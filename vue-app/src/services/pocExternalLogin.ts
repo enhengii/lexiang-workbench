@@ -48,6 +48,27 @@ export function resolvePocLogin(
   if (!fixture) return null
   if (password !== POC_EXTERNAL_PASSWORD) return 'invalid-password'
   if (fixture.loginType !== loginType) return 'wrong-login-type'
+  return resolvePocAccountState(fixture, readRequests, readFirstAccessApprovals)
+}
+
+/** Simulates an internal IdP result inside the isolated POC; never accepts credentials. */
+export function resolvePocAdfsLogin(
+  username: string,
+  previewEnabled: boolean,
+  readRequests: () => string | null,
+  readFirstAccessApprovals: () => string | null = () => null
+): PocLoginResult {
+  const fixture = findPocLoginAccount(username, previewEnabled)
+  if (!fixture) return null
+  if (fixture.loginType !== 'internal') return 'wrong-login-type'
+  return resolvePocAccountState(fixture, readRequests, readFirstAccessApprovals)
+}
+
+function resolvePocAccountState(
+  fixture: PocLoginAccount,
+  readRequests: () => string | null,
+  readFirstAccessApprovals: () => string | null
+): PocLoginResult {
   if (!fixture.disabled) {
     if (fixture.accessReason !== 'first-access') return 'active'
     const approvals: unknown = JSON.parse(readFirstAccessApprovals() || '[]')

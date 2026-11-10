@@ -10,7 +10,7 @@
     </section>
 
     <section class="adfs-panel" aria-label="Lenovo ADFS 登录">
-      <div v-if="directPocAccount" class="adfs-direct-entry" :aria-busy="pocEntryBusy">
+      <div v-if="directPocAccount || errorMsg" class="adfs-direct-entry" :aria-busy="pocEntryBusy">
         <p v-if="!errorMsg" role="status">正在进入演示场景…</p>
         <p v-else class="adfs-error" role="alert">{{ errorMsg }}</p>
         <div class="adfs-direct-actions">
@@ -18,48 +18,20 @@
           <button class="btn btn-secondary" type="button" :disabled="pocEntryBusy" @click="returnToPocSelection">返回选择</button>
         </div>
       </div>
-      <form v-else class="adfs-form" @submit.prevent="submitAdfsLogin">
-        <h1>Lenovo Corporation</h1>
-        <p>{{ passwordlessLogin ? '本地演示账号，无需密码，点击 Submit 继续。' : 'Please login with your ITCode / Password and OTP code (if required).' }}</p>
-
-        <div class="adfs-row">
-          <label for="adfs-login-itcode">ITCode</label>
-          <PocLoginAccountPicker v-if="allowPocLogin" id="adfs-login-itcode" v-model="itcode" placeholder="输入或选择演示账号" @select="selectPocAccount" @submit="submitAdfsLogin" />
-          <input v-else id="adfs-login-itcode" v-model.trim="itcode" autofocus autocomplete="username" />
-        </div>
-        <label v-if="!passwordlessLogin" class="adfs-row">
-          <span>Password</span>
-          <input v-model="password" type="password" autocomplete="current-password" />
-        </label>
-        <label v-if="!passwordlessLogin" class="adfs-row">
-          <span>OTP Code</span>
-          <input v-model.trim="otpCode" inputmode="numeric" autocomplete="one-time-code" />
-        </label>
-
-        <p v-if="!passwordlessLogin" class="adfs-register">If this is the first time you are using Lenovo OTP, please <button type="button">register</button>.</p>
-
-        <label class="adfs-remember">
-          <input v-model="rememberMe" type="checkbox" />
-          <span>使我保持登录状态</span>
-        </label>
-        <div v-if="errorMsg" class="adfs-error">{{ errorMsg }}</div>
-        <button class="adfs-submit" type="submit">Submit</button>
-      </form>
+      <p v-else class="adfs-direct-entry" role="status">正在返回登录…</p>
       <footer>© 2026 Lenovo</footer>
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { allowPocLogin, allowPocSimulation, isPocSandbox, permissionLabEnabled } from '@/config/runtimeMode'
-import { isPasswordlessLabAccount, labHeaders } from '@/services/permissionLab'
+import { allowPocLogin, allowPocSimulation, isPocSandbox } from '@/config/runtimeMode'
 import { pocLocalStorage, pocSessionStorage } from '@/services/pocStorage'
-import PocLoginAccountPicker from '@/components/auth/PocLoginAccountPicker.vue'
-import { POC_ACCOUNT_REQUESTS_KEY, POC_EXTERNAL_PASSWORD, findPocLoginAccount, resolvePocLogin } from '@/services/pocExternalLogin'
-import { findPocLoginChoice, navigatePocChoice, type PocLoginChoice } from '@/services/pocLoginChoices'
+import { POC_ACCOUNT_REQUESTS_KEY, findPocLoginAccount, resolvePocAdfsLogin } from '@/services/pocExternalLogin'
+import { findPocLoginChoice, navigatePocChoice } from '@/services/pocLoginChoices'
 import { APPROVAL_MAIL_ROWS_KEY } from '@/services/approvalMailReview'
 
 const route = useRoute()
@@ -67,47 +39,34 @@ const router = useRouter()
 const appStore = useAppStore()
 
 const itcode = ref('')
-const password = ref('')
-const passwordlessLogin = computed(() => isPasswordlessLabAccount(itcode.value, 'internal'))
-const otpCode = ref('')
-const rememberMe = ref(false)
 const errorMsg = ref('')
 const disabledAccount = ref('')
 const initialPocAccount = findPocLoginAccount(route.query.pocAccount, allowPocLogin)
 const initialPocChoice = findPocLoginChoice(route.query.pocAccount)
 const directPocAccount = ref(allowPocSimulation && initialPocChoice?.loginType === 'internal' ? initialPocChoice.username : '')
 const pocEntryBusy = ref(false)
-if (initialPocAccount) navigatePocChoice(initialPocAccount)
+let leavingForAnotherApp = false
+try { leavingForAnotherApp = initialPocChoice ? navigatePocChoice(initialPocChoice) : false }
+catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
 if (initialPocAccount?.loginType === 'internal') {
   itcode.value = initialPocAccount.username
-  password.value = POC_EXTERNAL_PASSWORD
-}
-
-async function selectPocAccount(account: PocLoginChoice) {
-  if (!allowPocLogin || navigatePocChoice(account)) return
-  errorMsg.value = ''
-  disabledAccount.value = ''
-  if (account.loginType === 'external') {
-    router.push({ path: '/login', query: { loginType: 'external', pocAccount: account.username, redirect: String(route.query.redirect || '/') } })
-    return
-  }
-  itcode.value = account.username
-  password.value = POC_EXTERNAL_PASSWORD
-  otpCode.value = ''
-  if (allowPocSimulation && findPocLoginChoice(account.username)?.loginType === 'internal') {
-    directPocAccount.value = account.username
-    await enterPocScenario()
-  }
 }
 
 async function enterPocScenario() {
+  if (initialPocChoice?.username === 'admin') {
+    errorMsg.value = ''
+    try { navigatePocChoice(initialPocChoice) }
+    catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
+    return
+  }
   const choice = findPocLoginChoice(directPocAccount.value)
-  if (!allowPocSimulation || choice?.loginType !== 'internal' || pocEntryBusy.value) return
+  const fixture = findPocLoginAccount(directPocAccount.value, allowPocSimulation)
+  if (!allowPocSimulation || choice?.loginType !== 'internal' || (choice.username !== 'admin' && fixture?.loginType !== 'internal') || pocEntryBusy.value) return
   pocEntryBusy.value = true
   itcode.value = choice.username
-  password.value = POC_EXTERNAL_PASSWORD
   try {
-    await submitAdfsLogin()
+    if (choice.username === 'admin') navigatePocChoice(choice)
+    else await submitAdfsLogin()
     if (!errorMsg.value && route.path === '/adfs-login') errorMsg.value = '未能进入演示场景，请重试或返回选择。'
   } finally {
     pocEntryBusy.value = false
@@ -118,11 +77,15 @@ function returnToPocSelection() {
   return router.replace({ path: '/login', query: { mode: 'scenarios', redirect: String(route.query.redirect || '/') } })
 }
 
-onMounted(enterPocScenario)
-
-function isDisabledLoginResponse(status: number, data: any) {
-  return status === 423 || data?.code === 'ACCOUNT_DISABLED' || data?.error === '账号已禁用'
-}
+onMounted(async () => {
+  if (leavingForAnotherApp || errorMsg.value) return
+  if (directPocAccount.value) return enterPocScenario()
+  if (isPocSandbox) {
+    await router.replace({ path: '/login', query: { ...route.query, mode: 'scenarios', loginType: initialPocChoice?.loginType || 'internal' } })
+    return
+  }
+  await router.replace({ path: '/login', query: { ...route.query, loginType: 'internal' } })
+})
 
 async function openEnableRequest() {
   if (!disabledAccount.value) return
@@ -133,18 +96,18 @@ async function submitAdfsLogin() {
   const account = itcode.value.trim()
   errorMsg.value = ''
   disabledAccount.value = ''
-  if (!account || (!passwordlessLogin.value && !password.value)) {
-    errorMsg.value = '请输入 ITCode 和 Password。'
+  if (!account) {
+    errorMsg.value = '请选择内部演示账号。'
     return
   }
 
   try {
-    const result = resolvePocLogin(account, password.value, 'internal', allowPocSimulation,
+    const result = resolvePocAdfsLogin(account, allowPocSimulation,
       () => pocLocalStorage.getItem(POC_ACCOUNT_REQUESTS_KEY),
       () => pocLocalStorage.getItem(APPROVAL_MAIL_ROWS_KEY))
     if (result) {
-      if (result === 'invalid-password' || result === 'wrong-login-type') {
-        errorMsg.value = result === 'invalid-password' ? '用户名或密码错误' : '该演示账号属于外部用户，请切换外部用户登录。'
+      if (result === 'wrong-login-type') {
+        errorMsg.value = '该演示账号属于外部用户，请切换外部用户登录。'
         return
       }
       pocLocalStorage.removeItem('preview_user')
@@ -171,44 +134,7 @@ async function submitAdfsLogin() {
     return
   }
 
-  if (isPocSandbox) {
-    errorMsg.value = '该入口仅支持指定演示账号。真实账号请返回正常登录。'
-    return
-  }
-  try {
-    disabledAccount.value = ''
-    const res = await fetch('/api/admin/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...labHeaders() },
-      body: JSON.stringify({ username: account, password: passwordlessLogin.value ? '' : password.value, otpCode: otpCode.value, rememberMe: rememberMe.value, loginType: 'adfs' })
-    })
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      if (isDisabledLoginResponse(res.status, data)) {
-        disabledAccount.value = account
-        pocSessionStorage.setItem('leaibot-disabled-login-account', account)
-        pocSessionStorage.setItem('leaibot-disabled-login-type', 'internal')
-        await openEnableRequest()
-        return
-      }
-      errorMsg.value = data.error || '登录失败'
-      return
-    }
-    if (permissionLabEnabled && data.next === 'first-access') {
-      appStore.user = null
-      await router.replace({ path: '/access-denied', query: { itcode: data.username, userType: 'internal' } })
-      return
-    }
-    appStore.user = data.username || account
-    await appStore.loadUserContext()
-    if (!appStore.permissions.length) {
-      await router.replace({ path: '/access-denied', query: { itcode: data.username || account, userType: 'internal' } })
-      return
-    }
-    await router.replace(String(route.query.redirect || (permissionLabEnabled ? '/agent/permissions?module=approval' : '/')))
-  } catch {
-    errorMsg.value = '登录服务暂不可用，请稍后重试'
-  }
+  errorMsg.value = '该入口仅支持指定演示账号。请返回登录页面完成身份验证。'
 }
 </script>
 
@@ -288,106 +214,10 @@ async function submitAdfsLogin() {
   margin-top: var(--space-4, 16px);
 }
 
-.adfs-form h1 {
-  margin: 0 0 86px;
-  font-size: 34px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-
-.adfs-form > p:not(.adfs-register) {
-  margin: 0 0 34px;
-  font-size: 17px;
-  line-height: 1.35;
-}
-
-.adfs-row {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  align-items: center;
-  gap: 24px;
-  margin-bottom: 28px;
-  font-size: 18px;
-}
-
-.adfs-row input,
-.adfs-row :deep(.poc-account-input) {
-  width: 100%;
-  height: 39px;
-  border: 1px solid #9b9b9b;
-  padding: 5px 8px;
-  background: #fff;
-  color: #111827;
-  font-size: 16px;
-}
-
-.adfs-row input:focus,
-.adfs-row :deep(.poc-account-input:focus) {
-  outline: 2px solid #111827;
-  outline-offset: -2px;
-  background: #eaf2ff;
-}
-
-.adfs-register {
-  margin: 0 0 42px;
-  font-size: 18px;
-  line-height: 1.35;
-}
-
-.adfs-register button {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #1683f5;
-  font: inherit;
-  cursor: pointer;
-}
-
-.adfs-remember {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  font-size: 16px;
-}
-
-.adfs-remember input {
-  width: 16px;
-  height: 16px;
-}
-
 .adfs-error {
   margin: 0 0 8px;
   color: #d92d20;
   font-size: 14px;
-}
-
-.adfs-enable-entry {
-  justify-self: start;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--color-primary);
-  font: inherit;
-  cursor: pointer;
-}
-.adfs-enable-entry:hover { text-decoration: underline; }
-.adfs-enable-entry:focus-visible { outline: none; border-radius: var(--radius-sm); box-shadow: var(--focus-ring); }
-
-.adfs-submit {
-  min-width: 104px;
-  min-height: 48px;
-  border: 0;
-  border-radius: 3px;
-  background: #0787e5;
-  color: #fff;
-  font-size: 20px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.adfs-submit:hover {
-  background: #0678cc;
 }
 
 .adfs-panel footer {
@@ -408,14 +238,5 @@ async function submitAdfsLogin() {
     padding: 36px 24px 28px;
   }
 
-  .adfs-form h1 {
-    margin-bottom: 36px;
-    font-size: 28px;
-  }
-
-  .adfs-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
 }
 </style>

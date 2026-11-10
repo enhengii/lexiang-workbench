@@ -24,7 +24,8 @@ import {
   statisticsStatuses,
   type StatisticsFilters,
   type StatisticsRow,
-  type StatisticsGroup
+  type StatisticsGroup,
+  type StatisticsStatus
 } from '@/services/activityPointsStatistics'
 
 const app = useAppStore()
@@ -65,6 +66,11 @@ const emptyFilters = (): StatisticsFilters => ({
   status: ''
 })
 const filters = reactive<StatisticsFilters>(emptyFilters())
+const appliedFilters = ref<StatisticsFilters>(emptyFilters())
+const hasUnappliedFilters = computed(() =>
+  (Object.keys(emptyFilters()) as Array<keyof StatisticsFilters>)
+    .some((key) => filters[key] !== appliedFilters.value[key])
+)
 const drillEnterprise = ref('')
 const drillAccount = ref('')
 const advanced = ref(false)
@@ -82,13 +88,11 @@ const allRows = computed(() =>
     : []
 )
 const rows = computed(() =>
-  dateError.value
-    ? []
-    : filterStatistics(allRows.value, {
-        ...filters,
-        exactEnterprise: drillEnterprise.value,
-        exactAccount: drillAccount.value
-      })
+  filterStatistics(allRows.value, {
+    ...appliedFilters.value,
+    exactEnterprise: drillEnterprise.value,
+    exactAccount: drillAccount.value
+  })
 )
 const summary = computed(() => summarizeStatistics(rows.value))
 const groups = computed(() =>
@@ -102,7 +106,17 @@ const orderPoints = (row: StatisticsRow) =>
   !row.eligible ? '不适用' : row.issue ? '待核对' : p(row.requiredPoints)
 const tierLabel = (group: StatisticsGroup) =>
   group.multiplier ? `${group.multiplier} 倍` : '未达档'
-const tableRows = computed<Array<Record<string, unknown>>>(() =>
+const statusTone = (status: StatisticsStatus) =>
+  status === '待自动发放' ? 'primary'
+    : status === '已发放' ? 'success'
+      : status === '发放失败' ? 'danger'
+        : status === '计算异常' ? 'warning' : 'neutral'
+const statusNote = (row: StatisticsRow) =>
+  row.status === '待自动发放' ? `计划发放：${plannedDate.value}`
+    : row.status === '已发放' && row.record ? `发放时间：${row.record.time}` : row.reason
+type StatusMarker = { status: StatisticsStatus; count?: number }
+type StatisticsTableRow = Record<string, unknown> & { markers: StatusMarker[] }
+const tableRows = computed<StatisticsTableRow[]>(() =>
   tab.value === '订单明细'
     ? rows.value.map((row) => ({
         key: row.key,
@@ -115,12 +129,13 @@ const tableRows = computed<Array<Record<string, unknown>>>(() =>
         amount: money(row.netReceipt),
         required: orderPoints(row),
         status: row.status,
-        reason: row.reason
+        reason: statusNote(row),
+        markers: [{ status: row.status }]
       }))
     : groups.value.map((group) => ({
         key: group.id,
         name: tab.value === '企业统计' ? group.enterprise : group.account,
-        secondary: tab.value === '企业统计' ? group.enterpriseId : group.enterprise,
+        secondary: tab.value === '企业统计' ? (group.enterpriseTaxNo || '—') : group.enterprise,
         count: `${group.summary.orderCount} 单 / ${group.summary.accountCount} 个账号`,
         quantity: n(group.summary.quantity),
         amount: money(group.summary.amount),
@@ -132,7 +147,10 @@ const tableRows = computed<Array<Record<string, unknown>>>(() =>
         posted: n(group.summary.posted),
         pending: n(group.summary.pending),
         failed: n(group.summary.failed),
-        exceptions: group.summary.exceptionCount
+        exceptions: group.summary.exceptionCount,
+        markers: statisticsStatuses
+          .map((status) => ({ status, count: group.rows.filter((row) => row.status === status).length }))
+          .filter((marker) => marker.count > 0)
       }))
 )
 const paged = computed(() => tableRows.value.slice((page.value - 1) * 10, page.value * 10))
@@ -152,7 +170,7 @@ const columns = computed<Column[]>(() =>
         { key: 'actions', label: '操作' }
       ]
     : [
-        { key: 'name', label: tab.value === '企业统计' ? '企业名称 / 标识' : 'Lenovo ID / 企业' },
+        { key: 'name', label: tab.value === '企业统计' ? '企业名称 / 税号' : 'Lenovo ID / 企业' },
         { key: 'count', label: '订单 / 账号' },
         numeric('quantity', '有效台数'),
         numeric('amount', '实际收款金额'),
@@ -164,15 +182,26 @@ const columns = computed<Column[]>(() =>
         numeric('pending', pendingPointsLabel.value),
         numeric('failed', '失败积分'),
         numeric('exceptions', '计算异常'),
+        { key: 'status', label: '发放状态 / 明细笔数' },
         { key: 'actions', label: '操作' }
       ]
 )
-function resetFilters() {
-  Object.assign(filters, emptyFilters())
+function query() {
+  if (!canView.value || !activity.value) return
+  if (dateError.value) {
+    advanced.value = true
+    return
+  }
+  appliedFilters.value = { ...filters }
   drillEnterprise.value = ''
   drillAccount.value = ''
   page.value = 1
+  detailKey.value = ''
   notice.value = ''
+}
+function resetFilters() {
+  Object.assign(filters, emptyFilters())
+  query()
 }
 function openRow(key: unknown) {
   if (tab.value === '订单明细') {
@@ -199,13 +228,13 @@ function exportDetails() {
     notice.value = '当前账号没有明细导出权限。'
     return
   }
-  if (!activity.value || dateError.value || !rows.value.length) return
+  if (!activity.value || !rows.value.length) return
   exportPointsCsv(
     `${activity.value.name}-活动积分明细`,
     [
       '活动编号',
       '活动名称',
-      '企业标识',
+      '税号',
       '企业名称',
       '订单号',
       '商品编码',
@@ -228,7 +257,7 @@ function exportDetails() {
     rows.value.map((row) => [
       row.activityId,
       row.activityName,
-      row.enterpriseId,
+      row.enterpriseTaxNo || '',
       row.enterprise,
       row.id,
       row.sku,
@@ -249,7 +278,7 @@ function exportDetails() {
       state.date
     ])
   )
-  notice.value = `已导出当前筛选的全部 ${rows.value.length} 条订单明细，可用 Excel 打开。`
+  notice.value = `已导出当前查询结果的全部 ${rows.value.length} 条订单明细，可用 Excel 打开。`
 }
 watch(
   () => route.query.activity,
@@ -270,7 +299,7 @@ watch(tab, (value) => {
   } else if (value === '账号明细') drillAccount.value = ''
 })
 watch(
-  [filters, drillEnterprise, drillAccount, tab],
+  [appliedFilters, drillEnterprise, drillAccount, tab],
   () => {
     page.value = 1
     notice.value = ''
@@ -296,7 +325,7 @@ watch(
           <button
             v-if="canExport"
             class="btn btn-primary"
-            :disabled="!rows.length || !!dateError"
+            :disabled="!rows.length"
             @click="exportDetails"
           >
             导出明细
@@ -321,7 +350,7 @@ watch(
           {{ storageNotice.message }}
         </p>
         <div class="points-list-workspace" data-flow-role="list-workspace">
-          <div class="points-filter">
+          <form class="points-filter" @submit.prevent="query">
             <div class="points-filter-grid">
               <PointsSelect
                 v-model="activityId"
@@ -330,11 +359,11 @@ watch(
                 searchable
                 placeholder="输入活动名称或编号检索"
               />
-              <label class="points-field">企业名称 / 标识<input
+              <label class="points-field">企业名称 / 税号<input
                 v-model="filters.enterprise"
                 class="form-input"
                 type="search"
-                placeholder="输入企业名称或标识"
+                placeholder="输入企业名称或税号"
               /></label>
               <label class="points-field">Lenovo ID<input
                 v-model="filters.account"
@@ -365,15 +394,16 @@ watch(
                 />
               </template>
               <div class="points-actions points-filter-actions">
-                <span class="points-muted">条件变更后实时筛选</span>
-                <button class="points-link" :aria-expanded="advanced" @click="advanced = !advanced">
+                <span v-if="hasUnappliedFilters" class="points-muted" role="status">筛选条件已修改，点击查询后生效</span>
+                <button class="btn btn-primary" type="submit">查询</button>
+                <button class="points-link" type="button" :aria-expanded="advanced" @click="advanced = !advanced">
                   {{ advanced ? '收起筛选' : '更多筛选' }}
                 </button>
-                <button class="btn btn-secondary" @click="resetFilters">重置筛选</button>
+                <button class="btn btn-secondary" type="button" @click="resetFilters">重置筛选</button>
               </div>
             </div>
-            <p v-if="dateError" class="points-code-error" role="alert">{{ dateError }}</p>
-          </div>
+            <p v-if="dateError" class="points-code-error" role="alert">{{ dateError }}，请调整后查询；当前仍显示上次查询结果。</p>
+          </form>
           <MetricGrid data-flow-role="summary">
             <MetricCard
               :label="activityPointsLabel"
@@ -449,19 +479,14 @@ watch(
                 <template #cell-name="{ row }"><button class="points-link points-name" @click="openRow(row.key)">
                   {{ row.name }}</button><small class="points-secondary">{{ row.secondary }}</small></template>
                 <template #cell-multiplier="{ row }"><span class="points-numeric">{{ row.multiplier }}</span><small v-if="row.tierContext" class="points-secondary">活动累计 {{ row.tierContext }}</small></template>
-                <template #cell-status="{ row }"><StatusTag
-                  :tone="
-                    row.status === '已发放'
-                      ? 'success'
-                      : row.status === '发放失败'
-                        ? 'danger'
-                        : row.status === '计算异常'
-                          ? 'warning'
-                          : 'neutral'
-                  "
-                >{{ row.status }}</StatusTag><small v-if="row.reason" class="points-secondary">{{
-                  row.reason
-                }}</small></template>
+                <template #cell-status="{ row }">
+                  <div class="points-status-tags">
+                    <StatusTag v-for="marker in row.markers" :key="marker.status" :tone="statusTone(marker.status)">
+                      {{ marker.status }}<template v-if="marker.count != null"> {{ marker.count }} 笔</template>
+                    </StatusTag>
+                  </div>
+                  <small v-if="row.reason" class="points-secondary">{{ row.reason }}</small>
+                </template>
                 <template #cell-actions="{ row }"><button class="points-link" @click="openRow(row.key)">
                   {{
                     tab === '企业统计' ? '查看账号' : tab === '账号明细' ? '查看订单' : '查看详情'
@@ -470,8 +495,8 @@ watch(
               </DataTable>
               <FeedbackState
                 v-else
-                :state="dateError ? 'error' : 'filtered-empty'"
-                :title="dateError || '暂无符合条件的积分明细'"
+                state="filtered-empty"
+                title="暂无符合条件的积分明细"
                 description="请调整活动或筛选条件。待开始活动尚无统计期内订单。"
               ><template #action><button class="btn btn-secondary" @click="resetFilters">
                 重置筛选
@@ -490,15 +515,13 @@ watch(
       @close="detailKey = ''"
     >
       <div class="points-form-flow">
-        <StatusTag
-          :tone="
-            detail.status === '计算异常' || detail.status === '发放失败' ? 'warning' : 'primary'
-          "
-        >{{ detail.status }}</StatusTag>
-        <p v-if="detail.reason" class="points-notice points-warning">{{ detail.reason }}</p>
+        <div>
+          <StatusTag :tone="statusTone(detail.status)">{{ detail.status }}</StatusTag>
+          <p v-if="statusNote(detail)" class="points-secondary">{{ statusNote(detail) }}</p>
+        </div>
         <dl class="points-definition">
-          <dt>企业 / 标识</dt>
-          <dd>{{ detail.enterprise }} / {{ detail.enterpriseId }}</dd>
+          <dt>企业名称 / 税号</dt>
+          <dd>{{ detail.enterprise }} / {{ detail.enterpriseTaxNo || '—' }}</dd>
           <dt>Lenovo ID</dt>
           <dd>{{ detail.account }}</dd>
           <dt>订单号 / 商品编码</dt>
@@ -509,6 +532,12 @@ watch(
           <dd>{{ n(detail.netQuantity) }} 台</dd>
           <dt>{{ orderPointsLabel }}</dt>
           <dd>{{ orderPoints(detail) }}<template v-if="detail.eligible && !detail.issue && detail.requiredPoints != null"> 分</template></dd>
+          <template v-if="detail.record">
+            <dt>发放记录时间</dt>
+            <dd>{{ detail.record.time }}</dd>
+            <dt>积分流水号</dt>
+            <dd>{{ detail.record.transaction || '暂无成功流水' }}</dd>
+          </template>
         </dl>
       </div>
       <template #actions><button class="btn btn-secondary" @click="detailKey = ''">关闭</button></template>

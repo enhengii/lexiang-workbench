@@ -211,6 +211,11 @@
   font-size: var(--text-xs, 12px);
   line-height: 1.5;
 }
+.points-status-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1, 4px);
+}
 .points-summary-alert {
   display: flex;
   flex-wrap: wrap;

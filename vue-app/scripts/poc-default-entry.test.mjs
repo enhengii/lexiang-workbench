@@ -17,7 +17,7 @@ function loadGuard({ sandbox = true, enabled = true, user = null } = {}) {
   const store = { user, role: null, permissions: [], async loadUserContext() { restores += 1 } }
   const context = vm.createContext({
     ...fixtures, URLSearchParams,
-    allowPocLogin: enabled, isPocSandbox: sandbox, normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/', appBase: sandbox ? '/admin-vue/poc/' : '/admin-vue/', localAdminPassword: '',
+    allowPocLogin: enabled, isPocSandbox: sandbox, isPocWorkbench: false, normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/', appBase: sandbox ? '/admin-vue/poc/' : '/admin-vue/', localAdminPassword: '',
     window: { location: { replace: target => exits.push(target), assign: target => exits.push(target) } },
     aiInspectRoutes: [], ACTIVITY_POINTS_MENU: { children: {} }, canUseActivityPoints: () => false, showWorkbenchToast() {},
     useAppStore() { storeReads += 1; return store },

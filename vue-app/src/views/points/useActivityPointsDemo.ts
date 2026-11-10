@@ -4,6 +4,10 @@ import {
   initialRecords,
   TODAY,
   validateActivity,
+  validateEligibilityConditions,
+  migrateActivityEligibility,
+  invoiceTypeOptions,
+  enterpriseGroupOptions,
   type Activity,
   type RecordItem
 } from '@/services/activityPoints'
@@ -29,7 +33,20 @@ function load(): DemoState {
       !/^\d{4}-\d{2}-\d{2}$/.test(data.date)
     )
       throw new Error('invalid')
-    if (data.activities.some((a) => validateActivity(a))) throw new Error('invalid')
+    data.activities = data.activities.map(migrateActivityEligibility)
+    // Preserve legacy qualifications and 1–14 day delays on read. Substitute only
+    // in this validation copy; never rewrite stored settings or discard their ledger.
+    if (
+      data.activities.some((a) =>
+        validateActivity({
+          ...a,
+          delay: Number.isInteger(a.delay) && a.delay >= 1 && a.delay < 15 ? 15 : a.delay,
+          invoiceTypes: invoiceTypeOptions.map((option) => option.value),
+          enterpriseGroupIds: enterpriseGroupOptions.map((option) => option.value)
+        })
+      )
+    )
+      throw new Error('invalid')
     if (
       data.records.some(
         (row) =>
@@ -45,6 +62,13 @@ function load(): DemoState {
       )
     )
       throw new Error('invalid')
+    const configurationIssues: string[] = []
+    if (data.activities.some((a) => validateEligibilityConditions(a)))
+      configurationIssues.push('发票类型或企业组尚未配置完整')
+    if (data.activities.some((a) => a.delay < 15))
+      configurationIssues.push('活动结束后延迟天数不足15天')
+    if (configurationIssues.length)
+      storageNotice.message = `部分活动${configurationIssues.join('、')}，请补齐或调整后使用；已有发放记录已保留。`
     return data
   } catch {
     storageNotice.message = '本地演示记录不可读取，已载入初始示例。'

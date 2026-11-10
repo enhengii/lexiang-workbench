@@ -123,6 +123,7 @@ function activityRouteHarness(user: string | null, permissions: string[]) {
       allowPreviewAuth: false,
       allowPocLogin: false,
       isPocSandbox: false,
+      isPocWorkbench: false,
       appBase: '/admin-vue/',
       normalAppBase: '/admin-vue/'
     },

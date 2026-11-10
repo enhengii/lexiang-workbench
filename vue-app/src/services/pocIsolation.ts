@@ -8,8 +8,10 @@ export function pocLoginEnabled(value: string | undefined, development: boolean)
 export function runtimePaths(base: string, pathname: string) {
   const normalBase = `${base.replace(/\/$/, '')}/`
   const demoBase = `${normalBase}poc/`
+  const workbenchBase = `${demoBase}workbench/`
   const sandbox = pathname === demoBase.slice(0, -1) || pathname.startsWith(demoBase)
-  return { normalBase, demoBase, sandbox, routerBase: sandbox ? demoBase : normalBase }
+  const workbench = pathname === workbenchBase.slice(0, -1) || pathname.startsWith(workbenchBase)
+  return { normalBase, demoBase, workbenchBase, sandbox, workbench, routerBase: workbench ? workbenchBase : sandbox ? demoBase : normalBase }
 }
 
 export type DemoStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>

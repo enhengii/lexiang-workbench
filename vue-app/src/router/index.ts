@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { allowPocLogin, appBase, isPocSandbox, normalAppBase } from '@/config/runtimeMode'
+import { allowPocLogin, appBase, isPocSandbox, isPocWorkbench, normalAppBase } from '@/config/runtimeMode'
 import { findPocLoginChoice } from '@/services/pocLoginChoices'
 import { aiInspectRoutes } from '@/views/aiinspect/routes'
 import { ACTIVITY_POINTS_MENU, canUseActivityPoints } from '@/services/activityPointsAccess'
@@ -11,6 +11,7 @@ const AppLayout = () => import('@/components/AppLayout.vue')
 
 // 页面组件（懒加载，首屏不打包进去）
 const PortalHome      = () => import('@/views/PortalHomeView.vue')
+const SalesWorkbench = () => import('@/views/sales/SalesWorkbenchView.vue')
 const NativeWorkbenchPage = () => import('@/views/NativeWorkbenchPage.vue')
 const WIPView           = () => import('@/views/WIPView.vue')  // 开发中占位页
 const DashboardOverview = () => import('@/views/dashboard/DashboardOverviewView.vue')
@@ -43,6 +44,7 @@ const ReviewAssist = () => import('@/views/reviews/ReviewAssistView.vue')
 const AgentSkills = () => import('@/views/agent/AgentSkillsView.vue')
 const AgentSkillCreate = () => import('@/views/agent/AgentSkillCreateView.vue')
 const AgentPermissions = () => import('@/views/agent/AgentPermissionsView.vue')
+const UsageDashboard = () => import('@/views/agent/UsageDashboardView.vue')
 const AdminCleanupEmailMock = () => import('@/views/agent/AdminCleanupEmailMockView.vue')
 const AccountEnableRequest = () => import('@/views/AccountEnableRequestView.vue')
 
@@ -89,6 +91,7 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '',              redirect: '/portal/home' },
       { path: 'portal/home',  component: PortalHome, meta: { pageId: 'portal.home' } },
+      { path: 'sales/workbench', component: SalesWorkbench, meta: { pageId: 'sales.workbench' } },
 
       // 乐享运营
       { path: 'dashboard/overview',   component: DashboardOverview, meta: { pageId: 'dashboard.overview',  group: 'dashboard' } },
@@ -144,6 +147,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'agent/scenario-package-create', component: AgentSkills, meta: { pageId: 'agent.scenarioPackageCreate' } },
       { path: 'agent/skill-create',   component: AgentSkillCreate, meta: { pageId: 'agent.skillCreate' } },
       { path: 'agent/permissions',    component: AgentPermissions, meta: { pageId: 'agent.permissions' } },
+      { path: 'agent/usage-dashboard', component: UsageDashboard, meta: { pageId: 'agent.usageDashboard' } },
       { path: 'agent/permissions/admin-cleanup-email', component: AdminCleanupEmailMock, meta: { pageId: 'agent.permissions' } },
 
       // 封板项目中的隐藏/详情/二级流程页：不进左导航，但需要支持 switchPage 内部跳转
@@ -183,7 +187,7 @@ const demoRoutes: RouteRecordRaw[] = [{
 
 const router = createRouter({
   history: createWebHistory(appBase),
-  routes: isPocSandbox ? demoRoutes : routes
+  routes: isPocSandbox && !isPocWorkbench ? demoRoutes : routes
 })
 
 // 全局导航守卫：未登录跳转 /login
@@ -192,6 +196,13 @@ router.beforeEach(async (to) => {
     if (!allowPocLogin) {
       window.location.replace(normalAppBase + 'login')
       return false
+    }
+    if (isPocWorkbench) {
+      if (to.path === '/login' || to.path === '/adfs-login' || !useAppStore().usePreviewSession('admin')) {
+        window.location.replace(normalAppBase + 'login')
+        return false
+      }
+      return true
     }
     if ((to.path === '/login' || to.path === '/adfs-login')
       && to.query.mode !== 'scenarios' && !findPocLoginChoice(to.query.pocAccount)) return '/agent/permissions'

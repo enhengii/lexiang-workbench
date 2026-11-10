@@ -1,5 +1,5 @@
 <template>
-  <!-- 原 #login-screen，class/结构/样式一字不改 -->
+  <!-- 复用原登录卡片与表单样式 -->
   <div id="login-screen">
     <div class="login-card">
       <div class="login-logo" style="margin-bottom:40px;">
@@ -24,30 +24,21 @@
         >外部用户登录</button>
       </div>
 
-      <div v-if="loginTab === 'internal'" class="login-adfs-panel" role="tabpanel">
-        <div v-if="allowPocLogin" class="form-group">
-          <label class="form-label" for="internal-demo-account">演示账号</label>
-          <PocLoginAccountPicker id="internal-demo-account" v-model="username" placeholder="选择 POC 演示场景" @select="selectPocAccount" />
-        </div>
-        <button class="btn btn-primary login-btn" type="button" @click="goAdfsLogin">内网ADFS登录</button>
-        <p>内网环境下，可通过您的 ITCode 账号免输入密码直接登录！</p>
-      </div>
-
-      <div v-else role="tabpanel">
-        <div class="form-group">
-          <label class="form-label" for="external-login-username">用户名</label>
-          <PocLoginAccountPicker v-if="allowPocLogin" id="external-login-username" v-model="username" placeholder="请输入用户名或选择演示账号" @select="selectPocAccount" @submit="doLogin" />
+      <div role="tabpanel">
+        <div v-if="loginTab === 'external' || allowPocLogin" class="form-group">
+          <label class="form-label" for="external-login-username">{{ loginTab === 'internal' ? '演示账号（可选）' : '用户名' }}</label>
+          <PocLoginAccountPicker v-if="allowPocLogin" id="external-login-username" v-model="username" :placeholder="loginTab === 'internal' ? '默认进入管理员演示，或选择其他场景' : '请输入用户名或选择演示账号'" @select="selectPocAccount" @submit="doLogin" />
           <input
             v-else
             id="external-login-username"
             class="form-input"
             v-model="username"
-            placeholder="admin"
+            :placeholder="loginTab === 'internal' ? '请输入 ITCode' : '请输入用户名'"
             autofocus
             @keydown.enter="doLogin"
           />
         </div>
-        <div v-if="!passwordlessLogin" class="form-group">
+        <div v-if="loginTab === 'external' && !passwordlessLogin" class="form-group">
           <div class="login-field-head">
             <label class="form-label" for="external-login-password">密码</label>
           </div>
@@ -60,13 +51,14 @@
             @keydown.enter="doLogin"
           />
         </div>
-        <p v-else class="form-label" role="status">本地演示账号，无需密码，点击登录工作台继续。</p>
+        <p v-else-if="loginTab === 'external'" class="form-label" role="status">本地演示账号，无需密码，点击登录工作台继续。</p>
+        <p v-else class="form-label" role="status">内部用户免密进入工作台，无需在此输入密码。</p>
         <!-- 原 #login-error：有错误时才显示，保留原来的 display:block 效果 -->
         <div
           class="login-error"
           :style="{ display: errorMsg ? 'block' : '' }"
         >{{ errorMsg }}</div>
-        <button class="btn btn-primary login-btn" @click="doLogin">登录工作台</button>
+        <button class="btn btn-primary login-btn" @click="doLogin">{{ loginTab === 'internal' ? 'ADFS 登录' : '登录工作台' }}</button>
         <div class="login-register-entry">
           <span>还没有工作台账号？</span>
         </div>
@@ -178,7 +170,8 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { allowPocLogin, allowPocSimulation, appBase, isPocSandbox } from '@/config/runtimeMode'
 import { pocLocalStorage, pocSessionStorage } from '@/services/pocStorage'
-import { POC_ACCOUNT_REQUESTS_KEY, resolvePocExternalLogin } from '@/services/pocExternalLogin'
+import { POC_ACCOUNT_REQUESTS_KEY, resolvePocLogin } from '@/services/pocExternalLogin'
+import { APPROVAL_MAIL_ROWS_KEY } from '@/services/approvalMailReview'
 import { findPocLoginChoice, getPocLoginPassword, navigatePocChoice, type PocLoginChoice } from '@/services/pocLoginChoices'
 import PocLoginAccountPicker from '@/components/auth/PocLoginAccountPicker.vue'
 import { EXTERNAL_DISABLED_MESSAGE } from '@/services/accountEnableRequest'
@@ -191,25 +184,33 @@ const appStore = useAppStore()
 
 const username = ref('')
 const password = ref('')
-const passwordlessLogin = computed(() => isPasswordlessLabAccount(username.value, 'external'))
 const errorMsg = ref('')
 const loginTab = ref<'internal' | 'external'>(route.query.loginType === 'external' ? 'external' : 'internal')
+const passwordlessLogin = computed(() => isPasswordlessLabAccount(username.value, loginTab.value))
 const initialPocAccount = findPocLoginChoice(route.query.pocAccount)
-if (initialPocAccount) navigatePocChoice(initialPocAccount)
-if (initialPocAccount?.loginType === 'external') {
-  loginTab.value = 'external'
+if (initialPocAccount) {
+  try { navigatePocChoice(initialPocAccount) }
+  catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
+}
+if (initialPocAccount) {
+  loginTab.value = initialPocAccount.loginType
   username.value = initialPocAccount.username
   password.value = getPocLoginPassword(initialPocAccount)
 }
 
 function selectPocAccount(account: PocLoginChoice) {
-  if (!allowPocLogin || navigatePocChoice(account)) return
+  if (!allowPocLogin) return
+  try { if (navigatePocChoice(account)) return }
+  catch {
+    errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。'
+    return
+  }
   errorMsg.value = ''
+  loginTab.value = account.loginType
   if (account.loginType === 'internal') {
     router.push({ path: '/adfs-login', query: { pocAccount: account.username, redirect: String(route.query.redirect || '/') } })
     return
   }
-  loginTab.value = 'external'
   username.value = account.username
   password.value = getPocLoginPassword(account)
 }
@@ -269,29 +270,42 @@ const approvalRoute = computed(() => [
 function switchLoginTab(tab: 'internal' | 'external') {
   loginTab.value = tab
   errorMsg.value = ''
+  password.value = ''
 }
 
 function isDisabledLoginResponse(status: number, data: any) {
   return status === 423 || data?.code === 'ACCOUNT_DISABLED' || data?.error === '账号已禁用'
 }
 
-function goAdfsLogin() {
-  router.push({
-    path: '/adfs-login',
-    query: { redirect: String(route.query.redirect || '/') }
-  })
-}
-
 // 对应原 doLogin()
 async function doLogin() {
+  // Internal POC emulates the IdP redirect, never the password login API.
+  if (loginTab.value === 'internal') {
+    password.value = ''
+    errorMsg.value = ''
+    if (!allowPocLogin) {
+      showLoginError('当前环境未启用 ADFS 演示。')
+      return
+    }
+    const choice = findPocLoginChoice(username.value.trim() || 'admin')
+    if (!choice || choice.loginType !== 'internal') {
+      showLoginError('请选择内部演示账号；外部账号请使用外部用户登录。')
+      return
+    }
+    selectPocAccount(choice)
+    return
+  }
   const u = username.value.trim()
   const p = passwordlessLogin.value ? '' : password.value
+  const loginType = 'external' as const
   errorMsg.value = ''
   if (!u || (!passwordlessLogin.value && !p)) { showLoginError('请输入用户名和密码'); return }
 
   // Resolve POC fixtures before the network fallback; storage failures must not create an admin preview session.
   try {
-    const pocResult = resolvePocExternalLogin(u, p, allowPocSimulation, () => pocLocalStorage.getItem(POC_ACCOUNT_REQUESTS_KEY))
+    const pocResult = resolvePocLogin(u, p, loginType, allowPocSimulation,
+      () => pocLocalStorage.getItem(POC_ACCOUNT_REQUESTS_KEY),
+      () => pocLocalStorage.getItem(APPROVAL_MAIL_ROWS_KEY))
     if (pocResult) {
       if (pocResult === 'invalid-password') {
         showLoginError('用户名或密码错误')
@@ -314,7 +328,7 @@ async function doLogin() {
       } else if (pocResult === 'active') {
         await router.replace('/agent/permissions')
       } else {
-        await router.replace({ path: '/access-denied', query: { itcode: account, userType: 'external' } })
+        await router.replace({ path: '/access-denied', query: { itcode: account, userType: loginType } })
       }
       return
     }
@@ -349,7 +363,7 @@ async function doLogin() {
     appStore.user = data.username || u
     await appStore.loadUserContext()
     if (!appStore.permissions.length) {
-      await router.replace({ path: '/access-denied', query: { itcode: data.username || u, userType: 'external' } })
+      await router.replace({ path: '/access-denied', query: { itcode: data.username || u, userType: loginType } })
       return
     }
     router.replace(String(route.query.redirect || (permissionLabEnabled ? '/agent/permissions?module=approval' : '/')))
@@ -681,21 +695,6 @@ function submitRegisterApplication() {
 .login-tabs button.active {
   border-bottom-color: var(--primary, #316dff);
   color: var(--primary, #316dff);
-}
-
-.login-adfs-panel {
-  display: grid;
-  min-height: 208px;
-  align-content: space-between;
-  padding-top: 92px;
-}
-
-.login-adfs-panel p {
-  margin: 0;
-  color: #303846;
-  font-size: 14px;
-  line-height: 1.7;
-  text-align: center;
 }
 
 .login-field-head {

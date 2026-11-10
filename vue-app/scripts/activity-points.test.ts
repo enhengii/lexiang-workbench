@@ -13,6 +13,21 @@ import {
   checkExcludedProductCodes
 } from '../src/services/activityPoints.ts'
 const a = seedActivities[0]
+await test('活动发放至少延迟15天，草稿与启用以及两类日历均遵守下限', () => {
+  for (const draft of [true, false]) {
+    for (const calendar of ['natural', 'weekday'] as const) {
+      assert.equal(validateActivity({ ...a, draft, calendar, delay: 14 }), '活动结束后延迟天数不能小于15天')
+      for (const delay of [15, 20, 90]) {
+        assert.equal(validateActivity({ ...a, draft, calendar, delay }), '')
+      }
+    }
+  }
+})
+await test('活动发放延迟仍拒绝空值、小数和超上限，不能绕过整数限制', () => {
+  for (const delay of [0, -1, 14.9, 15.5, 91, NaN, Infinity, '' as unknown as number]) {
+    assert.notEqual(validateActivity({ ...a, delay }), '', String(delay))
+  }
+})
 await test('排除商品允许留空，参与商品编码仍为必填', () => {
   assert.deepEqual(checkExcludedProductCodes(''), { codes: [], duplicateCount: 0, error: '' })
   assert.notEqual(checkProductCodes('').error, '')
