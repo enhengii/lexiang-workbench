@@ -65,11 +65,6 @@ watch(() => props.view, () => { reset(); showAll.value = false })
   <div class="daily-panel">
     <p class="daily-source-note" data-flow-role="notice">来源：{{ USAGE_DAILY_SOURCE.filename }} · 核心概览 {{ USAGE_DAILY_SOURCE.overviewRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.overviewRange.endDate }}，Skill 明细 {{ USAGE_DAILY_SOURCE.detailRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.detailRange.endDate }} · 当前为已导入快照</p>
     <template v-if="view === 'overview'">
-      <section class="daily-surface daily-section" data-flow-role="summary">
-        <SectionHeader title="截止日活跃与覆盖" :description="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate} · 直接采用日报去重结果，周期人数不相加` : '所选周期暂无日报数据'" />
-        <UsageActivityCards :total-users="overview.summary.totalUsers" :windows="overview.windows" />
-        <p v-if="overview.summary.asOfDate && overview.summary.asOfDate !== endDate" class="daily-muted" data-flow-role="notice">所选截止日 {{ endDate }} 暂无日报，活跃人数与授权总用户均采用 {{ overview.summary.asOfDate }} 的记录。</p>
-      </section>
       <MetricGrid :columns="5" data-flow-role="summary">
         <MetricCard label="Query数" :value="n(overview.summary.queries)" unit="次" :meta="`所选周期累计 · 平均首字等待 ${overview.summary.firstTokenSeconds == null ? '—' : `${overview.summary.firstTokenSeconds.toFixed(2)} 秒`}（Query加权估算）`" />
         <MetricCard label="任务执行次数" :value="n(overview.summary.tasks)" unit="次" meta="按任务 traceId 统计" />
@@ -82,6 +77,11 @@ watch(() => props.view, () => { reset(); showAll.value = false })
         <MetricCard label="被调用Skill数" :value="n(calledSkillCount)" unit="个" meta="本周期已有明细内去重 · 调用大于0" />
         <MetricCard label="反馈好评率" :value="rate(overviewAnalysis.summary.likeRate)" :meta="`已有明细 · 赞 ${n(overviewAnalysis.summary.likes)} / 踩 ${n(overviewAnalysis.summary.dislikes)}`" />
       </MetricGrid>
+      <section class="daily-surface daily-section" data-flow-role="summary">
+        <SectionHeader title="截止日活跃与覆盖" :description="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate} · 直接采用日报去重结果，周期人数不相加` : '所选周期暂无日报数据'" />
+        <UsageActivityCards :total-users="overview.summary.totalUsers" :windows="overview.windows" />
+        <p v-if="overview.summary.asOfDate && overview.summary.asOfDate !== endDate" class="daily-muted" data-flow-role="notice">所选截止日 {{ endDate }} 暂无日报，活跃人数与授权总用户均采用 {{ overview.summary.asOfDate }} 的记录。</p>
+      </section>
       <p v-if="overviewAnalysis.quality.detailCoveragePartial" class="daily-source-note" data-flow-role="notice">所选周期包含未提供 Skill 明细的日期。创建人数、被调用Skill数、反馈与排行仅按 {{ overviewAnalysis.quality.detailCoverageStart }} 至 {{ overviewAnalysis.quality.detailCoverageEnd }} 内已有明细汇总；未覆盖日期不当作零调用。</p>
       <UsageOverviewRankings :rows="overviewAnalysis.skills" :scope-label="`${startDate} 至 ${endDate} · 仅按已提供的Skill明细排行`" @open-detail="targetId = $event" @view-all="emit('show-skills')" />
     </template>

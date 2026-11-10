@@ -141,12 +141,6 @@ onDeactivated(() => { detailTarget.value = null })
       <FeedbackState v-else-if="!report || !report.trend.length" state="empty" title="所选周期暂无数据" description="请选择样例范围内的其他日期。" data-flow-role="notice" />
 
       <template v-else-if="tab === 'overview'">
-        <section class="usage-surface usage-section" data-flow-role="summary">
-          <SectionHeader title="活跃与覆盖" :description="`截至 ${endDate} · DAU / WAU / MAU 分别按1 / 7 / 30个自然日去重`" />
-          <UsageActivityCards :total-users="report.summary.totalUsers" :windows="report.windows" />
-          <p class="usage-period-hint">所选周期互动覆盖率：{{ rate(penetration) }}（周期内去重互动人数 ÷ 截止日授权总用户，区别于上方截止日活跃占比）。</p>
-        </section>
-
         <MetricGrid :columns="5" data-flow-role="summary">
           <MetricCard label="访问用户数" :value="n(report.summary.loginUsers)" unit="人" meta="所选周期去重" />
           <MetricCard label="AI互动用户数" :value="n(report.summary.aiUsers)" unit="人" meta="所选周期去重" />
@@ -159,6 +153,12 @@ onDeactivated(() => { detailTarget.value = null })
           <MetricCard label="被调用Skill数" :value="n(report.summary.calledSkills)" unit="个" meta="所选周期内有调用的Skill" />
           <MetricCard label="好评率" :value="rate(analysis?.summary.likeRate ?? null)" :meta="`点赞 ${n(report.summary.likes)} / 点踩 ${n(report.summary.dislikes)} 次`" />
         </MetricGrid>
+
+        <section class="usage-surface usage-section" data-flow-role="summary">
+          <SectionHeader title="活跃与覆盖" :description="`截至 ${endDate} · DAU / WAU / MAU 分别按1 / 7 / 30个自然日去重`" />
+          <UsageActivityCards :total-users="report.summary.totalUsers" :windows="report.windows" />
+          <p class="usage-period-hint">所选周期互动覆盖率：{{ rate(penetration) }}（周期内去重互动人数 ÷ 截止日授权总用户，区别于上方截止日活跃占比）。</p>
+        </section>
 
         <UsageOverviewRankings :rows="report.skills" :scope-label="`${startDate} 至 ${endDate} · 全平台样例`" data-flow-role="main" @open-detail="showSkill" @view-all="tab = 'skills'" />
       </template>
