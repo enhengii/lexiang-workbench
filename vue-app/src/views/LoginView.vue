@@ -25,9 +25,9 @@
       </div>
 
       <div role="tabpanel">
-        <div class="form-group">
-          <label class="form-label" for="external-login-username">{{ loginTab === 'internal' ? 'ITCode' : '用户名' }}</label>
-          <PocLoginAccountPicker v-if="allowPocLogin" id="external-login-username" v-model="username" :placeholder="loginTab === 'internal' ? '输入 ITCode 或选择演示账号' : '请输入用户名或选择演示账号'" @select="selectPocAccount" @submit="doLogin" />
+        <div v-if="loginTab === 'external' || allowPocLogin" class="form-group">
+          <label class="form-label" for="external-login-username">{{ loginTab === 'internal' ? '演示账号（可选）' : '用户名' }}</label>
+          <PocLoginAccountPicker v-if="allowPocLogin" id="external-login-username" v-model="username" :placeholder="loginTab === 'internal' ? '默认进入管理员演示，或选择其他场景' : '请输入用户名或选择演示账号'" @select="selectPocAccount" @submit="doLogin" />
           <input
             v-else
             id="external-login-username"
@@ -38,7 +38,7 @@
             @keydown.enter="doLogin"
           />
         </div>
-        <div v-if="!passwordlessLogin" class="form-group">
+        <div v-if="loginTab === 'external' && !passwordlessLogin" class="form-group">
           <div class="login-field-head">
             <label class="form-label" for="external-login-password">密码</label>
           </div>
@@ -51,13 +51,14 @@
             @keydown.enter="doLogin"
           />
         </div>
-        <p v-else class="form-label" role="status">本地演示账号，无需密码，点击登录工作台继续。</p>
+        <p v-else-if="loginTab === 'external'" class="form-label" role="status">本地演示账号，无需密码，点击登录工作台继续。</p>
+        <p v-else class="form-label" role="status">POC 模拟 ADFS：内部用户免密进入演示，无需在此输入密码。</p>
         <!-- 原 #login-error：有错误时才显示，保留原来的 display:block 效果 -->
         <div
           class="login-error"
           :style="{ display: errorMsg ? 'block' : '' }"
         >{{ errorMsg }}</div>
-        <button class="btn btn-primary login-btn" @click="doLogin">登录工作台</button>
+        <button class="btn btn-primary login-btn" @click="doLogin">{{ loginTab === 'internal' ? 'ADFS 登录' : '登录工作台' }}</button>
         <div class="login-register-entry">
           <span>还没有工作台账号？</span>
         </div>
@@ -198,7 +199,7 @@ function selectPocAccount(account: PocLoginChoice) {
   if (!allowPocLogin || navigatePocChoice(account)) return
   errorMsg.value = ''
   loginTab.value = account.loginType
-  if (account.loginType === 'internal' && account.username !== 'admin') {
+  if (account.loginType === 'internal') {
     router.push({ path: '/adfs-login', query: { pocAccount: account.username, redirect: String(route.query.redirect || '/') } })
     return
   }
@@ -261,6 +262,7 @@ const approvalRoute = computed(() => [
 function switchLoginTab(tab: 'internal' | 'external') {
   loginTab.value = tab
   errorMsg.value = ''
+  password.value = ''
 }
 
 function isDisabledLoginResponse(status: number, data: any) {
@@ -269,9 +271,25 @@ function isDisabledLoginResponse(status: number, data: any) {
 
 // 对应原 doLogin()
 async function doLogin() {
+  // Internal POC emulates the IdP redirect, never the password login API.
+  if (loginTab.value === 'internal') {
+    password.value = ''
+    errorMsg.value = ''
+    if (!allowPocLogin) {
+      showLoginError('当前环境未启用 ADFS 演示。')
+      return
+    }
+    const choice = findPocLoginChoice(username.value.trim() || 'admin')
+    if (!choice || choice.loginType !== 'internal') {
+      showLoginError('请选择内部演示账号；外部账号请使用外部用户登录。')
+      return
+    }
+    selectPocAccount(choice)
+    return
+  }
   const u = username.value.trim()
   const p = passwordlessLogin.value ? '' : password.value
-  const loginType = loginTab.value
+  const loginType = 'external' as const
   errorMsg.value = ''
   if (!u || (!passwordlessLogin.value && !p)) { showLoginError('请输入用户名和密码'); return }
 
@@ -286,7 +304,7 @@ async function doLogin() {
         return
       }
       if (pocResult === 'wrong-login-type') {
-        showLoginError(loginType === 'internal' ? '该演示账号属于外部用户，请切换外部用户登录。' : '该演示账号属于内部用户，请切换内部用户登录。')
+        showLoginError('该演示账号属于内部用户，请切换内部用户登录。')
         return
       }
       pocLocalStorage.removeItem('preview_user')
@@ -298,8 +316,7 @@ async function doLogin() {
       appStore.visibleMenus = []
       const account = u.toLowerCase()
       if (pocResult === 'disabled') {
-        if (loginType === 'internal') await openInternalEnableRequest(account)
-        else showLoginError(EXTERNAL_DISABLED_MESSAGE)
+        showLoginError(EXTERNAL_DISABLED_MESSAGE)
       } else if (pocResult === 'active') {
         await router.replace('/agent/permissions')
       } else {
@@ -320,28 +337,20 @@ async function doLogin() {
     const res = await fetch('/api/admin/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...labHeaders() },
-      body: JSON.stringify({ username: u, password: p, ...(loginType === 'internal' ? { loginType: 'adfs' } : {}) })
+      body: JSON.stringify({ username: u, password: p })
     })
     const data = await res.json().catch(() => ({}))
     if (!res.ok) {
       if (isDisabledLoginResponse(res.status, data)) {
-        if (loginType === 'internal') await openInternalEnableRequest(u)
-        else {
-          pocSessionStorage.removeItem('leaibot-disabled-login-account')
-          pocSessionStorage.removeItem('leaibot-disabled-login-type')
-          showLoginError(EXTERNAL_DISABLED_MESSAGE)
-        }
+        pocSessionStorage.removeItem('leaibot-disabled-login-account')
+        pocSessionStorage.removeItem('leaibot-disabled-login-type')
+        showLoginError(EXTERNAL_DISABLED_MESSAGE)
         return
       }
       showLoginError(data.error || '登录失败')
       return
     }
 
-    if (loginType === 'internal' && permissionLabEnabled && data.next === 'first-access') {
-      appStore.user = null
-      await router.replace({ path: '/access-denied', query: { itcode: data.username || u, userType: 'internal' } })
-      return
-    }
     // 写入 store，然后跳转（等价于原来隐藏 login-screen、显示 sidebar + main）
     appStore.user = data.username || u
     await appStore.loadUserContext()
@@ -353,12 +362,6 @@ async function doLogin() {
   } catch {
     showLoginError('登录服务暂不可用，请稍后重试')
   }
-}
-
-async function openInternalEnableRequest(account: string) {
-  pocSessionStorage.setItem('leaibot-disabled-login-account', account)
-  pocSessionStorage.setItem('leaibot-disabled-login-type', 'internal')
-  await router.replace({ path: '/account-enable-request', query: { account, loginType: 'internal' } })
 }
 
 // 对应原 showLoginError()

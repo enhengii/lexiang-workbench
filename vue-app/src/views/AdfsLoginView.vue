@@ -30,7 +30,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { allowPocLogin, allowPocSimulation, isPocSandbox } from '@/config/runtimeMode'
 import { pocLocalStorage, pocSessionStorage } from '@/services/pocStorage'
-import { POC_ACCOUNT_REQUESTS_KEY, POC_EXTERNAL_PASSWORD, findPocLoginAccount, resolvePocLogin } from '@/services/pocExternalLogin'
+import { POC_ACCOUNT_REQUESTS_KEY, findPocLoginAccount, resolvePocAdfsLogin } from '@/services/pocExternalLogin'
 import { findPocLoginChoice, navigatePocChoice } from '@/services/pocLoginChoices'
 import { APPROVAL_MAIL_ROWS_KEY } from '@/services/approvalMailReview'
 
@@ -39,28 +39,26 @@ const router = useRouter()
 const appStore = useAppStore()
 
 const itcode = ref('')
-const password = ref('')
 const errorMsg = ref('')
 const disabledAccount = ref('')
 const initialPocAccount = findPocLoginAccount(route.query.pocAccount, allowPocLogin)
 const initialPocChoice = findPocLoginChoice(route.query.pocAccount)
-const directPocAccount = ref(allowPocSimulation && initialPocAccount?.loginType === 'internal' && initialPocChoice?.loginType === 'internal' ? initialPocChoice.username : '')
+const directPocAccount = ref(allowPocSimulation && initialPocChoice?.loginType === 'internal' ? initialPocChoice.username : '')
 const pocEntryBusy = ref(false)
 const leavingForAnotherApp = initialPocChoice ? navigatePocChoice(initialPocChoice) : false
 if (initialPocAccount?.loginType === 'internal') {
   itcode.value = initialPocAccount.username
-  password.value = POC_EXTERNAL_PASSWORD
 }
 
 async function enterPocScenario() {
   const choice = findPocLoginChoice(directPocAccount.value)
   const fixture = findPocLoginAccount(directPocAccount.value, allowPocSimulation)
-  if (!allowPocSimulation || fixture?.loginType !== 'internal' || choice?.loginType !== 'internal' || pocEntryBusy.value) return
+  if (!allowPocSimulation || choice?.loginType !== 'internal' || (choice.username !== 'admin' && fixture?.loginType !== 'internal') || pocEntryBusy.value) return
   pocEntryBusy.value = true
   itcode.value = choice.username
-  password.value = POC_EXTERNAL_PASSWORD
   try {
-    await submitAdfsLogin()
+    if (choice.username === 'admin') await router.replace('/agent/permissions')
+    else await submitAdfsLogin()
     if (!errorMsg.value && route.path === '/adfs-login') errorMsg.value = '未能进入演示场景，请重试或返回选择。'
   } finally {
     pocEntryBusy.value = false
@@ -90,18 +88,18 @@ async function submitAdfsLogin() {
   const account = itcode.value.trim()
   errorMsg.value = ''
   disabledAccount.value = ''
-  if (!account || !password.value) {
-    errorMsg.value = '请输入 ITCode 和 Password。'
+  if (!account) {
+    errorMsg.value = '请选择内部演示账号。'
     return
   }
 
   try {
-    const result = resolvePocLogin(account, password.value, 'internal', allowPocSimulation,
+    const result = resolvePocAdfsLogin(account, allowPocSimulation,
       () => pocLocalStorage.getItem(POC_ACCOUNT_REQUESTS_KEY),
       () => pocLocalStorage.getItem(APPROVAL_MAIL_ROWS_KEY))
     if (result) {
-      if (result === 'invalid-password' || result === 'wrong-login-type') {
-        errorMsg.value = result === 'invalid-password' ? '用户名或密码错误' : '该演示账号属于外部用户，请切换外部用户登录。'
+      if (result === 'wrong-login-type') {
+        errorMsg.value = '该演示账号属于外部用户，请切换外部用户登录。'
         return
       }
       pocLocalStorage.removeItem('preview_user')

@@ -25,7 +25,7 @@ const port = server.httpServer.address().port
 const origin = `http://127.0.0.1:${port}`
 const normal = origin + '/admin-vue'
 const demo = normal + '/poc'
-const out = path.join(os.tmpdir(), 'poc-isolation-qa' + (built ? '-build' : ''))
+const out = process.env.POC_QA_EVIDENCE_DIR || path.join(os.tmpdir(), 'poc-isolation-qa' + (built ? '-build' : ''))
 await fs.mkdir(out, { recursive: true })
 const browser = await playwright.chromium.launch({ headless: true })
 const context = await browser.newContext({ viewport: { width: 1440, height: 900 } })
@@ -53,6 +53,10 @@ try {
   await page.goto(normal + '/login')
   if (!enabled) {
     assert.equal(await page.getByRole('combobox').count(), 0)
+    assert.equal(await page.locator('#login-screen input[type=password]').count(), 0, 'Disabled internal POC never offers a password fallback')
+    await page.locator('#login-screen .login-btn').click()
+    await page.getByText(/未启用.*ADFS.*演示/).waitFor()
+    assert.equal(api.length, 0, 'Disabled internal POC never calls the password API')
     await page.goto(demo + '/adfs-login?pocAccount=noaccess')
     await page.waitForURL(normal + '/login')
     await page.goto(normal + '/login?loginType=external&pocAccount=external-disabled')
@@ -64,11 +68,18 @@ try {
     assert.equal(api.at(-1).path, '/api/admin/login', 'A demo-shaped username does not bypass real authentication when disabled')
     console.log('Disabled feature: no selector/autofill, direct demo URL denied, ordinary login still uses the backend')
   } else {
+    assert.equal(await page.locator('#login-screen input[type=password]').count(), 0, 'Internal ADFS POC never asks for a password')
     await page.getByRole('combobox').click()
     assert.equal(await page.getByRole('option').count(), 4)
-    await page.getByRole('option', { name: '管理员 · 正常登录 admin' }).click()
+    await page.getByRole('option').filter({ has: page.locator('small', { hasText: /^admin$/ }) }).click()
+    await page.waitForURL(demo + '/agent/permissions')
+    assert.equal(await page.locator('#sidebar').count(), 0, 'The administrator demo remains outside the real workbench layout')
+    assert.equal(api.length, 0, 'Selecting admin starts only the isolated POC, never real authentication')
+
+    // External manual credentials retain the original real password-authentication contract.
+    await page.goto(normal + '/login?loginType=external')
+    await page.getByRole('combobox').fill('admin')
     assert.equal(await page.locator('input[type=password]').inputValue(), '', 'Server build never autofills a real admin password')
-    assert.equal(api.length, 0, 'Selecting admin must not log in')
     await page.locator('input[type=password]').fill('wrong')
     await page.getByRole('button', { name: '登录工作台', exact: true }).click()
     await page.getByText('QA 密码错误', { exact: true }).waitFor()
@@ -83,7 +94,7 @@ try {
     await page.waitForURL(normal + '/agent/permissions')
     assert.ok(api.some(row => row.path === '/api/admin/me'))
     assert.ok(api.some(row => row.path === '/api/harness/menu'))
-    console.log('Real login contract: selection, rejection, network failure and success passed with intercepted test backend')
+    console.log('Internal isolated ADFS POC and external real login rejection/network/success contracts passed with intercepted test backend')
 
     // A real-session-shaped cookie is present throughout the demo. No real credentials are used.
     await context.addCookies([{ name: 'connect.sid', value: 'QA-session-canary', url: origin }])
@@ -128,7 +139,7 @@ try {
     await page.getByRole('button', { name: '审批', exact: true }).click()
     await page.getByRole('button', { name: '同意', exact: true }).click()
     await page.getByRole('button', { name: '提交审批', exact: true }).click()
-    await page.waitForFunction(({ key, id }) => JSON.parse(localStorage.getItem(key)).find(row => row.id === id)?.nodeType === 'business', { key: approvalKey, id: firstAccess.id })
+    await page.waitForFunction(({ key, id }) => JSON.parse(localStorage.getItem(key) || '[]').find(row => row.id === id)?.nodeType === 'business', { key: approvalKey, id: firstAccess.id })
     // A completed manager approval is still insufficient to resolve first access.
     await page.goto(demo + '/adfs-login?pocAccount=noaccess')
     await page.waitForURL(demo + '/access-denied?**')
@@ -139,7 +150,7 @@ try {
     await page.locator('.approval-business-form button').first().click()
     await page.getByRole('button', { name: '提交审批', exact: true }).click()
     await page.waitForFunction(({ key, id }) => {
-      const row = JSON.parse(localStorage.getItem(key)).find(item => item.id === id)
+      const row = JSON.parse(localStorage.getItem(key) || '[]').find(item => item.id === id)
       return row?.statusKey === 'done' && row.nodeType === 'done'
         && row.approvalLogs.some(log => log.action === 'execute-success' && log.operator === 'system')
     }, { key: approvalKey, id: firstAccess.id })
@@ -160,7 +171,7 @@ try {
     await page.getByRole('button', { name: '审批', exact: true }).click()
     await page.getByRole('button', { name: '同意', exact: true }).click()
     await page.getByRole('button', { name: '提交审批', exact: true }).click()
-    await page.waitForFunction(({ key, id }) => JSON.parse(localStorage.getItem(key)).find(row => row.id === id)?.statusKey === 'done', { key: requestKey, id: request.id })
+    await page.waitForFunction(({ key, id }) => JSON.parse(localStorage.getItem(key) || '[]').find(row => row.id === id)?.statusKey === 'done', { key: requestKey, id: request.id })
     await page.goto(demo + '/adfs-login?pocAccount=internal-disabled')
     await page.waitForURL(demo + '/agent/permissions')
 
@@ -178,16 +189,18 @@ try {
     assert.deepEqual(after, original, 'Normal local/session records are unchanged')
     console.log('First access final execution/relogin, enable approval/relogin, external-disabled and session/data isolation passed')
 
-    // Hand-typed credentials retain their original password and login-type checks.
-    await page.goto(demo + '/login?mode=scenarios')
-    await page.getByRole('combobox').fill('noaccess')
+    // External fixtures keep their password check; the internal entry keeps its identity check without a password form.
+    await page.goto(demo + '/login?mode=scenarios&loginType=external')
+    await page.getByRole('combobox').fill('external-active')
     await page.locator('input[type=password]').fill('wrong')
     await page.getByRole('button', { name: '登录工作台', exact: true }).click()
     await page.getByText('用户名或密码错误', { exact: true }).waitFor()
+    await page.getByRole('tab', { name: '内部用户登录', exact: true }).click()
+    assert.equal(await page.locator('#login-screen input[type=password]').count(), 0)
     await page.getByRole('combobox').fill('external-active')
-    await page.locator('input[type=password]').fill('Poc123456!')
-    await page.getByRole('button', { name: '登录工作台', exact: true }).click()
-    await page.getByText('该演示账号属于外部用户，请切换外部用户登录。', { exact: true }).waitFor()
+    await page.getByRole('combobox').press('Escape')
+    await page.locator('#login-screen .login-btn').click()
+    await page.getByText('请选择内部演示账号；外部账号请使用外部用户登录。', { exact: true }).waitFor()
     await page.evaluate(key => localStorage.setItem(key, 'broken-json'), requestKey)
     await page.goto(demo + '/adfs-login?pocAccount=internal-disabled')
     await page.getByText('演示账号状态读取失败，请检查浏览器存储后重试。', { exact: true }).waitFor()

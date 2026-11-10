@@ -18,7 +18,7 @@
       @click="showOptions"
       @keydown="onKeydown"
     />
-    <span :id="id + '-hint'" class="poc-account-hint">选择内部演示账号后直接进入对应场景，使用模拟数据；管理员正常登录仍需身份验证。</span>
+    <span :id="id + '-hint'" class="poc-account-hint">内部账号模拟 ADFS 免密进入演示；外部演示账号使用演示密码，不改变真实账号及权限。</span>
     <div v-if="open" class="poc-account-popup" :class="{ 'opens-above': opensAbove }">
       <ul :id="id + '-options'" :style="{ maxHeight: popupHeight + 'px' }" role="listbox" aria-label="POC 演示账号">
         <li

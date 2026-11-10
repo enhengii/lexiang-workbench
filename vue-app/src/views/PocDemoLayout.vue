@@ -5,7 +5,7 @@
       <div class="poc-demo-actions">
         <RouterLink to="/login?mode=scenarios">选择演示场景</RouterLink>
         <RouterLink to="/agent/permissions?module=approval">演示审批工作台</RouterLink>
-        <a :href="normalAppBase + 'login?loginType=external&pocAccount=admin'">返回正常登录</a>
+        <a :href="normalAppBase + 'login?loginType=external'">返回正常登录</a>
       </div>
     </nav>
     <div class="poc-demo-content"><RouterView /></div>
