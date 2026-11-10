@@ -1,5 +1,5 @@
 <script setup lang="ts">
-withDefaults(defineProps<{ columns?: 'auto' | 2 | 3 | 4 }>(), { columns: 'auto' })
+withDefaults(defineProps<{ columns?: 'auto' | 2 | 3 | 4 | 5 }>(), { columns: 'auto' })
 </script>
 
 <template>
@@ -36,16 +36,21 @@ withDefaults(defineProps<{ columns?: 'auto' | 2 | 3 | 4 }>(), { columns: 'auto' 
 .cs-metric-grid[data-columns='3'] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
+.cs-metric-grid[data-columns='5'] {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
 @container (max-width:1039px) {
   .cs-metric-grid,
-  .cs-metric-grid[data-columns='3'] {
+  .cs-metric-grid[data-columns='3'],
+  .cs-metric-grid[data-columns='5'] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @container (max-width:719px) {
   .cs-metric-grid,
   .cs-metric-grid[data-columns='2'],
-  .cs-metric-grid[data-columns='3'] {
+  .cs-metric-grid[data-columns='3'],
+  .cs-metric-grid[data-columns='5'] {
     grid-template-columns: 1fr;
   }
 }
