@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import ContentTabs from '@/components/content/ContentTabs.vue'
 import MetricGrid from '@/components/content/MetricGrid.vue'
 import MetricCard from '@/components/content/MetricCard.vue'
 import SectionHeader from '@/components/content/SectionHeader.vue'
@@ -9,43 +8,30 @@ import DataTable from '@/components/content/DataTable.vue'
 import ListSurface from '@/components/content/ListSurface.vue'
 import Pagination from '@/components/content/Pagination.vue'
 import FeedbackState from '@/components/content/FeedbackState.vue'
-import UsageTrendChart from './UsageTrendChart.vue'
 import UsageDailyDetails from './UsageDailyDetails.vue'
 import UsageActivityCards from './UsageActivityCards.vue'
+import UsageOverviewRankings from './UsageOverviewRankings.vue'
 import { getDailyOverview, getDailyAnalysis, USAGE_DAILY_SOURCE, USAGE_DAILY_MODULES, dailyOverviewToCsv, dailySkillRowsToCsv, dailyCreatorRowsToCsv } from '@/domain/usageDailyReport.js'
 
 const props = defineProps<{ view: string; startDate: string; endDate: string }>()
+const emit = defineEmits<{ 'show-skills': [] }>()
 const module = ref('all')
 const search = ref('')
 const page = ref(1)
 const showAll = ref(false)
-const trendMode = ref<'users' | 'calls'>('calls')
-const coreGroup = ref('usage')
-const qualityKey = ref<'successRate' | 'likeRate'>('successRate')
 const notice = ref('')
 const targetId = ref('')
 const pageSize = 8
 const creators = computed(() => props.view === 'creators')
 const overview = computed(() => getDailyOverview({ startDate: props.startDate, endDate: props.endDate }))
+const overviewAnalysis = computed(() => getDailyAnalysis({ startDate: props.startDate, endDate: props.endDate, dimension: 'skills' }))
+const calledSkillCount = computed(() => overviewAnalysis.value.summary.skillCount == null ? null : overviewAnalysis.value.skills.filter(row => (row.calls ?? 0) > 0).length)
 const analysis = computed(() => getDailyAnalysis({ startDate: props.startDate, endDate: props.endDate, module: module.value, search: search.value, dimension: creators.value ? 'creators' : 'skills' }))
 const rows = computed(() => creators.value ? analysis.value.creators : analysis.value.skills)
 const pageRows = computed(() => showAll.value ? rows.value : rows.value.slice((page.value - 1) * pageSize, page.value * pageSize))
-const coreRows = computed(() => [...overview.value.dailyRows].reverse().slice((page.value - 1) * pageSize, page.value * pageSize))
-const top = computed(() => rows.value.filter(row => (row.calls ?? 0) > 0).slice(0, 5))
-const qualityRows = computed(() => rows.value.filter(row => row[qualityKey.value] != null).sort((a, b) => (b[qualityKey.value] || 0) - (a[qualityKey.value] || 0) || (b.calls ?? 0) - (a.calls ?? 0)).slice(0, 5))
-const trend = computed(() => overview.value.dailyRows.map(row => ({ date: row.date, loginUsers: row.loginDau, aiUsers: row.aiDau, queries: row.queries, calls: row.calls })))
-const coreGroups = [{ key: 'usage', label: '用户与互动' }, { key: 'tasks', label: '任务与 Skill' }, { key: 'coverage', label: '覆盖与响应' }]
 const n = (value: number | null | undefined) => value == null ? '—' : value.toLocaleString('zh-CN')
 const rate = (value: number | null | undefined) => value == null ? '—' : `${(value * 100).toFixed(1)}%`
 const numberColumn = (key: string, label: string) => ({ key, label, align: 'right' as const, width: '100px', format: (value: unknown) => n(typeof value === 'number' ? value : null) })
-const coreColumns = computed(() => [
-  { key: 'date', label: '日期', width: '120px' },
-  ...(coreGroup.value === 'usage'
-    ? [numberColumn('loginDau', '登录 DAU'), numberColumn('loginWau', '登录 WAU'), numberColumn('loginMau', '登录 MAU'), numberColumn('aiDau', '互动 DAU'), numberColumn('aiWau', '互动 WAU'), numberColumn('aiMau', '互动 MAU'), numberColumn('totalUsers', '授权用户'), numberColumn('queries', 'Query数')]
-    : coreGroup.value === 'tasks'
-      ? [numberColumn('tasks', '任务执行'), numberColumn('taskSuccess', '任务成功'), numberColumn('taskFailed', '任务失败'), numberColumn('totalSkills', 'Skill存量'), numberColumn('newSkills', '新增Skill'), numberColumn('calledSkills', '被调用Skill'), numberColumn('calls', 'Skill调用'), numberColumn('success', '成功调用'), numberColumn('failed', '失败调用')]
-      : [numberColumn('totalUsers', '授权用户'), { key: 'loginWauRate', label: '登录周覆盖率', align: 'right' as const, format: (value: unknown) => rate(typeof value === 'number' ? value : null) }, { key: 'aiWauRate', label: '互动周覆盖率', align: 'right' as const, format: (value: unknown) => rate(typeof value === 'number' ? value : null) }, { key: 'firstTokenSeconds', label: '当日首字等待（秒）', align: 'right' as const, format: (value: unknown) => typeof value === 'number' ? value.toFixed(2) : '—' }])
-])
 const columns = computed(() => [
   { key: 'name', label: creators.value ? '创建人 IT Code' : 'Skill', width: '240px' },
   ...(creators.value ? [numberColumn('skillCount', '有明细Skill')] : [{ key: 'creator', label: '创建人', width: '140px' }, { key: 'module', label: '菜单', width: '130px' }, numberColumn('users', '当日使用人数')]),
@@ -73,38 +59,31 @@ function download() {
 }
 watch(() => [props.startDate, props.endDate, props.view, module.value, search.value], () => { page.value = 1; targetId.value = ''; notice.value = '' })
 watch(() => props.view, () => { reset(); showAll.value = false })
-watch(coreGroup, () => { page.value = 1 })
 </script>
 
 <template>
   <div class="daily-panel">
     <p class="daily-source-note" data-flow-role="notice">来源：{{ USAGE_DAILY_SOURCE.filename }} · 核心概览 {{ USAGE_DAILY_SOURCE.overviewRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.overviewRange.endDate }}，Skill 明细 {{ USAGE_DAILY_SOURCE.detailRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.detailRange.endDate }} · 当前为已导入快照</p>
     <template v-if="view === 'overview'">
-      <MetricGrid :columns="3" data-flow-role="summary">
-        <MetricCard label="Query数" :value="n(overview.summary.queries)" unit="次" meta="所选周期累计" />
-        <MetricCard label="任务执行次数" :value="n(overview.summary.tasks)" unit="次" meta="按任务 traceId 统计" />
-        <MetricCard label="任务成功率" :value="rate(overview.summary.taskSuccessRate)" :meta="`${n(overview.summary.taskSuccess)} / ${n(overview.summary.tasks)} 次任务`" />
-      </MetricGrid>
-      <MetricGrid data-flow-role="summary">
-        <MetricCard label="Skill 存量" :value="n(overview.summary.totalSkills)" unit="个" :meta="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate}` : '所选周期暂无日报数据'" />
-        <MetricCard label="周期新增 Skill" :value="n(overview.summary.newSkills)" unit="个" :meta="`${startDate} 至 ${endDate} 累计`" />
-        <MetricCard label="Skill调用次数" :value="n(overview.summary.calls)" unit="次" meta="所选周期累计" />
-        <MetricCard label="Skill调用成功率" :value="rate(overview.summary.successRate)" :meta="`${n(overview.summary.success)} / ${n(overview.summary.calls)} 次调用`" />
-      </MetricGrid>
       <section class="daily-surface daily-section" data-flow-role="summary">
         <SectionHeader title="截止日活跃与覆盖" :description="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate} · 直接采用日报去重结果，周期人数不相加` : '所选周期暂无日报数据'" />
         <UsageActivityCards :total-users="overview.summary.totalUsers" :windows="overview.windows" />
         <p v-if="overview.summary.asOfDate && overview.summary.asOfDate !== endDate" class="daily-muted" data-flow-role="notice">所选截止日 {{ endDate }} 暂无日报，活跃人数与授权总用户均采用 {{ overview.summary.asOfDate }} 的记录。</p>
-        <p class="daily-muted">平均首字等待：{{ overview.summary.firstTokenSeconds == null ? '—' : `${overview.summary.firstTokenSeconds.toFixed(2)} 秒` }}（按每日 Query 数加权估算）。任务与 Skill 调用分开计数，一个任务可调用多个 Skill。</p>
       </section>
-      <section class="daily-surface daily-section" data-flow-role="main">
-        <SectionHeader :title="trendMode === 'calls' ? 'Query 与 Skill 调用趋势' : '每日用户活跃趋势'" description="日报原始日统计；人数曲线为每日去重人数。"><template #actions><div class="daily-segmented" role="group" aria-label="日报趋势指标"><button type="button" :aria-pressed="trendMode === 'calls'" @click="trendMode = 'calls'">Query与调用</button><button type="button" :aria-pressed="trendMode === 'users'" @click="trendMode = 'users'">用户活跃</button></div></template></SectionHeader>
-        <UsageTrendChart :rows="trend" :mode="trendMode" source-label="邮件日报数据" />
-      </section>
-      <ListSurface data-flow-role="list-workspace"><template #toolbar><div class="daily-toolbar"><SectionHeader title="核心数据日报明细" description="与原表一致的每日统计，导出包含完整指标。" /><button type="button" class="btn btn-secondary" :disabled="!overview.dailyRows.length" @click="download">导出日报统计</button></div><ContentTabs v-model="coreGroup" :items="coreGroups" label="核心日报指标组" /></template>
-        <DataTable :columns="coreColumns" :rows="coreRows" row-key="date" caption="邮件日报核心数据日统计" density="compact" />
-        <template #pagination><Pagination v-model:page="page" :page-size="pageSize" :total="overview.dailyRows.length" /></template>
-      </ListSurface>
+      <MetricGrid :columns="5" data-flow-role="summary">
+        <MetricCard label="Query数" :value="n(overview.summary.queries)" unit="次" :meta="`所选周期累计 · 平均首字等待 ${overview.summary.firstTokenSeconds == null ? '—' : `${overview.summary.firstTokenSeconds.toFixed(2)} 秒`}（Query加权估算）`" />
+        <MetricCard label="任务执行次数" :value="n(overview.summary.tasks)" unit="次" meta="按任务 traceId 统计" />
+        <MetricCard label="任务成功率" :value="rate(overview.summary.taskSuccessRate)" :meta="`${n(overview.summary.taskSuccess)} / ${n(overview.summary.tasks)} 次任务`" />
+        <MetricCard label="Skill 存量" :value="n(overview.summary.totalSkills)" unit="个" :meta="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate}` : '所选周期暂无日报数据'" />
+        <MetricCard label="周期新增 Skill" :value="n(overview.summary.newSkills)" unit="个" :meta="`${startDate} 至 ${endDate} 累计`" />
+        <MetricCard label="Skill调用次数" :value="n(overview.summary.calls)" unit="次" meta="所选周期累计" />
+        <MetricCard label="Skill调用成功率" :value="rate(overview.summary.successRate)" :meta="`${n(overview.summary.success)} / ${n(overview.summary.calls)} 次调用`" />
+        <MetricCard label="创建人数" :value="n(overviewAnalysis.summary.creatorCount)" unit="位" meta="本周期明细中已有明确创建人归属" />
+        <MetricCard label="被调用Skill数" :value="n(calledSkillCount)" unit="个" meta="本周期已有明细内去重 · 调用大于0" />
+        <MetricCard label="反馈好评率" :value="rate(overviewAnalysis.summary.likeRate)" :meta="`已有明细 · 赞 ${n(overviewAnalysis.summary.likes)} / 踩 ${n(overviewAnalysis.summary.dislikes)}`" />
+      </MetricGrid>
+      <p v-if="overviewAnalysis.quality.detailCoveragePartial" class="daily-source-note" data-flow-role="notice">所选周期包含未提供 Skill 明细的日期。创建人数、被调用Skill数、反馈与排行仅按 {{ overviewAnalysis.quality.detailCoverageStart }} 至 {{ overviewAnalysis.quality.detailCoverageEnd }} 内已有明细汇总；未覆盖日期不当作零调用。</p>
+      <UsageOverviewRankings :rows="overviewAnalysis.skills" :scope-label="`${startDate} 至 ${endDate} · 仅按已提供的Skill明细排行`" @open-detail="targetId = $event" @view-all="emit('show-skills')" />
     </template>
     <template v-else>
       <section class="daily-filter daily-surface" data-flow-role="filters" :aria-label="creators ? '日报创建人筛选' : '日报Skill筛选'">
@@ -112,25 +91,8 @@ watch(coreGroup, () => { page.value = 1 })
         <FilterField label="所属菜单"><select v-model="module"><option value="all">全部菜单</option><option v-for="item in USAGE_DAILY_MODULES" :key="item" :value="item">{{ item }}</option></select></FilterField>
         <button type="button" class="btn btn-secondary" @click="reset">重置</button>
       </section>
-      <MetricGrid data-flow-role="summary">
-        <MetricCard :label="creators ? '有明细的创建人' : '有明细的Skill'" :value="n(creators ? analysis.summary.creatorCount : analysis.summary.skillCount)" :meta="creators ? '仅统计已有创建人 IT Code 归属的数据' : '当前筛选范围；不代表全部上线Skill'" />
-        <MetricCard label="调用次数" :value="n(analysis.summary.calls)" unit="次" meta="当前周期及筛选累计" />
-        <MetricCard label="运行成功率" :value="rate(analysis.summary.successRate)" :meta="`${n(analysis.summary.success)} / ${n(analysis.summary.calls)} 次调用`" />
-        <MetricCard label="反馈好评率" :value="rate(analysis.summary.likeRate)" :meta="`${n(analysis.summary.likes)} 个赞 / ${n(analysis.summary.feedbackCount)} 条评价`" />
-      </MetricGrid>
       <p v-if="analysis.quality.detailCoveragePartial" class="daily-source-note" data-flow-role="notice">所选周期包含未提供 Skill 明细的日期。以下仅汇总 {{ analysis.quality.detailCoverageStart }} 至 {{ analysis.quality.detailCoverageEnd }} 内已有明细，未覆盖日期不当作零调用。</p>
       <p class="daily-muted" data-flow-role="notice">{{ creators ? '创建人数据为其创建 Skill 的使用贡献，不是本人调用；仅统计已有明确创建人归属的数据。' : '使用人数仅在单天单个 Skill 可得；跨日无法去重时显示“—”。缺失归属按“未标注”保留。' }}运行成功率与用户反馈分开展示，不合成为质量评分。</p>
-      <div class="daily-rank-grid" data-flow-role="main">
-        <section class="daily-surface daily-section"><SectionHeader :title="creators ? '创建人调用贡献' : 'Skill调用排行'" description="当前筛选 · 按调用次数排序 · Top 5" />
-          <ol v-if="top.length" class="daily-ranking"><li v-for="(row, i) in top" :key="row.id"><button type="button" :aria-label="`查看${row.name}日报明细`" @click="targetId = row.id"><span class="daily-rank-index">{{ i + 1 }}</span><span class="daily-rank-label">{{ row.name }}<span class="daily-track" aria-hidden="true"><i :style="{ width: `${(row.calls ?? 0) / (top[0]?.calls || 1) * 100}%` }"></i></span></span><b>{{ n(row.calls) }}<small> 次</small></b></button></li></ol>
-          <FeedbackState v-else state="filtered-empty" title="没有匹配的日报明细" description="请调整日期、菜单或搜索条件。" />
-        </section>
-        <section class="daily-surface daily-section"><SectionHeader title="质量对比" description="比例旁展示分子与分母；没有评价时不计算好评率。" />
-          <div class="daily-segmented" role="group" aria-label="日报质量指标"><button type="button" :aria-pressed="qualityKey === 'successRate'" @click="qualityKey = 'successRate'">运行成功率</button><button type="button" :aria-pressed="qualityKey === 'likeRate'" @click="qualityKey = 'likeRate'">反馈好评率</button></div>
-          <ol v-if="qualityRows.length" class="daily-ranking"><li v-for="row in qualityRows" :key="row.id"><button type="button" :aria-label="`查看${row.name}质量明细`" @click="targetId = row.id"><span class="daily-rank-label">{{ row.name }}<small>{{ qualityKey === 'likeRate' ? `${n(row.likes)} / ${n(row.feedbackCount)} 条评价` : `${n(row.success)} / ${n(row.calls)} 次调用` }}</small><span class="daily-track" aria-hidden="true"><i :style="{ width: `${(row[qualityKey] || 0) * 100}%` }"></i></span></span><b>{{ rate(row[qualityKey]) }}</b></button></li></ol>
-          <FeedbackState v-else state="empty" :title="qualityKey === 'likeRate' ? '暂无赞踩反馈' : '暂无调用记录'" description="分母为零时显示“—”，不计入排行。" />
-        </section>
-      </div>
       <ListSurface data-flow-role="list-workspace"><template #toolbar><SectionHeader :title="creators ? '创建人聚合明细' : 'Skill聚合明细'" :description="`当前筛选 ${rows.length} 条 · 仅含日报中已有的明细`"><template #actions><button v-if="rows.length > pageSize || showAll" type="button" class="btn btn-secondary" :aria-pressed="showAll" @click="toggleAll">{{ showAll ? '分页显示' : `查看全部（${rows.length}）` }}</button><button type="button" class="btn btn-secondary" :disabled="!rows.length" @click="download">导出当前统计</button></template></SectionHeader></template>
         <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人归属下Skill调用与质量统计' : 'Skill日统计按当前周期汇总'" density="two-line">
           <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? `当前范围涵盖 ${row.skillCount} 个Skill` : row.id }}</div></template>
@@ -144,6 +106,7 @@ watch(coreGroup, () => { page.value = 1 })
     </template>
     <p v-if="notice" role="status" class="daily-source-note" data-flow-role="notice">{{ notice }}</p>
     <details class="daily-surface daily-definitions" data-flow-role="notice"><summary>日报来源、口径与数据范围</summary>
+      <button v-if="view === 'overview'" type="button" class="btn btn-secondary" :disabled="!overview.dailyRows.length" @click="download">导出核心日报统计</button>
       <p>当前为用户提供的邮件附件快照，尚未接入邮件自动同步。核心概览含80天数据；Skill明细覆盖29天、148条日统计、66个Skill，不是完整Skill资产清单。缺失名称用ID展示；Skill分析保留缺失菜单及创建人信息，创建人分析仅统计已有明确归属的数据。</p>
       <p>DAU / WAU / MAU、授权用户和Skill存量取截止日原表值；跨日人数和每日存量不能直接相加。创建人跨Skill去重人数无法由这份日报恢复。运行成功不等于业务已解决，好评率仅代表已收到的赞踩。</p>
       <p>任务按traceId去重，任务成功按日报定义为最终结果正确且任务内Skill调用成功；Skill成功率按成功调用/总调用。首字等待按每日均值和Query数加权估算，原均值已四舍五入；无问答时留空，不能当0秒。</p>
@@ -166,23 +129,9 @@ watch(coreGroup, () => { page.value = 1 })
 .daily-filter > :first-child { flex: 1 1 240px; }
 .daily-filter > :nth-child(2) { flex: 1 1 180px; }
 .daily-filter input, .daily-filter select { box-sizing: border-box; width: 100%; min-width: 0; height: 28px; padding: 0 var(--space-2, 8px); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text); font: inherit; }
-.daily-rank-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4, 16px); min-width: 0; }
-.daily-ranking { display: grid; gap: var(--space-3, 12px); padding: 0; margin: 0; list-style: none; }
-.daily-ranking button { display: flex; align-items: center; gap: var(--space-3, 12px); width: 100%; min-width: 0; padding: var(--space-2, 8px); border: 0; border-radius: var(--radius-md); background: transparent; color: var(--color-text); font: inherit; text-align: left; cursor: pointer; }
-.daily-ranking button:hover { background: var(--color-bg-subtle); }
-.daily-rank-index { color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
-.daily-rank-label { display: grid; gap: var(--space-2, 8px); flex: 1; min-width: 0; overflow-wrap: anywhere; }
-.daily-ranking small { display: inline; font-size: var(--text-xs, 12px); color: var(--color-text-secondary); font-weight: 400; }
-.daily-ranking b { flex: none; font-variant-numeric: tabular-nums; }
-.daily-track { height: 4px; width: 100%; border-radius: var(--radius-pill, 9999px); background: var(--color-bg-subtle); overflow: hidden; }
-.daily-track i { display: block; height: 100%; background: var(--color-primary); border-radius: inherit; }
-.daily-segmented { display: flex; flex-wrap: wrap; gap: var(--space-2, 8px); }
-.daily-segmented button { padding: var(--space-1, 4px) var(--space-2, 8px); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text-secondary); font: inherit; cursor: pointer; }
-.daily-segmented button[aria-pressed="true"] { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-subtle); }
 .daily-link { padding: var(--space-1, 4px); border: 0; background: transparent; color: var(--color-primary); font: inherit; cursor: pointer; white-space: nowrap; }
 .daily-definitions { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); line-height: 1.75; }
 .daily-definitions summary { color: var(--color-text); cursor: pointer; font-weight: 500; }
 .daily-definitions p { margin: var(--space-3, 12px) 0 0; }
 .daily-panel button:focus-visible, .daily-panel input:focus-visible, .daily-panel select:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-@container (min-width: 880px) { .daily-rank-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
