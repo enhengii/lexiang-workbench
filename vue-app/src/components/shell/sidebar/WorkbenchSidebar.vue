@@ -169,6 +169,15 @@ const pocReleaseLedger = ref({ records: {} })
 
 const basePocLogRecords = [
   {
+    time: '2026-11-10',
+    releaseKey: 'workbench-login-flow-20261110',
+    title: '登录入口与管理员登录流程修复',
+    changePoint: '选择管理员后保持内部用户登录，在当前卡片完成身份验证，不再跳转到第二个登录表单。',
+    detail: '内部与外部账号共用原登录卡片；管理员仍需服务器验证密码。移除旧 ITCode、Password 和 OTP 二次表单，旧链接返回统一登录入口；内部首次访问、账号启用与外部禁用演示保留原流程和隔离边界。',
+    deployTargets: [],
+    status: '已修复，待验证发布'
+  },
+  {
     time: '2026-11-09',
     releaseKey: 'workbench-sales-entry-20261109',
     title: '销售工作台独立入口',

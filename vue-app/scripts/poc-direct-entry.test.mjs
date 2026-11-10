@@ -40,7 +40,7 @@ function mount({ query = {}, sandbox = true, enabled = true, local = new Map(), 
   })
   vm.runInContext(choiceJs, context)
   vm.runInContext(setupJs, context)
-  const state = vm.runInContext('({ itcode, password, errorMsg, selectPocAccount, submitAdfsLogin, retry: typeof enterPocScenario === "function" ? enterPocScenario : undefined, back: typeof returnToPocSelection === "function" ? returnToPocSelection : undefined })', context)
+  const state = vm.runInContext('({ itcode, password, errorMsg, submitAdfsLogin, retry: typeof enterPocScenario === "function" ? enterPocScenario : undefined, back: typeof returnToPocSelection === "function" ? returnToPocSelection : undefined })', context)
   return { ...state, navigations, fullNavigations, requests, local, route, async ready() { await Promise.all(mounted.map(callback => callback())) } }
 }
 
@@ -60,11 +60,11 @@ test('selected disabled internal scenario opens enable request without a second 
   assert.equal(page.requests.length, 0)
 })
 
-test('choosing an internal scenario on the ADFS page also enters it immediately', async () => {
+test('the legacy scenario chooser returns to the shared login card without authenticating', async () => {
   const page = mount({ query: { mode: 'scenarios' } })
   await page.ready()
-  await page.selectPocAccount(fixtures.POC_LOGIN_ACCOUNTS.find(account => account.username === 'noaccess'))
-  assert.equal(page.navigations[0]?.path, '/access-denied')
+  assert.equal(page.navigations[0]?.path, '/login')
+  assert.equal(page.navigations[0]?.query.mode, 'scenarios')
   assert.equal(page.requests.length, 0)
 })
 
@@ -80,7 +80,7 @@ test('empty, admin, external, unknown and hidden fixture query values never auto
   for (const pocAccount of [undefined, 'admin', 'external-disabled', 'external-active', 'ordinary-user', 'internal-active', ['noaccess']]) {
     const page = mount({ query: { pocAccount } })
     await page.ready()
-    assert.equal(page.navigations.length, 0, String(pocAccount))
+    assert.ok(page.navigations.every(target => target.path === '/login'), String(pocAccount))
     assert.equal(page.requests.length, 0, String(pocAccount))
   }
 })
@@ -89,7 +89,7 @@ test('automatic entry is disabled outside the opted-in isolated POC', async () =
   for (const options of [{ enabled: false }, { sandbox: false }]) {
     const page = mount({ query: { pocAccount: 'noaccess' }, ...options })
     await page.ready()
-    assert.equal(page.navigations.length, 0)
+    assert.ok(page.navigations.every(target => target.path === '/login'))
     assert.equal(page.requests.length, 0)
   }
 })
@@ -106,7 +106,8 @@ test('manually entered demo credentials still require the correct password and l
   await page.submitAdfsLogin()
   assert.match(page.errorMsg.value, /外部用户/)
   assert.equal(page.requests.length, 0)
-  assert.equal(page.navigations.length, 0)
+  assert.equal(page.navigations.length, 1)
+  assert.equal(page.navigations[0]?.path, '/login')
 })
 
 test('corrupt demo storage exposes a recoverable error and never calls real login', async () => {
@@ -139,15 +140,17 @@ test('returning from an automatic-entry error clears the selected query', async 
   assert.equal(page.navigations.at(-1)?.query.mode, 'scenarios')
 })
 
-test('the direct ADFS form keeps real credentials on the existing backend path', async () => {
-  const page = mount({ sandbox: false })
+test('the legacy ADFS route returns admin and its destination to the shared login without authenticating', async () => {
+  const page = mount({ sandbox: false, query: { pocAccount: 'admin', redirect: '/agent/skills' } })
   await page.ready()
   assert.equal(page.requests.length, 0)
+  assert.equal(page.navigations[0]?.path, '/login')
+  assert.equal(page.navigations[0]?.query.pocAccount, 'admin')
+  assert.equal(page.navigations[0]?.query.loginType, 'internal')
+  assert.equal(page.navigations[0]?.query.redirect, '/agent/skills')
   page.itcode.value = 'real-user'
   page.password.value = 'test-password'
   await page.submitAdfsLogin()
-  assert.equal(page.requests.length, 1)
-  assert.equal(page.requests[0].url, '/api/admin/login')
-  assert.equal(JSON.parse(page.requests[0].body).loginType, 'adfs')
-  assert.equal(page.navigations[0], '/')
+  assert.equal(page.requests.length, 0, 'The removed form cannot authenticate real users')
+  assert.match(page.errorMsg.value, /返回登录页面/)
 })

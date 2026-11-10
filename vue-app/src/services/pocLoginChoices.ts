@@ -4,7 +4,7 @@ import { POC_EXTERNAL_PASSWORD, POC_LOGIN_ACCOUNTS, type PocLoginAccount } from 
 
 // UI choices are intentionally separate from the synthetic authentication fixtures.
 export type PocLoginChoice = Pick<PocLoginAccount, 'username' | 'label' | 'loginType'>
-const localAdmin: PocLoginChoice = { username: 'admin', label: '管理员 · 正常登录', loginType: 'external' }
+const localAdmin: PocLoginChoice = { username: 'admin', label: '管理员 · 正常登录', loginType: 'internal' }
 // Normal-login demonstrations share the administrator choice; keep auth fixtures intact.
 const scenarioChoices = POC_LOGIN_ACCOUNTS.filter((account) => account.disabled || account.accessReason === 'first-access')
 export const POC_LOGIN_CHOICES: readonly PocLoginChoice[] = allowPocLogin

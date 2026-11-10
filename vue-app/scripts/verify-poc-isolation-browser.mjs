@@ -179,14 +179,14 @@ try {
     console.log('First access final execution/relogin, enable approval/relogin, external-disabled and session/data isolation passed')
 
     // Hand-typed credentials retain their original password and login-type checks.
-    await page.goto(demo + '/adfs-login?mode=scenarios')
+    await page.goto(demo + '/login?mode=scenarios')
     await page.getByRole('combobox').fill('noaccess')
     await page.locator('input[type=password]').fill('wrong')
-    await page.getByRole('button', { name: 'Submit', exact: true }).click()
+    await page.getByRole('button', { name: '登录工作台', exact: true }).click()
     await page.getByText('用户名或密码错误', { exact: true }).waitFor()
     await page.getByRole('combobox').fill('external-active')
     await page.locator('input[type=password]').fill('Poc123456!')
-    await page.getByRole('button', { name: 'Submit', exact: true }).click()
+    await page.getByRole('button', { name: '登录工作台', exact: true }).click()
     await page.getByText('该演示账号属于外部用户，请切换外部用户登录。', { exact: true }).waitFor()
     await page.evaluate(key => localStorage.setItem(key, 'broken-json'), requestKey)
     await page.goto(demo + '/adfs-login?pocAccount=internal-disabled')

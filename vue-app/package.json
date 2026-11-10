@@ -20,7 +20,7 @@
     "test:approval-mail-review:browser": "node scripts/verify-approval-mail-review-browser.mjs",
     "test:account-enable": "node scripts/test-account-enable-request.mjs",
     "test:application-progress": "node scripts/test-application-progress.mjs",
-    "test:poc-login": "node scripts/test-poc-external-login.mjs && node --test scripts/poc-enable-state-regression.test.mjs scripts/poc-first-access-state-regression.test.mjs",
+    "test:poc-login": "node scripts/test-poc-external-login.mjs && node --test scripts/poc-enable-state-regression.test.mjs scripts/poc-first-access-state-regression.test.mjs scripts/login-entry-flow.test.mjs scripts/poc-direct-entry.test.mjs",
     "test:poc-isolation": "node --test scripts/poc-isolation.test.mjs scripts/local-poc-admin-plugin.test.mjs",
     "test:poc-isolation:browser": "node scripts/verify-poc-isolation-browser.mjs",
     "test:poc-enable-state:browser": "node scripts/verify-poc-enable-state-browser.mjs",
