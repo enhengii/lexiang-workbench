@@ -24,7 +24,7 @@ withDefaults(
       <template v-if="state === 'loading'">加载中</template>
       <template v-else-if="state === 'missing'">—</template>
       <template v-else-if="state === 'error'">读取失败</template>
-      <template v-else>{{ value }}<small v-if="unit">{{ unit }}</small></template>
+      <template v-else><slot name="value">{{ value }}<small v-if="unit">{{ unit }}</small></slot></template>
     </div>
     <div v-if="meta || trend" class="cs-metric-card__meta">
       <span>{{ meta }}</span><span>{{ trend }}</span>

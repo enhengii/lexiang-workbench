@@ -12,6 +12,7 @@ import UsageTrendChart from './usage/UsageTrendChart.vue'
 import UsageDimensionPanel from './usage/UsageDimensionPanel.vue'
 import UsageAnalysisDetails from './usage/UsageAnalysisDetails.vue'
 import UsageDailyReportPanel from './usage/UsageDailyReportPanel.vue'
+import UsageActivityCards from './usage/UsageActivityCards.vue'
 import { USAGE_ANCHOR_DATE, getUsageReport, getUsageAnalysis, usageRowsToCsv, usageCreatorsToCsv } from '@/domain/usageDashboard.js'
 import { USAGE_DAILY_START_DATE, USAGE_DAILY_END_DATE } from '@/domain/usageDailyReport.js'
 
@@ -156,17 +157,8 @@ onDeactivated(() => { detailTarget.value = null })
 
         <section class="usage-surface usage-section" data-flow-role="summary">
           <SectionHeader title="活跃与覆盖" :description="`截至 ${endDate} · DAU / WAU / MAU 分别按1 / 7 / 30个自然日去重`" />
-          <div class="usage-coverage">
-            <div class="usage-active-grid" role="table" aria-label="截止日用户活跃统计">
-              <div class="usage-active-row usage-active-heading" role="row"><span role="columnheader">活跃类型</span><span role="columnheader">DAU</span><span role="columnheader">WAU</span><span role="columnheader">MAU</span></div>
-              <div class="usage-active-row" role="row"><span role="rowheader">登录用户</span><b role="cell">{{ n(report.windows.login.dau) }}</b><b role="cell">{{ n(report.windows.login.wau) }}</b><b role="cell">{{ n(report.windows.login.mau) }}</b></div>
-              <div class="usage-active-row" role="row"><span role="rowheader">AI互动用户</span><b role="cell">{{ n(report.windows.ai.dau) }}</b><b role="cell">{{ n(report.windows.ai.wau) }}</b><b role="cell">{{ n(report.windows.ai.mau) }}</b></div>
-            </div>
-            <dl class="usage-coverage-metrics">
-              <div><dt>截止日授权用户总数</dt><dd>{{ n(report.summary.totalUsers) }}<small> 人</small></dd></div>
-              <div><dt>AI授权渗透率</dt><dd>{{ rate(penetration) }}</dd><small>周期AI互动人数 / 授权总数</small></div>
-            </dl>
-          </div>
+          <UsageActivityCards :total-users="report.summary.totalUsers" :windows="report.windows" />
+          <p class="usage-period-hint">所选周期互动覆盖率：{{ rate(penetration) }}（周期内去重互动人数 ÷ 截止日授权总用户，区别于上方截止日活跃占比）。</p>
         </section>
 
         <section class="usage-surface usage-section" data-flow-role="main">
@@ -250,15 +242,8 @@ onDeactivated(() => { detailTarget.value = null })
 .usage-date-range > span { color: var(--color-text-tertiary); }
 .usage-period-hint { margin: 0; color: var(--color-text-secondary); font-size: var(--text-xs, 12px); }
 .usage-export-notice { color: var(--color-primary); font-size: var(--text-sm, 13px); }
-.usage-coverage { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-6, 24px); align-items: center; }
-.usage-active-grid { display: grid; gap: var(--space-2, 8px); min-width: 0; }
-.usage-active-row { display: grid; grid-template-columns: minmax(0, 1.2fr) repeat(3, minmax(0, 1fr)); gap: var(--space-2, 8px); align-items: center; }
-.usage-active-row > :not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
-.usage-active-heading { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); }
-.usage-coverage-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4, 16px); margin: 0; padding-left: var(--space-6, 24px); border-left: 1px solid var(--color-border-subtle); }
-.usage-coverage-metrics dt, .usage-quality-grid dt, .usage-supply-grid dt { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); }
-.usage-coverage-metrics dd, .usage-quality-grid dd { margin: var(--space-1, 4px) 0 0; color: var(--color-text); font-size: var(--text-lg, 18px); font-weight: 600; font-variant-numeric: tabular-nums; }
-.usage-coverage-metrics small { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); font-weight: 400; }
+.usage-quality-grid dt, .usage-supply-grid dt { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); }
+.usage-quality-grid dd { margin: var(--space-1, 4px) 0 0; color: var(--color-text); font-size: var(--text-lg, 18px); font-weight: 600; font-variant-numeric: tabular-nums; }
 .usage-segmented { display: flex; gap: var(--space-1, 4px); }
 .usage-bottom-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4, 16px); min-width: 0; }
 .usage-ranking { display: grid; gap: var(--space-3, 12px); margin: 0; padding: 0; list-style: none; }
@@ -291,8 +276,6 @@ onDeactivated(() => { detailTarget.value = null })
 .usage-definitions dt { color: var(--color-text); font-weight: 500; }
 .usage-definitions dd { margin: 0; line-height: 1.7; }
 @container (max-width: 1039px) {
-  .usage-coverage { grid-template-columns: 1fr; gap: var(--space-4, 16px); }
-  .usage-coverage-metrics { border-left: 0; border-top: 1px solid var(--color-border-subtle); padding-left: 0; padding-top: var(--space-3, 12px); }
   .usage-bottom-grid { grid-template-columns: 1fr; }
 }
 @container (max-width: 719px) {
@@ -306,8 +289,7 @@ onDeactivated(() => { detailTarget.value = null })
   .usage-skill-filters { grid-template-columns: 1fr; }
   .usage-skill-filters > :first-child { grid-column: auto; }
   .usage-quick-period { gap: var(--space-1, 4px); }
-  .usage-active-row { grid-template-columns: minmax(0, 1.3fr) repeat(3, minmax(0, 1fr)); gap: var(--space-1, 4px); }
-  .usage-coverage-metrics, .usage-quality-grid { grid-template-columns: 1fr; }
+  .usage-quality-grid { grid-template-columns: 1fr; }
   .usage-supply-grid { grid-template-columns: 1fr; }
   .usage-definitions dl > div { grid-template-columns: 1fr; gap: var(--space-1, 4px); }
 }

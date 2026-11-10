@@ -11,6 +11,7 @@ import Pagination from '@/components/content/Pagination.vue'
 import FeedbackState from '@/components/content/FeedbackState.vue'
 import UsageTrendChart from './UsageTrendChart.vue'
 import UsageDailyDetails from './UsageDailyDetails.vue'
+import UsageActivityCards from './UsageActivityCards.vue'
 import { getDailyOverview, getDailyAnalysis, USAGE_DAILY_SOURCE, USAGE_DAILY_MODULES, dailyOverviewToCsv, dailySkillRowsToCsv, dailyCreatorRowsToCsv } from '@/domain/usageDailyReport.js'
 
 const props = defineProps<{ view: string; startDate: string; endDate: string }>()
@@ -79,21 +80,21 @@ watch(coreGroup, () => { page.value = 1 })
   <div class="daily-panel">
     <p class="daily-source-note" data-flow-role="notice">来源：{{ USAGE_DAILY_SOURCE.filename }} · 核心概览 {{ USAGE_DAILY_SOURCE.overviewRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.overviewRange.endDate }}，Skill 明细 {{ USAGE_DAILY_SOURCE.detailRange.startDate }} 至 {{ USAGE_DAILY_SOURCE.detailRange.endDate }} · 当前为已导入快照</p>
     <template v-if="view === 'overview'">
-      <MetricGrid data-flow-role="summary">
+      <MetricGrid :columns="3" data-flow-role="summary">
         <MetricCard label="Query数" :value="n(overview.summary.queries)" unit="次" meta="所选周期累计" />
         <MetricCard label="任务执行次数" :value="n(overview.summary.tasks)" unit="次" meta="按任务 traceId 统计" />
+        <MetricCard label="任务成功率" :value="rate(overview.summary.taskSuccessRate)" :meta="`${n(overview.summary.taskSuccess)} / ${n(overview.summary.tasks)} 次任务`" />
+      </MetricGrid>
+      <MetricGrid data-flow-role="summary">
+        <MetricCard label="Skill 存量" :value="n(overview.summary.totalSkills)" unit="个" :meta="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate}` : '所选周期暂无日报数据'" />
+        <MetricCard label="周期新增 Skill" :value="n(overview.summary.newSkills)" unit="个" :meta="`${startDate} 至 ${endDate} 累计`" />
         <MetricCard label="Skill调用次数" :value="n(overview.summary.calls)" unit="次" meta="所选周期累计" />
         <MetricCard label="Skill调用成功率" :value="rate(overview.summary.successRate)" :meta="`${n(overview.summary.success)} / ${n(overview.summary.calls)} 次调用`" />
       </MetricGrid>
       <section class="daily-surface daily-section" data-flow-role="summary">
-        <SectionHeader title="截止日活跃与覆盖" :description="`截至 ${overview.summary.asOfDate || endDate} · 直接采用日报去重结果，周期人数不相加`" />
-        <div class="daily-active-wrap">
-          <table class="daily-active"><caption class="daily-sr-only">日报截止日去重用户统计</caption><thead><tr><th>用户类型</th><th>DAU</th><th>WAU</th><th>MAU</th></tr></thead><tbody>
-            <tr><th scope="row">登录用户</th><td>{{ n(overview.windows.login.dau) }}</td><td>{{ n(overview.windows.login.wau) }}</td><td>{{ n(overview.windows.login.mau) }}</td></tr>
-            <tr><th scope="row">智能体互动用户</th><td>{{ n(overview.windows.ai.dau) }}</td><td>{{ n(overview.windows.ai.wau) }}</td><td>{{ n(overview.windows.ai.mau) }}</td></tr>
-          </tbody></table>
-          <dl class="daily-small-metrics"><div><dt>授权用户总数</dt><dd>{{ n(overview.summary.totalUsers) }}</dd></div><div><dt>Skill 存量</dt><dd>{{ n(overview.summary.totalSkills) }}</dd></div><div><dt>周期新增 Skill</dt><dd>{{ n(overview.summary.newSkills) }}</dd></div><div><dt>任务成功率</dt><dd>{{ rate(overview.summary.taskSuccessRate) }}</dd></div></dl>
-        </div>
+        <SectionHeader title="截止日活跃与覆盖" :description="overview.summary.asOfDate ? `截至 ${overview.summary.asOfDate} · 直接采用日报去重结果，周期人数不相加` : '所选周期暂无日报数据'" />
+        <UsageActivityCards :total-users="overview.summary.totalUsers" :windows="overview.windows" />
+        <p v-if="overview.summary.asOfDate && overview.summary.asOfDate !== endDate" class="daily-muted" data-flow-role="notice">所选截止日 {{ endDate }} 暂无日报，活跃人数与授权总用户均采用 {{ overview.summary.asOfDate }} 的记录。</p>
         <p class="daily-muted">平均首字等待：{{ overview.summary.firstTokenSeconds == null ? '—' : `${overview.summary.firstTokenSeconds.toFixed(2)} 秒` }}（按每日 Query 数加权估算）。任务与 Skill 调用分开计数，一个任务可调用多个 Skill。</p>
       </section>
       <section class="daily-surface daily-section" data-flow-role="main">
@@ -179,18 +180,9 @@ watch(coreGroup, () => { page.value = 1 })
 .daily-segmented button { padding: var(--space-1, 4px) var(--space-2, 8px); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface); color: var(--color-text-secondary); font: inherit; cursor: pointer; }
 .daily-segmented button[aria-pressed="true"] { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-subtle); }
 .daily-link { padding: var(--space-1, 4px); border: 0; background: transparent; color: var(--color-primary); font: inherit; cursor: pointer; white-space: nowrap; }
-.daily-active-wrap { display: grid; gap: var(--space-4, 16px); min-width: 0; }
-.daily-active { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
-.daily-active th, .daily-active td { padding: var(--space-3, 12px) var(--space-2, 8px); border-bottom: 1px solid var(--color-border-subtle); text-align: right; }
-.daily-active th { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); font-weight: 500; }
-.daily-active th:first-child { text-align: left; }
-.daily-small-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4, 16px); margin: 0; }
-.daily-small-metrics dt { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); }
-.daily-small-metrics dd { margin: var(--space-1, 4px) 0 0; font-size: var(--text-lg, 18px); font-weight: 600; font-variant-numeric: tabular-nums; }
 .daily-definitions { color: var(--color-text-secondary); font-size: var(--text-xs, 12px); line-height: 1.75; }
 .daily-definitions summary { color: var(--color-text); cursor: pointer; font-weight: 500; }
 .daily-definitions p { margin: var(--space-3, 12px) 0 0; }
-.daily-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .daily-panel button:focus-visible, .daily-panel input:focus-visible, .daily-panel select:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
-@container (min-width: 880px) { .daily-rank-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .daily-active-wrap { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); } }
+@container (min-width: 880px) { .daily-rank-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
