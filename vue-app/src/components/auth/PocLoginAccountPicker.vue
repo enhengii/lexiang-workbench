@@ -18,7 +18,7 @@
       @click="showOptions"
       @keydown="onKeydown"
     />
-    <span :id="id + '-hint'" class="poc-account-hint">内部账号模拟 ADFS 免密进入演示；外部演示账号使用演示密码，不改变真实账号及权限。</span>
+    <span :id="id + '-hint'" class="poc-account-hint">选择管理员直接进入工作台；首次访问或禁用账号进入对应申请流程。</span>
     <div v-if="open" class="poc-account-popup" :class="{ 'opens-above': opensAbove }">
       <ul :id="id + '-options'" :style="{ maxHeight: popupHeight + 'px' }" role="listbox" aria-label="POC 演示账号">
         <li

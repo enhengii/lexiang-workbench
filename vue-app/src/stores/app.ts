@@ -18,7 +18,8 @@ import { ref, computed } from 'vue'
 import { STORAGE_KEYS, clearBooleanStorage, readBooleanStorage, writeBooleanStorage } from '@/constants/storageKeys'
 import { syncThemeMode } from '@/composables/useThemeMode'
 import { showWorkbenchToast } from '@/services/toast'
-import { isPocSandbox, permissionLabEnabled } from '@/config/runtimeMode'
+import { isPocSandbox, isPocWorkbench, allowPocSimulation, permissionLabEnabled } from '@/config/runtimeMode'
+import { hasPocWorkbenchSession, POC_WORKBENCH_SESSION_KEY } from '@/services/pocWorkbenchSession'
 import { labHeaders } from '@/services/permissionLab'
 import { AI_INSPECT_MENU, withAiInspectMenu } from '@/services/aiInspectAccess'
 import { ACTIVITY_POINTS_MENU, withActivityPointsMenu } from '@/services/activityPointsAccess'
@@ -316,7 +317,10 @@ export const useAppStore = defineStore('app', () => {
   // ===== 对应原 loadUserContext() =====
   async function loadUserContext() {
     // The isolated demo never reads a real session or its menu permissions.
-    if (isPocSandbox) return
+    if (isPocSandbox) {
+      if (isPocWorkbench) usePreviewSession('admin')
+      return
+    }
     // 先确认登录状态
     try {
       const meRes = await fetch('/api/admin/me')
@@ -378,12 +382,17 @@ export const useAppStore = defineStore('app', () => {
   }
 
   function usePreviewSession(username = 'demo') {
+    if (!allowPocSimulation || !isPocWorkbench || username !== 'admin') return false
+    try { if (!hasPocWorkbenchSession(window.sessionStorage)) return false }
+    catch { return false }
     user.value = username
     _fallbackMenus()
+    return true
   }
 
   // ===== 登出（对应原 doLogout）=====
   async function logout() {
+    if (isPocWorkbench) window.sessionStorage.removeItem(POC_WORKBENCH_SESSION_KEY)
     if (!isPocSandbox) {
       try { await fetch('/api/admin/logout', { method: 'POST', headers: { 'Content-Type': 'application/json', ...labHeaders() }, body: '{}' }) } catch {}
       localStorage.removeItem('preview_user')

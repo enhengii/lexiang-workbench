@@ -25,6 +25,7 @@ const port = server.httpServer.address().port
 const origin = `http://127.0.0.1:${port}`
 const normal = origin + '/admin-vue'
 const demo = normal + '/poc'
+const full = demo + '/workbench'
 const out = process.env.POC_QA_EVIDENCE_DIR || path.join(os.tmpdir(), 'poc-isolation-qa' + (built ? '-build' : ''))
 await fs.mkdir(out, { recursive: true })
 const browser = await playwright.chromium.launch({ headless: true })
@@ -72,8 +73,11 @@ try {
     await page.getByRole('combobox').click()
     assert.equal(await page.getByRole('option').count(), 4)
     await page.getByRole('option').filter({ has: page.locator('small', { hasText: /^admin$/ }) }).click()
-    await page.waitForURL(demo + '/agent/permissions')
-    assert.equal(await page.locator('#sidebar').count(), 0, 'The administrator demo remains outside the real workbench layout')
+    await page.waitForURL(full + '/portal/home')
+    assert.equal(await page.locator('#sidebar').count(), 1, 'The administrator demo uses the complete workbench sidebar')
+    assert.equal(await page.locator('#main-area > .topbar').count(), 1)
+    assert.equal(await page.locator('#ai-panel').count(), 1)
+    assert.equal(await page.locator('.poc-demo-banner').count(), 0, 'The complete workbench has no extra POC navigation')
     assert.equal(api.length, 0, 'Selecting admin starts only the isolated POC, never real authentication')
 
     // External manual credentials retain the original real password-authentication contract.
@@ -94,7 +98,7 @@ try {
     await page.waitForURL(normal + '/agent/permissions')
     assert.ok(api.some(row => row.path === '/api/admin/me'))
     assert.ok(api.some(row => row.path === '/api/harness/menu'))
-    console.log('Internal isolated ADFS POC and external real login rejection/network/success contracts passed with intercepted test backend')
+    console.log('Internal complete-workbench ADFS POC and external real login rejection/network/success contracts passed with intercepted test backend')
 
     // A real-session-shaped cookie is present throughout the demo. No real credentials are used.
     await context.addCookies([{ name: 'connect.sid', value: 'QA-session-canary', url: origin }])
@@ -106,7 +110,10 @@ try {
       localStorage.setItem('preview_user', 'must-not-become-admin')
       sessionStorage.setItem('leaibot-disabled-login-account', 'ordinary-account')
     })
-    const original = await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } }))
+    const original = await page.evaluate(() => ({
+      local: Object.fromEntries(['leaibot-first-access-applications', 'leaibot-account-request-status-rows', 'leaibot-approval-mail-mock-rows', 'preview_user'].map(key => [key, localStorage.getItem(key)])),
+      session: { 'leaibot-disabled-login-account': sessionStorage.getItem('leaibot-disabled-login-account') }
+    }))
     const cookies = await context.cookies()
     const beforeDemoApi = api.length
     for (const entrance of ['/login', '/adfs-login']) {
@@ -185,8 +192,11 @@ try {
     await page.getByText('该入口仅支持指定演示账号。真实账号请返回正常登录。', { exact: true }).waitFor()
     assert.equal(api.length, beforeDemoApi, 'Demo must not call any backend, including with an existing admin cookie')
     assert.deepEqual(await context.cookies(), cookies, 'Demo must not clear/replace the real session')
-    const after = await page.evaluate(prefix => ({ local: Object.fromEntries(Object.entries(localStorage).filter(([key]) => !key.startsWith(prefix))), session: Object.fromEntries(Object.entries(sessionStorage).filter(([key]) => !key.startsWith(prefix))) }), prefix)
-    assert.deepEqual(after, original, 'Normal local/session records are unchanged')
+    const after = await page.evaluate(() => ({
+      local: Object.fromEntries(['leaibot-first-access-applications', 'leaibot-account-request-status-rows', 'leaibot-approval-mail-mock-rows', 'preview_user'].map(key => [key, localStorage.getItem(key)])),
+      session: { 'leaibot-disabled-login-account': sessionStorage.getItem('leaibot-disabled-login-account') }
+    }))
+    assert.deepEqual(after, original, 'Ordinary account/approval records and authentication canaries are unchanged; workbench UI state may be reused')
     console.log('First access final execution/relogin, enable approval/relogin, external-disabled and session/data isolation passed')
 
     // External fixtures keep their password check; the internal entry keeps its identity check without a password form.

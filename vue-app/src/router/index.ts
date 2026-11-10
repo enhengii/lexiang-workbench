@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { allowPocLogin, appBase, isPocSandbox, normalAppBase } from '@/config/runtimeMode'
+import { allowPocLogin, appBase, isPocSandbox, isPocWorkbench, normalAppBase } from '@/config/runtimeMode'
 import { findPocLoginChoice } from '@/services/pocLoginChoices'
 import { aiInspectRoutes } from '@/views/aiinspect/routes'
 import { ACTIVITY_POINTS_MENU, canUseActivityPoints } from '@/services/activityPointsAccess'
@@ -187,7 +187,7 @@ const demoRoutes: RouteRecordRaw[] = [{
 
 const router = createRouter({
   history: createWebHistory(appBase),
-  routes: isPocSandbox ? demoRoutes : routes
+  routes: isPocSandbox && !isPocWorkbench ? demoRoutes : routes
 })
 
 // 全局导航守卫：未登录跳转 /login
@@ -196,6 +196,13 @@ router.beforeEach(async (to) => {
     if (!allowPocLogin) {
       window.location.replace(normalAppBase + 'login')
       return false
+    }
+    if (isPocWorkbench) {
+      if (to.path === '/login' || to.path === '/adfs-login' || !useAppStore().usePreviewSession('admin')) {
+        window.location.replace(normalAppBase + 'login')
+        return false
+      }
+      return true
     }
     if ((to.path === '/login' || to.path === '/adfs-login')
       && to.query.mode !== 'scenarios' && !findPocLoginChoice(to.query.pocAccount)) return '/agent/permissions'

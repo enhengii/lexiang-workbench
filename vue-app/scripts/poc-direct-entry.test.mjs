@@ -10,14 +10,18 @@ const root = fileURLToPath(new URL('../../', import.meta.url))
 const sourceRef = process.env.LOGIN_ENTRY_SOURCE_REF
 if (sourceRef) assert.match(sourceRef, /^[a-f0-9]{40}$/, 'An immutable full source commit is required')
 const readSource = path => sourceRef
-  ? execFileSync('git', ['-C', root, 'show', `${sourceRef}:vue-app/${path}`], { encoding: 'utf8' })
+  ? execFileSync('git', ['-C', root, 'show', `${sourceRef}:vue-app/${path}`], { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] })
   : readFileSync(new URL('../' + path, import.meta.url), 'utf8')
 const executable = text => stripTypeScriptTypes(text.replace(/^import .*\n/gm, '').replace(/^export /gm, ''))
+const optionalSessionModule = (() => {
+  try { return [['src/services/pocWorkbenchSession.ts', executable(readSource('src/services/pocWorkbenchSession.ts'))]] }
+  catch (error) { if (sourceRef && error.status === 128) return []; throw error }
+})()
 const modules = [
   'src/services/pocIsolation.ts', 'src/services/pocStorage.ts',
-  'src/services/pocExternalLogin.ts', 'src/services/pocLoginChoices.ts',
-  'src/services/approvalMailReview.ts'
-].map(path => [path, executable(readSource(path))])
+  'src/services/pocExternalLogin.ts', 'src/services/approvalMailReview.ts'
+].map(path => [path, executable(readSource(path))]).concat(optionalSessionModule,
+  [['src/services/pocLoginChoices.ts', executable(readSource('src/services/pocLoginChoices.ts'))]])
 const setup = executable(readSource('src/views/AdfsLoginView.vue').match(/<script setup lang="ts">([\s\S]*?)<\/script>/)[1])
 const plain = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
 const requestKey = 'leaibot-poc-demo:leaibot-account-request-status-rows'
@@ -26,11 +30,11 @@ const approvalKey = 'leaibot-poc-demo:leaibot-approval-mail-mock-rows'
 // Execute the actual ADFS proxy SFC, navigation helper, passwordless fixture
 // resolver and scoped storage. Only framework, browser and network boundaries
 // are replaced. An API call here is always recorded and rejected, never sent.
-function mount({ query = {}, sandbox = true, enabled = true, local = new Map(), session = new Map(), navigationFailure = false } = {}) {
+function mount({ query = {}, sandbox = true, enabled = true, local = new Map(), session = new Map(), navigationFailure = false, sessionWriteFailure = false } = {}) {
   const navigations = [], fullNavigations = [], requests = [], mounted = []
   const route = { query, path: '/adfs-login' }
   const storage = map => ({ getItem: key => map.get(key) ?? null,
-    setItem: (key, value) => map.set(key, String(value)), removeItem: key => map.delete(key), clear: () => map.clear() })
+    setItem: (key, value) => { if (map === session && sessionWriteFailure) throw new Error('QA-only session write failure'); map.set(key, String(value)) }, removeItem: key => map.delete(key), clear: () => map.clear() })
   const store = { user: null, role: null, permissions: [], visibleMenus: [], async loadUserContext() {
     requests.push({ type: 'unexpected-context-restore' }); throw new Error('The POC must not restore a real session')
   } }
@@ -43,8 +47,8 @@ function mount({ query = {}, sandbox = true, enabled = true, local = new Map(), 
   }
   const context = vm.createContext({
     console, URLSearchParams,
-    allowPocLogin: enabled, allowPocSimulation: enabled && sandbox, isPocSandbox: sandbox,
-    permissionLabEnabled: false, normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/', localAdminPassword: '',
+    allowPocLogin: enabled, allowPocSimulation: enabled && sandbox, isPocSandbox: sandbox, isPocWorkbench: false,
+    permissionLabEnabled: false, normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/', pocWorkbenchBase: '/admin-vue/poc/workbench/', localAdminPassword: '',
     window: { localStorage: storage(local), sessionStorage: storage(session), location: { assign: target => fullNavigations.push(target) } },
     ref: value => ({ value }), computed: getter => ({ get value() { return getter() } }), onMounted: callback => mounted.push(callback),
     useRoute: () => route, useRouter: () => router, useAppStore: () => store,
@@ -87,28 +91,38 @@ test('selected disabled internal scenario enters enable request without password
   assertNoRealIdentity(page)
 })
 
-test('admin ADFS demonstration enters only the isolated workbench and leaves real identity data unchanged', async () => {
+test('legacy admin ADFS demonstration enters the full workbench and leaves real identity data unchanged', async () => {
   const local = new Map([['preview_user', 'normal-record-canary'], ['leaibot-poc-demo:preview_user', 'old-demo-canary']])
   const session = new Map([['normal-session-canary', 'unchanged']])
   const page = mount({ query: { pocAccount: 'admin' }, local, session })
   await page.ready()
-  assert.deepEqual(page.navigations, ['/agent/permissions'])
-  assert.deepEqual(page.fullNavigations, [], 'A demo admin must never return to the normal authenticated workbench')
+  assert.deepEqual(page.navigations, [])
+  assert.equal(page.fullNavigations.length, 1)
+  assert.equal(new URL(page.fullNavigations[0], 'https://qa.invalid').pathname, '/admin-vue/poc/workbench/portal/home')
   assert.equal(page.local.get('preview_user'), 'normal-record-canary')
   assert.equal(page.local.get('leaibot-poc-demo:preview_user'), 'old-demo-canary')
   assert.equal(page.session.get('normal-session-canary'), 'unchanged')
   assertNoRealIdentity(page)
 })
 
-test('normal legacy admin URL crosses into the isolated POC proxy without backend authentication', async () => {
+test('normal legacy admin URL enters the complete workspace without backend authentication', async () => {
   const page = mount({ sandbox: false, query: { pocAccount: 'admin', redirect: '/agent/skills' } })
   await page.ready()
   assert.equal(page.fullNavigations.length, 1)
   const destination = new URL(page.fullNavigations[0], 'https://qa.invalid')
-  assert.equal(destination.pathname, '/admin-vue/poc/adfs-login')
-  assert.equal(destination.searchParams.get('pocAccount'), 'admin')
+  assert.equal(destination.pathname, '/admin-vue/poc/workbench/portal/home')
   assert.equal(destination.searchParams.get('password'), null)
   assert.deepEqual(page.navigations, [])
+  assertNoRealIdentity(page)
+})
+
+test('legacy admin ADFS entry stays recoverable when its explicit full-workbench marker cannot be stored', async () => {
+  const page = mount({ query: { pocAccount: 'admin' }, sessionWriteFailure: true })
+  await page.ready()
+  assert.match(page.errorMsg.value, /无法保存.*状态|会话存储/)
+  assert.deepEqual(page.fullNavigations, [])
+  assert.deepEqual(page.navigations, [])
+  assert.equal(page.session.size, 0)
   assertNoRealIdentity(page)
 })
 

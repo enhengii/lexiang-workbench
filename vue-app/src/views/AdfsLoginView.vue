@@ -10,7 +10,7 @@
     </section>
 
     <section class="adfs-panel" aria-label="Lenovo ADFS 登录">
-      <div v-if="directPocAccount" class="adfs-direct-entry" :aria-busy="pocEntryBusy">
+      <div v-if="directPocAccount || errorMsg" class="adfs-direct-entry" :aria-busy="pocEntryBusy">
         <p v-if="!errorMsg" role="status">正在进入演示场景…</p>
         <p v-else class="adfs-error" role="alert">{{ errorMsg }}</p>
         <div class="adfs-direct-actions">
@@ -45,19 +45,27 @@ const initialPocAccount = findPocLoginAccount(route.query.pocAccount, allowPocLo
 const initialPocChoice = findPocLoginChoice(route.query.pocAccount)
 const directPocAccount = ref(allowPocSimulation && initialPocChoice?.loginType === 'internal' ? initialPocChoice.username : '')
 const pocEntryBusy = ref(false)
-const leavingForAnotherApp = initialPocChoice ? navigatePocChoice(initialPocChoice) : false
+let leavingForAnotherApp = false
+try { leavingForAnotherApp = initialPocChoice ? navigatePocChoice(initialPocChoice) : false }
+catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
 if (initialPocAccount?.loginType === 'internal') {
   itcode.value = initialPocAccount.username
 }
 
 async function enterPocScenario() {
+  if (initialPocChoice?.username === 'admin') {
+    errorMsg.value = ''
+    try { navigatePocChoice(initialPocChoice) }
+    catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
+    return
+  }
   const choice = findPocLoginChoice(directPocAccount.value)
   const fixture = findPocLoginAccount(directPocAccount.value, allowPocSimulation)
   if (!allowPocSimulation || choice?.loginType !== 'internal' || (choice.username !== 'admin' && fixture?.loginType !== 'internal') || pocEntryBusy.value) return
   pocEntryBusy.value = true
   itcode.value = choice.username
   try {
-    if (choice.username === 'admin') await router.replace('/agent/permissions')
+    if (choice.username === 'admin') navigatePocChoice(choice)
     else await submitAdfsLogin()
     if (!errorMsg.value && route.path === '/adfs-login') errorMsg.value = '未能进入演示场景，请重试或返回选择。'
   } finally {
@@ -70,7 +78,7 @@ function returnToPocSelection() {
 }
 
 onMounted(async () => {
-  if (leavingForAnotherApp) return
+  if (leavingForAnotherApp || errorMsg.value) return
   if (directPocAccount.value) return enterPocScenario()
   if (isPocSandbox) {
     await router.replace({ path: '/login', query: { ...route.query, mode: 'scenarios', loginType: initialPocChoice?.loginType || 'internal' } })

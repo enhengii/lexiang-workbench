@@ -52,7 +52,7 @@
           />
         </div>
         <p v-else-if="loginTab === 'external'" class="form-label" role="status">本地演示账号，无需密码，点击登录工作台继续。</p>
-        <p v-else class="form-label" role="status">POC 模拟 ADFS：内部用户免密进入演示，无需在此输入密码。</p>
+        <p v-else class="form-label" role="status">内部用户免密进入工作台，无需在此输入密码。</p>
         <!-- 原 #login-error：有错误时才显示，保留原来的 display:block 效果 -->
         <div
           class="login-error"
@@ -188,7 +188,10 @@ const errorMsg = ref('')
 const loginTab = ref<'internal' | 'external'>(route.query.loginType === 'external' ? 'external' : 'internal')
 const passwordlessLogin = computed(() => isPasswordlessLabAccount(username.value, loginTab.value))
 const initialPocAccount = findPocLoginChoice(route.query.pocAccount)
-if (initialPocAccount) navigatePocChoice(initialPocAccount)
+if (initialPocAccount) {
+  try { navigatePocChoice(initialPocAccount) }
+  catch { errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。' }
+}
 if (initialPocAccount) {
   loginTab.value = initialPocAccount.loginType
   username.value = initialPocAccount.username
@@ -196,7 +199,12 @@ if (initialPocAccount) {
 }
 
 function selectPocAccount(account: PocLoginChoice) {
-  if (!allowPocLogin || navigatePocChoice(account)) return
+  if (!allowPocLogin) return
+  try { if (navigatePocChoice(account)) return }
+  catch {
+    errorMsg.value = '无法保存登录状态，请允许浏览器会话存储后重试。'
+    return
+  }
   errorMsg.value = ''
   loginTab.value = account.loginType
   if (account.loginType === 'internal') {

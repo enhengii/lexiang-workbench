@@ -10,18 +10,22 @@ const root = fileURLToPath(new URL('../../', import.meta.url))
 const sourceRef = process.env.LOGIN_ENTRY_SOURCE_REF
 if (sourceRef) assert.match(sourceRef, /^[a-f0-9]{40}$/, 'An immutable full source commit is required')
 const readSource = path => sourceRef
-  ? execFileSync('git', ['-C', root, 'show', `${sourceRef}:vue-app/${path}`], { encoding: 'utf8' })
+  ? execFileSync('git', ['-C', root, 'show', `${sourceRef}:vue-app/${path}`], { encoding: 'utf8', stdio: ['pipe', 'pipe', 'pipe'] })
   : readFileSync(new URL('../' + path, import.meta.url), 'utf8')
 const executable = text => stripTypeScriptTypes(text.replace(/^import .*\n/gm, '').replace(/^export /gm, ''))
+const optionalSessionModule = (() => {
+  try { return [['src/services/pocWorkbenchSession.ts', executable(readSource('src/services/pocWorkbenchSession.ts'))]] }
+  catch (error) { if (sourceRef && error.status === 128) return []; throw error }
+})()
 const modules = [
   'src/services/pocIsolation.ts',
   'src/services/pocStorage.ts',
   'src/services/pocExternalLogin.ts',
   'src/services/permissionLab.ts',
   'src/services/accountEnableRequest.ts',
-  'src/services/approvalMailReview.ts',
-  'src/services/pocLoginChoices.ts'
-].map(path => [path, executable(readSource(path))])
+  'src/services/approvalMailReview.ts'
+].map(path => [path, executable(readSource(path))]).concat(optionalSessionModule,
+  [['src/services/pocLoginChoices.ts', executable(readSource('src/services/pocLoginChoices.ts'))]])
 const setup = executable(readSource('src/views/LoginView.vue').match(/<script setup lang="ts">([\s\S]*?)<\/script>/)[1])
 const plain = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
 
@@ -30,12 +34,12 @@ const plain = value => value === undefined ? undefined : JSON.parse(JSON.stringi
 // boundaries are replaced. No server, cookie, credential or real API is used.
 function mount({ query = {}, sandbox = false, enabled = true, lab = false,
   response = { status: 200, data: { success: true, username: 'server-confirmed-admin' } },
-  networkFailure = false, permissions = ['dashboard:view'], local = new Map(), session = new Map() } = {}) {
+  networkFailure = false, permissions = ['dashboard:view'], local = new Map(), session = new Map(), sessionWriteFailure = false } = {}) {
   const navigations = [], fullNavigations = [], requests = [], trace = [], mounted = []
   const route = { path: '/login', query }
   const storage = map => ({
     getItem: key => map.get(key) ?? null,
-    setItem: (key, value) => map.set(key, String(value)),
+    setItem: (key, value) => { if (map === session && sessionWriteFailure) throw new Error('QA-only session write failure'); map.set(key, String(value)) },
     removeItem: key => map.delete(key),
     clear: () => map.clear()
   })
@@ -58,8 +62,8 @@ function mount({ query = {}, sandbox = false, enabled = true, lab = false,
   const context = vm.createContext({
     console, URLSearchParams,
     allowPocLogin: enabled && !lab, allowPocSimulation: enabled && !lab && sandbox,
-    isPocSandbox: sandbox, permissionLabEnabled: lab,
-    normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/',
+    isPocSandbox: sandbox, isPocWorkbench: false, permissionLabEnabled: lab,
+    normalAppBase: '/admin-vue/', pocAppBase: '/admin-vue/poc/', pocWorkbenchBase: '/admin-vue/poc/workbench/',
     appBase: sandbox ? '/admin-vue/poc/' : '/admin-vue/', localAdminPassword: '',
     window: { localStorage: storage(local), sessionStorage: storage(session), location: {
       origin: 'https://qa.invalid', assign: target => fullNavigations.push(target)
@@ -80,7 +84,8 @@ function mount({ query = {}, sandbox = false, enabled = true, lab = false,
   for (const [path, code] of modules) vm.runInContext(code, context, { filename: path })
   vm.runInContext(setup, context, { filename: 'LoginView.vue setup' })
   const state = vm.runInContext('({ username, password, errorMsg, loginTab, selectPocAccount, doLogin, switchLoginTab, findPocLoginChoice })', context)
-  return { ...state, requests, trace, navigations, fullNavigations, store, local, session, isSandbox: sandbox,
+  const sessionContract = vm.runInContext('({ key: typeof POC_WORKBENCH_SESSION_KEY === "undefined" ? undefined : POC_WORKBENCH_SESSION_KEY, has: typeof hasPocWorkbenchSession === "undefined" ? undefined : hasPocWorkbenchSession })', context)
+  return { ...state, requests, trace, navigations, fullNavigations, store, local, session, sessionContract, isSandbox: sandbox,
     async ready() { await Promise.all(mounted.map(callback => callback())) } }
 }
 
@@ -109,33 +114,72 @@ function assertInternalProxy(page, account) {
   assert.equal(loadEvents(page).length, 0)
 }
 
-test('default internal ADFS demonstration enters the isolated administrator proxy without a password or API', async () => {
+function assertAdminWorkbench(page, expectedSessionSize = 1) {
+  assert.equal(page.fullNavigations.length, 1, 'An administrator must enter the full workbench document')
+  const destination = new URL(page.fullNavigations[0], 'https://qa.invalid')
+  assert.equal(destination.pathname, '/admin-vue/poc/workbench/portal/home')
+  assert.equal(destination.searchParams.get('password'), null)
+  assert.deepEqual(page.navigations, [], 'Administrator entry must not stop at the approval-only proxy')
+  assert.equal(page.requests.length, 0)
+  assert.equal(page.store.user, null, 'The source document must not impersonate a real server identity')
+  assert.deepEqual(plain(page.store.permissions), [])
+  assert.equal(loadEvents(page).length, 0)
+  assert.equal(typeof page.sessionContract.has, 'function')
+  // Read the same bytes with the actual storage scope of the destination.
+  const canonical = { getItem: key => page.session.get(key) ?? null }
+  assert.equal(page.sessionContract.has(canonical), true, 'The full workbench must read the canonical explicit demo marker')
+  assert.equal(page.session.size, expectedSessionSize, 'Entry writes one dedicated browser demo marker only')
+}
+
+test('default internal ADFS demonstration enters the complete administrator workbench without a password or API', async () => {
   const page = mount()
   await page.ready(); await page.doLogin()
-  assertInternalProxy(page, 'admin')
+  assertAdminWorkbench(page)
   assert.equal(page.password.value, '')
 })
 
-test('selecting administrator enters the isolated internal proxy without authenticating a real admin', async () => {
+test('selecting administrator enters the complete workspace without authenticating a real admin', async () => {
   const page = mount()
   await selectAdmin(page)
-  assertInternalProxy(page, 'admin')
+  assertAdminWorkbench(page)
   assert.equal(page.password.value, '')
 })
 
-test('an administrator query in the normal document enters the isolated POC instead of requesting a password', async () => {
+test('an administrator query in the normal document enters the full workspace instead of requesting a password', async () => {
   const page = mount({ query: { pocAccount: 'admin', loginType: 'internal', redirect: '/sales/workbench' } })
   await page.ready()
-  assertInternalProxy(page, 'admin')
+  assertAdminWorkbench(page)
   assert.equal(page.password.value, '')
 })
 
-test('administrator chosen inside the POC stays in the isolated proxy and preserves ordinary storage', async () => {
+test('administrator chosen inside the approval POC enters the complete workspace and preserves ordinary storage', async () => {
   const local = new Map([['preview_user', 'normal-record-canary']])
   const page = mount({ sandbox: true, query: { mode: 'scenarios' }, local })
   await selectAdmin(page)
-  assertInternalProxy(page, 'admin')
+  assertAdminWorkbench(page)
   assert.equal(page.local.get('preview_user'), 'normal-record-canary')
+})
+
+test('full-workbench entry preserves unrelated ordinary browser session data', async () => {
+  const session = new Map([['normal-session-canary', 'unchanged']])
+  const page = mount({ session })
+  await selectAdmin(page)
+  assertAdminWorkbench(page, 2)
+  assert.equal(session.get('normal-session-canary'), 'unchanged')
+})
+
+test('administrator entry fails visibly without navigation or authentication when its browser session marker cannot be written', async () => {
+  for (const initialQuery of [false, true]) {
+    const page = mount({ sessionWriteFailure: true, query: initialQuery ? { pocAccount: 'admin' } : {} })
+    await page.ready()
+    if (!initialQuery) await page.doLogin()
+    assert.match(page.errorMsg.value, /无法保存.*状态|会话存储/)
+    assert.deepEqual(page.fullNavigations, [])
+    assert.deepEqual(page.navigations, [])
+    assert.equal(page.store.user, null)
+    assert.equal(page.session.size, 0)
+    assert.equal(page.requests.length, 0)
+  }
 })
 
 test('first-access internal choice crosses into its isolated ADFS state proxy without password login', async () => {
