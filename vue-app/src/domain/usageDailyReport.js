@@ -165,10 +165,11 @@ export function createDailyReportApi(dataset) {
       && (!options.module || options.module === 'all' || row.module === options.module)
       && (!options.creatorId || row.creatorId === options.creatorId)
       && (!options.skillId || row.skillId === options.skillId)
+      && (options.dimension !== 'creators' || (row.creatorKnown && row.creatorId !== 'unattributed'))
       && (!keyword || (options.dimension === 'creators' ? [row.creator, row.creatorId] : [row.name, row.skillId, row.creator]).some(value => value.toLocaleLowerCase().includes(keyword)))
     )).map(row => ({ ...row }))
     const skills = groupRows(dailyRows, 'skillId')
-    const creators = groupRows(dailyRows, 'creatorId')
+    const creators = groupRows(dailyRows.filter(row => row.creatorKnown && row.creatorId !== 'unattributed'), 'creatorId')
     const counts = counters(dailyRows)
     const summary = {
       ...counts, calls: covered ? counts.calls : null, success: covered ? counts.success : null, failed: covered ? counts.failed : null,

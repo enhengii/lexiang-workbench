@@ -75,7 +75,7 @@ test('daily-report API preserves source aggregates without inventing deduplicate
     assert.equal(report.summary.creatorCount, 13)
     assert.equal(report.quality.unknownCreatorRows, 18)
     assert.equal(report.quality.missingModuleRows, 28)
-    assert.equal(report.creators.find(row => row.id === 'unattributed').name, '未标注')
+    assert.ok(report.creators.every(row => row.id !== 'unattributed'))
     assert.equal(report.dailyRows.find(row => row.skillId === 'report-generator').creatorId, 'unattributed')
     assert.equal(report.dailyRows.find(row => row.skillId === 'report-generator').module, '未标注')
     assert.equal(report.summary.newSkills, null)
@@ -137,6 +137,52 @@ test('daily-report API preserves source aggregates without inventing deduplicate
     const skills = api.getDailyAnalysis({ ...scope, dimension: 'skills', search: 'form-data-query-export' })
     assert.equal(skills.dailyRows.length, 3)
     assert.equal(skills.summary.calls, 13)
+  })
+
+  await t.test('excludes unattributed contributions consistently from creator tables, quality, totals and exports', () => {
+    const scope = { startDate: '2026-10-08', endDate: '2026-11-05' }
+    const skills = api.getDailyAnalysis(scope)
+    const creators = api.getDailyAnalysis({ ...scope, dimension: 'creators' })
+    const knownRows = skills.dailyRows.filter(row => row.creatorKnown && row.creatorId !== 'unattributed')
+    assert.equal(skills.dailyRows.length, 148, 'Skill analysis keeps every original daily row')
+    assert.equal(skills.summary.calls, 376, 'Skill totals remain unchanged')
+    assert.deepEqual(creators.dailyRows, knownRows)
+    assert.equal(creators.creators.length, 13)
+    assert.equal(creators.summary.creatorCount, creators.creators.length)
+    for (const key of ['calls', 'success', 'failed', 'likes', 'dislikes', 'feedbackCount']) {
+      const expected = knownRows.reduce((sum, row) => sum + row[key], 0)
+      assert.equal(creators.summary[key], expected, key)
+      assert.equal(creators.creators.reduce((sum, row) => sum + row[key], 0), expected, `creator groups: ${key}`)
+      assert.equal(creators.trend.reduce((sum, row) => sum + row[key], 0), expected, `daily trend: ${key}`)
+    }
+    assert.equal(creators.summary.successRate, creators.summary.success / creators.summary.calls)
+    assert.ok(creators.creators.every(row => row.id !== 'unattributed' && row.name !== '未标注'))
+    const creatorCsv = api.dailyCreatorRowsToCsv(creators.creators).split('\r\n').slice(1)
+    assert.equal(creatorCsv.length, 13)
+    assert.ok(creatorCsv.every(line => !/^(?:未标注|unattributed),/.test(line)))
+    const unknown = api.getDailyAnalysis({ ...scope, dimension: 'creators', search: '未标注' })
+    assert.deepEqual(unknown.dailyRows, [])
+    assert.deepEqual(unknown.creators, [])
+    assert.equal(unknown.summary.calls, 0)
+    assert.equal(unknown.summary.successRate, null)
+  })
+
+  await t.test('keeps a known creator with a missing menu while excluding unknown and reserved creator identities', () => {
+    const date = '2026-11-05'
+    const daily = api.createDailyReportApi({ overviewRows: [{ date }], detailRows: [
+      { date, skillId: 'known', creatorId: 'alice', creator: 'alice', calls: 5 },
+      { date, skillId: 'missing', calls: 8 },
+      { date, skillId: 'flagged-unknown', creatorId: 'not-confirmed', creator: '未标注', creatorKnown: false, calls: 3 },
+      { date, skillId: 'reserved', creatorId: 'unattributed', creator: '未标注', creatorKnown: true, calls: 9 },
+    ] })
+    const scope = { startDate: date, endDate: date }
+    const creators = daily.getDailyAnalysis({ ...scope, dimension: 'creators' })
+    assert.deepEqual(creators.dailyRows.map(row => row.skillId), ['known'])
+    assert.equal(creators.creators[0].id, 'alice')
+    assert.equal(creators.creators[0].module, '未标注', 'Missing menu does not discard a known creator')
+    assert.equal(creators.summary.calls, 5)
+    assert.equal(daily.getDailyAnalysis(scope).dailyRows.length, 4, 'Raw Skill contributions are preserved')
+    assert.deepEqual(daily.getDailyAnalysis({ ...scope, dimension: 'creators', creatorId: 'unattributed' }).dailyRows, [])
   })
 
   await t.test('reconciles every covered date, accepting zero-call dates without detail rows', () => {

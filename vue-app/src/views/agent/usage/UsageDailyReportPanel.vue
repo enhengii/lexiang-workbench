@@ -113,13 +113,13 @@ watch(coreGroup, () => { page.value = 1 })
         <button type="button" class="btn btn-secondary" @click="reset">重置</button>
       </section>
       <MetricGrid data-flow-role="summary">
-        <MetricCard :label="creators ? '有明细的创建人' : '有明细的Skill'" :value="n(creators ? analysis.summary.creatorCount : analysis.summary.skillCount)" :meta="creators ? '按创建人IT Code归属；未标注单列' : '当前筛选范围；不代表全部上线Skill'" />
+        <MetricCard :label="creators ? '有明细的创建人' : '有明细的Skill'" :value="n(creators ? analysis.summary.creatorCount : analysis.summary.skillCount)" :meta="creators ? '仅统计已有创建人 IT Code 归属的数据' : '当前筛选范围；不代表全部上线Skill'" />
         <MetricCard label="调用次数" :value="n(analysis.summary.calls)" unit="次" meta="当前周期及筛选累计" />
         <MetricCard label="运行成功率" :value="rate(analysis.summary.successRate)" :meta="`${n(analysis.summary.success)} / ${n(analysis.summary.calls)} 次调用`" />
         <MetricCard label="反馈好评率" :value="rate(analysis.summary.likeRate)" :meta="`${n(analysis.summary.likes)} 个赞 / ${n(analysis.summary.feedbackCount)} 条评价`" />
       </MetricGrid>
       <p v-if="analysis.quality.detailCoveragePartial" class="daily-source-note" data-flow-role="notice">所选周期包含未提供 Skill 明细的日期。以下仅汇总 {{ analysis.quality.detailCoverageStart }} 至 {{ analysis.quality.detailCoverageEnd }} 内已有明细，未覆盖日期不当作零调用。</p>
-      <p class="daily-muted" data-flow-role="notice">{{ creators ? '创建人数据为其创建 Skill 的使用贡献，不是本人调用。' : '使用人数仅在单天单个 Skill 可得；跨日无法去重时显示“—”。' }}运行成功率与用户反馈分开展示，不合成为质量评分。缺失归属按“未标注”保留。</p>
+      <p class="daily-muted" data-flow-role="notice">{{ creators ? '创建人数据为其创建 Skill 的使用贡献，不是本人调用；仅统计已有明确创建人归属的数据。' : '使用人数仅在单天单个 Skill 可得；跨日无法去重时显示“—”。缺失归属按“未标注”保留。' }}运行成功率与用户反馈分开展示，不合成为质量评分。</p>
       <div class="daily-rank-grid" data-flow-role="main">
         <section class="daily-surface daily-section"><SectionHeader :title="creators ? '创建人调用贡献' : 'Skill调用排行'" description="当前筛选 · 按调用次数排序 · Top 5" />
           <ol v-if="top.length" class="daily-ranking"><li v-for="(row, i) in top" :key="row.id"><button type="button" :aria-label="`查看${row.name}日报明细`" @click="targetId = row.id"><span class="daily-rank-index">{{ i + 1 }}</span><span class="daily-rank-label">{{ row.name }}<span class="daily-track" aria-hidden="true"><i :style="{ width: `${(row.calls ?? 0) / (top[0]?.calls || 1) * 100}%` }"></i></span></span><b>{{ n(row.calls) }}<small> 次</small></b></button></li></ol>
@@ -133,7 +133,7 @@ watch(coreGroup, () => { page.value = 1 })
       </div>
       <ListSurface data-flow-role="list-workspace"><template #toolbar><SectionHeader :title="creators ? '创建人聚合明细' : 'Skill聚合明细'" :description="`当前筛选 ${rows.length} 条 · 仅含日报中已有的明细`"><template #actions><button v-if="rows.length > pageSize || showAll" type="button" class="btn btn-secondary" :aria-pressed="showAll" @click="toggleAll">{{ showAll ? '分页显示' : `查看全部（${rows.length}）` }}</button><button type="button" class="btn btn-secondary" :disabled="!rows.length" @click="download">导出当前统计</button></template></SectionHeader></template>
         <DataTable v-if="rows.length" :columns="columns" :rows="pageRows" row-key="id" :caption="creators ? '创建人归属下Skill调用与质量统计' : 'Skill日统计按当前周期汇总'" density="two-line">
-          <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? (row.id === 'unattributed' ? '原日报未标注，保留此分组' : `当前范围涵盖 ${row.skillCount} 个Skill`) : row.id }}</div></template>
+          <template #cell-name="{ row }"><div class="daily-name">{{ row.name }}</div><div class="daily-meta">{{ creators ? `当前范围涵盖 ${row.skillCount} 个Skill` : row.id }}</div></template>
           <template #cell-users="{ row }"><span :title="row.users == null ? '日报只有日去重人数，无法跨日去重' : '当天该Skill去重人数'">{{ n(row.users) }}</span></template>
           <template #cell-outcomes="{ row }">{{ n(row.success) }} / {{ n(row.failed) }}</template><template #cell-successRate="{ row }">{{ rate(row.successRate) }}</template><template #cell-feedback="{ row }">{{ n(row.likes) }} / {{ n(row.dislikes) }}</template><template #cell-likeRate="{ row }">{{ rate(row.likeRate) }}</template>
           <template #cell-actions="{ row }"><button type="button" class="daily-link" :aria-label="`查看${row.name}日报明细`" @click="targetId = row.id">查看明细</button></template>
@@ -144,7 +144,7 @@ watch(coreGroup, () => { page.value = 1 })
     </template>
     <p v-if="notice" role="status" class="daily-source-note" data-flow-role="notice">{{ notice }}</p>
     <details class="daily-surface daily-definitions" data-flow-role="notice"><summary>日报来源、口径与数据范围</summary>
-      <p>当前为用户提供的邮件附件快照，尚未接入邮件自动同步。核心概览含80天数据；Skill明细覆盖29天、148条日统计、66个Skill，不是完整Skill资产清单。缺失名称用ID展示，菜单及创建人缺失按“未标注”保留。</p>
+      <p>当前为用户提供的邮件附件快照，尚未接入邮件自动同步。核心概览含80天数据；Skill明细覆盖29天、148条日统计、66个Skill，不是完整Skill资产清单。缺失名称用ID展示；Skill分析保留缺失菜单及创建人信息，创建人分析仅统计已有明确归属的数据。</p>
       <p>DAU / WAU / MAU、授权用户和Skill存量取截止日原表值；跨日人数和每日存量不能直接相加。创建人跨Skill去重人数无法由这份日报恢复。运行成功不等于业务已解决，好评率仅代表已收到的赞踩。</p>
       <p>任务按traceId去重，任务成功按日报定义为最终结果正确且任务内Skill调用成功；Skill成功率按成功调用/总调用。首字等待按每日均值和Query数加权估算，原均值已四舍五入；无问答时留空，不能当0秒。</p>
       <p>2026-10-08至11-05的Skill明细调用与核心概览逐日一致；没有明细的8天核心调用均为0。日报不含逐次调用日志、用户清单、输入输出或运行耗时，真实明细按“日期×Skill”展示。</p>
