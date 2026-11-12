@@ -1,0 +1,6 @@
+interface:
+  display_name: "联想门户工作台统一 Skill 1109"
+  short_description: "PM、UI 与研发共用的门户设计和 Vue 组件基线"
+  default_prompt: "使用 $portal-workbench-ui-1109 维护或核验 1109 门户工作台。新增查询/筛选区时优先读取 references/filter-placeholder-contract.md 并使用框内提示布局；业务表单保留上置标签，既有权限管理不批量改造。再读取 1109 本地归档说明、1014-review-scope 与 1009-confirmed-adjustments，再遵循继承的统一合同；优先复用项目已验证组件，区分历史证据、当前局部验证与真实业务验收。"
+policy:
+  allow_implicit_invocation: true

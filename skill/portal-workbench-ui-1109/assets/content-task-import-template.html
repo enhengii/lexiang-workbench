@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 任务与导入</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">批量导入线索</h1><p class="page-desc">上传、校验、排队和执行均是独立状态；长任务允许离开页面后恢复。</p></div>
+        <button class="btn">查看历史任务</button>
+      </header>
+
+      <div class="notice"><div><strong>导入前准备</strong><br>仅支持 XLSX / CSV，单文件不超过 20 MB；手机号等敏感字段应按权限处理。<button class="text-button">下载模板</button></div></div>
+
+      <section class="card module-stack">
+        <div class="section-header"><div><h2 class="section-title">1. 上传文件</h2><p class="section-desc">拖拽和按钮入口同时提供。</p></div><span class="status status--success">文件已选择</span></div>
+        <div class="upload-zone">
+          <div>
+            <div class="upload-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <strong>lead-import-0803.xlsx</strong><p class="page-desc">2.8 MB · 已识别 1,248 行</p><button class="btn">重新选择</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card module-stack">
+        <div class="section-header"><div><h2 class="section-title">2. 任务进度</h2><p class="section-desc">当前正在校验字段映射与数据格式。</p></div><button class="btn btn--compact">取消任务</button></div>
+        <div class="progress-steps" aria-label="导入任务进度">
+          <div class="progress-step is-complete"><strong>上传</strong><br><span>已完成</span></div>
+          <div class="progress-step is-active"><strong>校验</strong><br><span>786 / 1,248</span></div>
+          <div class="progress-step"><strong>排队</strong><br><span>等待中</span></div>
+          <div class="progress-step"><strong>写入</strong><br><span>未开始</span></div>
+        </div>
+        <div class="notice notice--warning"><div><strong>发现 12 条格式问题</strong><br>任务将继续处理有效数据，完成后可下载失败明细并仅重试失败项。</div></div>
+      </section>
+
+      <section class="card module-stack">
+        <div class="section-header"><div><h2 class="section-title">3. 结果摘要</h2><p class="section-desc">示例展示部分成功状态。</p></div><span class="status status--warning">部分成功</span></div>
+        <div class="result-grid">
+          <div class="result-item result-item--numeric"><span class="meta">总数据</span><strong>1,248</strong></div>
+          <div class="result-item result-item--numeric"><span class="meta">成功</span><strong class="result-value--success">1,236</strong></div>
+          <div class="result-item result-item--numeric"><span class="meta">失败</span><strong class="result-value--danger">12</strong></div>
+        </div>
+        <div class="toolbar"><span class="template-note">重试时明确仅处理失败项，避免重复写入成功数据。</span><div class="action-group"><button class="btn">下载失败明细</button><button class="btn btn--primary">仅重试失败项</button></div></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

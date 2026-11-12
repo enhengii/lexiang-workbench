@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 带摘要列表</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-page-block="header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">协议采购单管理</h1><p class="page-desc">维护立项生成的协议采购单，跟踪商品转化进度、协议有效期和订单转化状态。</p></div>
+        <button class="btn">导出</button>
+      </header>
+
+      <div class="page-flow page-flow--summary-list" data-page-flow>
+        <section class="kpi-grid" data-page-block="summary" aria-label="采购单摘要">
+          <article class="kpi-card"><div class="kpi-label">协议采购单</div><div class="kpi-value">6</div><div class="kpi-meta">当前列表</div></article>
+          <article class="kpi-card"><div class="kpi-label">进行中</div><div class="kpi-value">3</div><div class="kpi-meta">可继续转化</div></article>
+          <article class="kpi-card"><div class="kpi-label">已完成</div><div class="kpi-value">2</div><div class="kpi-meta">转化达成</div></article>
+          <article class="kpi-card"><div class="kpi-label">转化订单</div><div class="kpi-value">11</div><div class="kpi-meta">已转化 1,598 件</div></article>
+        </section>
+
+        <section class="list-workspace" data-page-block="list-workspace" aria-label="协议采购单列表工作区">
+          <div class="card card--compact" data-page-block="filters" aria-label="筛选条件">
+            <div class="filter-row">
+              <input class="control" aria-label="搜索协议采购单" placeholder="请输入协议编号 / 协议名称 / 客户">
+              <select class="control" aria-label="状态"><option value="all">状态 - 全部</option><option value="active">状态 - 进行中</option><option value="done">状态 - 已完成</option></select>
+              <button class="btn btn--primary">查询</button><button class="btn">重置</button>
+            </div>
+          </div>
+
+          <div class="list-surface" data-page-block="list-surface">
+            <div class="tabs" data-list-part="tabs" role="tablist" aria-label="采购单状态">
+              <button class="tab" role="tab" aria-selected="true">全部 6</button><button class="tab" role="tab" aria-selected="false">进行中 3</button><button class="tab" role="tab" aria-selected="false">已完成 2</button><button class="tab" role="tab" aria-selected="false">已过期 1</button>
+            </div>
+            <div class="table-wrap" data-list-part="table">
+              <table class="data-table">
+                <thead><tr><th>协议编号</th><th>协议名称</th><th>客户</th><th>商品</th><th>商品总数量</th><th>转化进度</th><th>协议有效期</th><th>状态</th><th class="cell-actions">操作</th></tr></thead>
+                <tbody>
+                  <tr><td>K0260403250008</td><td><strong>单显示器</strong></td><td>陈恩雨</td><td>显示器 x2款</td><td>700</td><td>146/700</td><td>2026-07-21</td><td><span class="status status--success">进行中</span></td><td class="cell-actions"><button class="text-button">查看详情</button></td></tr>
+                  <tr><td>K0260403250012</td><td><strong>办公整机协议</strong></td><td>李博</td><td>整机 x2款</td><td>200</td><td>24/200</td><td>2026-08-10</td><td><span class="status status--success">进行中</span></td><td class="cell-actions"><button class="text-button">查看详情</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <nav class="pagination" data-list-part="pagination" aria-label="分页"><span>共 6 条，当前显示 1-5 条</span><button class="page-button">上一页</button><button class="page-button">下一页</button></nav>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

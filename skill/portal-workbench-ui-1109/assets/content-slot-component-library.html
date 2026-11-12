@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>中间内容槽组件库</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot component-catalog" data-component-library="middle-content-slot-only">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001" data-stage="B">
+        <div class="page-heading">
+          <span class="catalog-kicker">PORTAL CONTENT COMPONENTS · 0825</span>
+          <h1 class="page-title">中间内容槽组件库</h1>
+          <p class="page-desc">14 个原批准工程合同与新增 SectionHeader 已写入设计 Skill；本页是结构、状态与组合预览，不代表项目已有共享 Vue 组件。</p>
+        </div>
+        <div class="action-group">
+          <span class="status status--warning">Skill 已实施</span>
+          <span class="status status--neutral">Vue 未实施</span>
+        </div>
+      </header>
+
+      <div class="catalog-nav" aria-label="组件波次导航">
+        <a href="#wave-1">Wave 1 · 基础组件</a>
+        <a href="#wave-2">Wave 2 · 内容组合</a>
+        <a href="#wave-3">Wave 3 · 图表与时间</a>
+      </div>
+
+      <div class="page-flow">
+        <section class="catalog-section" id="wave-1">
+          <header class="catalog-section-head">
+            <div><span class="catalog-wave">Wave 1</span><h2>稳定基础组件</h2><p>低业务耦合、可作为后续组合组件的设计依赖。</p></div>
+            <span class="catalog-count">5 components</span>
+          </header>
+
+          <div class="catalog-grid catalog-grid--2">
+            <article class="catalog-card" data-component-id="CS-C001" data-stage="C">
+              <header class="catalog-card-head"><div><span class="catalog-id">CS-C001 · C/Common</span><h3>ActionButton</h3></div><span class="status status--success">Stable</span></header>
+              <p class="catalog-purpose">页面级、区块级和行级动作；一个区域最多一个主按钮。</p>
+              <div class="catalog-demo action-group">
+                <button class="btn btn--primary" type="button">主要操作</button>
+                <button class="btn" type="button">次要操作</button>
+                <button class="text-button" type="button">文字操作</button>
+                <button class="btn btn--danger" type="button">危险操作</button>
+                <button class="btn" type="button" disabled>不可用</button>
+              </div>
+              <footer class="catalog-spec"><span>28 / 36 / 44px</span><span>radius 8px</span><span>label 13px</span></footer>
+            </article>
+
+            <article class="catalog-card" data-component-id="CS-C002" data-stage="C">
+              <header class="catalog-card-head"><div><span class="catalog-id">CS-C002 · C/Common</span><h3>FormControl</h3></div><span class="status status--success">Stable</span></header>
+              <p class="catalog-purpose">标签、控件与帮助/错误信息形成一个完整字段。</p>
+              <div class="catalog-demo field-grid">
+                <label class="field"><span class="field-label">关键词<span class="required">*</span></span><input class="control" value="示例内容"></label>
+                <label class="field"><span class="field-label">状态</span><select class="control"><option>全部状态</option></select></label>
+                <label class="field field--invalid"><span class="field-label">业务编号</span><input class="control" aria-invalid="true" value="A-1"><small class="field-error">请输入 8 位业务编号</small></label>
+                <label class="field"><span class="field-label">禁用字段</span><input class="control" value="不可编辑" disabled></label>
+              </div>
+              <footer class="catalog-spec"><span>default 36px</span><span>compact 28px</span><span>focus ring</span></footer>
+            </article>
+
+            <article class="catalog-card" data-component-id="CS-C003" data-stage="C">
+              <header class="catalog-card-head"><div><span class="catalog-id">CS-C003 · C/Common</span><h3>StatusTag</h3></div><span class="status status--success">Stable</span></header>
+              <p class="catalog-purpose">使用文字、圆点和语义色共同表达状态，不依赖颜色单独传达。</p>
+              <div class="catalog-demo toolbar-group">
+                <span class="status status--success">已完成</span><span class="status status--warning">待处理</span><span class="status status--danger">失败</span><span class="status status--info">处理中</span><span class="status status--primary">当前</span><span class="status status--neutral">草稿</span>
+              </div>
+              <footer class="catalog-spec"><span>inline size</span><span>semantic label</span><span>no interaction</span></footer>
+            </article>
+
+            <article class="catalog-card" data-component-id="CS-C005" data-stage="C">
+              <header class="catalog-card-head"><div><span class="catalog-id">CS-C005 · C/Common</span><h3>ContentTabs</h3></div><span class="status status--success">Stable</span></header>
+              <p class="catalog-purpose">切换同一任务的稳定视图；不模仿工作台壳层页签。</p>
+              <div class="catalog-demo">
+                <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">全部 128</button><button class="tab" role="tab" aria-selected="false">处理中 12</button><button class="tab" role="tab" aria-selected="false">异常 3</button><button class="tab" role="tab" aria-selected="false" disabled>已归档</button></div>
+              </div>
+              <footer class="catalog-spec"><span>aria-selected</span><span>keyboard</span><span>2px indicator</span></footer>
+            </article>
+
+            <article class="catalog-card catalog-card--wide" data-component-id="CS-C010" data-stage="C">
+              <header class="catalog-card-head"><div><span class="catalog-id">CS-C010 · C/Common</span><h3>FeedbackState</h3></div><span class="status status--success">Stable</span></header>
+              <p class="catalog-purpose">按具体原因替换正常内容区域；不同状态必须提供不同解释和恢复路径。</p>
+              <div class="feedback-state-grid">
+                <div class="feedback-state feedback-state--compact" role="status"><span class="state-glyph state-glyph--loading" aria-hidden="true"></span><strong>正在加载数据</strong><span>请稍候，不会清空当前筛选。</span></div>
+                <div class="feedback-state feedback-state--compact"><span class="state-glyph" aria-hidden="true">○</span><strong>暂无数据</strong><span>创建第一条记录后会显示在这里。</span><button class="btn btn--compact" type="button">新建记录</button></div>
+                <div class="feedback-state feedback-state--compact"><span class="state-glyph" aria-hidden="true">⌕</span><strong>没有符合条件的数据</strong><span>调整或清空筛选条件后重试。</span><button class="btn btn--compact" type="button">清空筛选</button></div>
+                <div class="feedback-state feedback-state--compact"><span class="state-glyph state-glyph--danger" aria-hidden="true">!</span><strong>数据加载失败</strong><span>网络异常，请重试。</span><button class="btn btn--compact" type="button">重新加载</button></div>
+              </div>
+              <footer class="catalog-spec"><span>loading</span><span>empty</span><span>filtered-empty</span><span>error / no-permission / stale</span></footer>
+            </article>
+          </div>
+        </section>
+
+        <section class="catalog-section" id="wave-2">
+          <header class="catalog-section-head">
+            <div><span class="catalog-wave">Wave 2</span><h2>内容组合组件</h2><p>组织页面信息层级、指标、筛选和连续数据表面。</p></div>
+            <span class="catalog-count">8 components</span>
+          </header>
+
+          <article class="catalog-card" data-component-id="CS-B001" data-stage="B">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-B001 · B/Common</span><h3>ContentPageHeader</h3></div><span class="status status--info">Incubating</span></header>
+            <div class="catalog-demo catalog-demo--canvas">
+              <div class="page-header">
+                <div class="page-heading"><h2 class="page-title">运营数据概览</h2><p class="page-desc">查看核心指标、趋势与异常情况，数据更新于 10:30。</p></div>
+                <div class="action-group"><button class="btn" type="button">导出</button><button class="btn btn--primary" type="button">创建报告</button></div>
+              </div>
+            </div>
+            <footer class="catalog-spec"><span>title 20px</span><span>desc 13px</span><span>next block 16px</span><span>one spacing owner</span></footer>
+          </article>
+
+          <article class="catalog-card" data-component-id="CS-B006" data-stage="B">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-B006 · B/Common</span><h3>SectionHeader</h3></div><span class="status status--info">Incubating</span></header>
+            <p class="catalog-purpose">页面内部可重复的一级模块标题；示例对应运营总览中的关键经营链路、GMV 结构拆解和核心趋势速览。</p>
+            <div class="catalog-demo catalog-demo--canvas module-heading-preview">
+              <section class="card">
+                <header class="section-header">
+                  <div class="section-heading">
+                    <div class="section-title-row"><h2 class="section-title">关键经营链路</h2><span class="condition-chip">转化漏斗</span></div>
+                  </div>
+                  <div class="section-meta-actions"><span>登录 → 互动 → 购买 → 成交</span><button class="btn btn--compact" type="button">问 AI</button></div>
+                </header>
+                <div class="section-body section-placeholder"><span>模块内容区域</span></div>
+              </section>
+              <section class="card">
+                <header class="section-header">
+                  <div class="section-heading"><div class="section-title-row"><h2 class="section-title">GMV 结构拆解</h2><span class="condition-chip">9801.7万</span></div></div>
+                  <div class="section-meta-actions"><span>登录口径 + 平台交易回算</span></div>
+                </header>
+                <div class="section-body subsection-preview-grid"><div><h3 class="subsection-heading">分业务</h3><span class="subsection-meta">消费业务 / SMB 业务 / 政企业务</span></div><div><h3 class="subsection-heading">分平台</h3><span class="subsection-meta">官网 / 非官网</span></div></div>
+              </section>
+            </div>
+            <footer class="catalog-spec"><span>repeatable h2</span><span>4×18 marker</span><span>badge / meta / actions</span><span>h3 subsection without marker</span></footer>
+          </article>
+
+          <article class="catalog-card" data-component-id="CS-B002" data-stage="B">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-B002 · B/Common</span><h3>MetricGrid / MetricCard</h3></div><span class="status status--info">Incubating</span></header>
+            <p class="catalog-purpose">值、零值、缺失和过期具有不同含义；卡片保持等宽等高。</p>
+            <div class="catalog-demo kpi-grid">
+              <article class="kpi-card"><span class="kpi-label">总访问量</span><strong class="kpi-value">12,450</strong><span class="kpi-meta trend-up">较上期 +8.2%</span></article>
+              <article class="kpi-card"><span class="kpi-label">新增用户</span><strong class="kpi-value">0</strong><span class="kpi-meta">本期暂无新增</span></article>
+              <article class="kpi-card"><span class="kpi-label">转化金额</span><strong class="kpi-value">—</strong><span class="kpi-meta">数据源尚未接入</span></article>
+              <article class="kpi-card kpi-card--stale"><span class="kpi-label">异常任务</span><strong class="kpi-value">36</strong><span class="kpi-meta">数据更新于 2 小时前</span></article>
+            </div>
+            <footer class="catalog-spec"><span>gap 14px</span><span>4 → 2 → 1</span><span>zero ≠ missing</span><span>equal height</span></footer>
+          </article>
+
+          <article class="catalog-card" data-component-id="CS-B003" data-stage="B">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-B003 · B/Common</span><h3>SectionCard</h3></div><span class="status status--info">Incubating</span></header>
+            <div class="catalog-demo">
+              <section class="card module-stack">
+                <header class="section-header"><div><h4 class="section-title">业务趋势</h4><p class="section-desc">一个区块只承载一个完整任务。</p></div><div class="action-group"><button class="btn btn--compact" type="button">查看详情</button></div></header>
+                <div class="section-placeholder"><span>Body slot</span><small>loading / empty / error 由内容区反馈状态承载</small></div>
+              </section>
+            </div>
+            <footer class="catalog-spec"><span>compact 8px</span><span>large 12px</span><span>actions wrap as group</span><span>no card-in-card</span></footer>
+          </article>
+
+          <article class="catalog-card" data-component-id="CS-C007" data-stage="C">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-C007 · C/Common</span><h3>FilterBar</h3></div><span class="status status--success">Stable</span></header>
+            <div class="catalog-demo">
+              <section class="card card--compact filter-bar" aria-label="筛选条件">
+                <div class="field-grid field-grid--4">
+                  <label class="field filter-placeholder"><span class="field-label">关键词</span><input class="control " placeholder="名称或编号"></label>
+                  <label class="field filter-placeholder"><span class="field-label">状态</span><select class="control "><option value="all">状态 - 全部</option></select></label>
+                  <label class="field filter-placeholder"><span class="field-label">更新时间</span><select class="control "><option value="30">更新时间 - 近 30 天</option></select></label>
+                  <div class="field filter-placeholder"><div class="action-group"><button class="btn btn--primary " type="button">查询</button><button class="btn" type="button">重置</button></div></div>
+                </div>
+                <div class="condition-summary"><span>已选条件</span><span class="condition-chip">状态：处理中 ×</span><button class="text-button" type="button">清空</button></div>
+              </section>
+            </div>
+            <footer class="catalog-spec"><span>4 / 2 / 1 columns</span><span>12px to ListSurface</span><span>query + reset</span><span>filter → page 1</span></footer>
+          </article>
+
+          <article class="catalog-card catalog-card--flush" data-component-id="CS-C006" data-stage="C">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-C006 · C/Common</span><h3>ListSurface</h3></div><span class="status status--success">Stable</span></header>
+            <p class="catalog-purpose">ContentTabs、工具栏、DataTable 和 Pagination 在同一连续表面中协作。</p>
+            <div class="catalog-demo">
+              <div class="list-surface">
+                <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">全部记录</button><button class="tab" role="tab" aria-selected="false">待处理</button></div>
+                <div class="table-toolbar"><div><strong>数据列表</strong> <span class="meta">共 128 条</span></div><button class="btn btn--compact" type="button">刷新</button></div>
+                <div class="table-wrap">
+                  <table class="data-table" data-component-id="CS-C008" data-stage="C">
+                    <caption class="sr-only">业务记录列表</caption>
+                    <thead><tr><th>业务名称</th><th>负责人</th><th>状态</th><th class="cell-num">访问量</th><th class="cell-actions">操作</th></tr></thead>
+                    <tbody>
+                      <tr><td>智能客服知识库</td><td>张明</td><td><span class="status status--success">已完成</span></td><td class="cell-num">12,450</td><td class="cell-actions"><button class="text-button" type="button">查看</button></td></tr>
+                      <tr><td>营销素材生成</td><td>李悦</td><td><span class="status status--info">处理中</span></td><td class="cell-num">8,320</td><td class="cell-actions"><button class="text-button" type="button">查看</button></td></tr>
+                      <tr><td>线索评分模型</td><td>王宁</td><td><span class="status status--warning">待处理</span></td><td class="cell-num">2,180</td><td class="cell-actions"><button class="text-button" type="button">查看</button></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <nav class="pagination" aria-label="分页" data-component-id="CS-C009" data-stage="C"><span class="meta">共 128 条</span><button class="page-button" type="button" disabled aria-label="上一页">‹</button><button class="page-button" aria-current="page" type="button">1</button><button class="page-button" type="button">2</button><button class="page-button" type="button" aria-label="下一页">›</button></nav>
+              </div>
+            </div>
+            <footer class="catalog-spec"><span>DataTable CS-C008</span><span>Pagination CS-C009</span><span>0 gap + 1px divider</span><span>table-only overflow</span></footer>
+          </article>
+        </section>
+
+        <section class="catalog-section" id="wave-3">
+          <header class="catalog-section-head">
+            <div><span class="catalog-wave">Wave 3</span><h2>图表与时间合同</h2><p>视觉壳和业务图表配置分离，先明确数据作用域和生命周期。</p></div>
+            <span class="catalog-count">2 components</span>
+          </header>
+          <article class="catalog-card" data-component-id="CS-B004" data-stage="B">
+            <header class="catalog-card-head"><div><span class="catalog-id">CS-B004 · B/Common</span><h3>ChartPanel</h3></div><span class="status status--info">Incubating</span></header>
+            <div class="catalog-demo">
+              <section class="card module-stack chart-panel">
+                <header class="section-header">
+                  <div><h4 class="section-title">访问趋势</h4><p class="section-desc">统计口径：成功请求 · 北京时间</p></div>
+                  <label class="time-range" data-component-id="CS-B005" data-stage="B"><span class="field-label">时间范围</span><select class="control"><option>近 7 天</option><option>近 30 天</option></select></label>
+                </header>
+                <div class="chart-legend" aria-label="图例"><span><i class="legend-swatch legend-swatch--1"></i>访问量</span><span><i class="legend-swatch legend-swatch--2"></i>成功量</span></div>
+                <div class="chart-placeholder" role="img" aria-label="近七天访问量和成功量柱状趋势示例"><div class="chart-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+              </section>
+            </div>
+            <footer class="catalog-spec"><span>TimeRange CS-B005</span><span>loading / empty / error / stale</span><span>container resize</span><span>dispose on unmount</span></footer>
+          </article>
+        </section>
+
+        <aside class="notice notice--warning" data-component-id="CS-C004" data-stage="C"><strong>组件状态：</strong><span>以上 14 个原批准合同与新增 SectionHeader 已写入设计 Skill，并提供 PM、UI、AI 与研发共用的 Vue 组件基线（<code>skillVueComponent:true</code>）；本条同时示例未纳入本批抽取的既有 FeedbackNotice。产品项目仍为 <code>sharedVueComponent:false</code>，该状态由研发落地和核验决定。</span></aside>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

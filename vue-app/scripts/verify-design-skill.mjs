@@ -75,7 +75,7 @@ if (warnings.length > 0) {
   console.warn('\n[Design Skill Warning] 当前项目存在设计合同或封板样式风险：')
   for (const warning of warnings) console.warn(`- ${warning}`)
   const protectedSurfaces = (contract?.protectedSurfaces || []).join(', ')
-  console.warn(`\n上述兼容性警告不单独阻止启动；后续 0914 合同检查仍须通过。继续新增需求前请检查目标源码和统一设计合同，并避免影响封板表面：${protectedSurfaces || 'topbar, sidebar, Agent, tabs, shared components'}。\n`)
+  console.warn(`\n上述兼容性警告不单独阻止启动；后续 1109 合同检查仍须通过。继续新增需求前请检查目标源码和统一设计合同，并避免影响封板表面：${protectedSurfaces || 'topbar, sidebar, Agent, tabs, shared components'}。\n`)
 } else {
   const contractLabel = contract?.baselineName || contract?.recommendedSkillVersion || 'portable-design-contract'
   console.log(`[Design Skill Check] OK: ${contract?.requiredSkillId || 'design-skill'} ${contractLabel}`)
@@ -117,9 +117,9 @@ function argumentError(message) {
 
 function runBundledConsistencyCheck() {
   // Only execute the reviewed, bundled checker; external metadata candidates cannot replace it.
-  const checker = join(projectPackageRoot, 'skill/portal-workbench-ui-0914/scripts/check-consistency.mjs')
+  const checker = join(projectPackageRoot, 'skill/portal-workbench-ui-1109/scripts/check-consistency.mjs')
   if (!existsSync(checker)) {
-    console.error('[Design Skill Error] 缺少随仓库 0914 scripts/check-consistency.mjs，无法完成合同检查。')
+    console.error('[Design Skill Error] 缺少随仓库 1109 scripts/check-consistency.mjs，无法完成合同检查。')
     process.exit(1)
   }
   let result
@@ -137,7 +137,7 @@ function runBundledConsistencyCheck() {
     process.exit(1)
   }
   if (result.error || result.signal || result.status === null) {
-    console.error(`[Design Skill Error] 0914 合同检查未正常完成：${result.error?.message || result.signal || '无退出状态'}。`)
+    console.error(`[Design Skill Error] 1109 合同检查未正常完成：${result.error?.message || result.signal || '无退出状态'}。`)
     process.exit(1)
   }
   if (result.status !== 0) process.exit(result.status)

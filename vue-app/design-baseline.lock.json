@@ -1,11 +1,11 @@
 {
   "projectId": "lexiang-workbench",
   "requiredSkillId": "portal-workbench-ui",
-  "recommendedSkillVersion": "2026-09-14",
-  "recommendedSkillRelease": "0914",
+  "recommendedSkillVersion": "2026-11-09",
+  "recommendedSkillRelease": "1109",
   "compatibilityPolicy": "portable-rule-based",
   "warningOnly": true,
-  "baselineName": "0914-pm-scope-with-0908-design-contract",
+  "baselineName": "1109-filter-placeholder-with-inherited-1028-contract",
   "protectedSurfaces": [
     "topbar",
     "left-sidebar",

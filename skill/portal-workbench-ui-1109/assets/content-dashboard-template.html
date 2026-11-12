@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 数据看板</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack dashboard-flow">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading">
+          <h1 class="page-title">业务数据概览</h1>
+          <p class="page-desc">统一查看核心指标、趋势、结构拆解和异常明细，数据更新于 18:30。</p>
+        </div>
+        <div class="action-group" aria-label="页面操作">
+          <label class="action-field filter-placeholder"><span class="field-label">统计周期</span><select class="control" aria-label="统计周期"><option value="30">统计周期 - 近 30 天</option><option value="7">统计周期 - 近 7 天</option></select></label>
+          <button class="btn">导出数据</button>
+          <button class="btn btn--primary">AI 解读</button>
+        </div>
+      </header>
+
+      <section class="kpi-grid" aria-label="关键指标">
+        <article class="kpi-card"><div class="kpi-label">访问用户</div><div class="kpi-value">12,450</div><div class="kpi-meta">环比 +8.2%</div></article>
+        <article class="kpi-card"><div class="kpi-label">有效互动</div><div class="kpi-value">8,320</div><div class="kpi-meta">互动率 66.8%</div></article>
+        <article class="kpi-card"><div class="kpi-label">AI 调用</div><div class="kpi-value">5,140</div><div class="kpi-meta">成功率 98.6%</div></article>
+        <article class="kpi-card"><div class="kpi-label">待处理异常</div><div class="kpi-value">37</div><div class="kpi-meta">其中高优先级 4 项</div></article>
+      </section>
+
+      <section class="dashboard-grid">
+        <article class="card module-stack">
+          <div class="section-header"><div><h2 class="section-title">业务趋势</h2><p class="section-desc">日粒度 · 访问与有效互动</p></div><span class="status status--success">数据正常</span></div>
+          <div class="chart-placeholder" role="img" aria-label="近十四天业务趋势柱状图占位">
+            <div class="chart-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </article>
+        <article class="card module-stack">
+          <div class="section-header"><div><h2 class="section-title">渠道结构</h2><p class="section-desc">当前筛选范围内占比</p></div><button class="text-button">查看明细</button></div>
+          <div class="donut-placeholder" role="img" aria-label="渠道结构环图占位"><div class="donut" aria-hidden="true"></div></div>
+        </article>
+      </section>
+
+      <section class="card card--flush">
+        <div class="table-toolbar"><div><strong>异常明细</strong><span class="meta"> · 共 37 项</span></div><button class="btn btn--compact">查看全部</button></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>异常对象</th><th>业务域</th><th>影响指标</th><th>状态</th><th>发现时间</th><th class="cell-actions">操作</th></tr></thead>
+            <tbody>
+              <tr><td>渠道召回率下降</td><td>GEO 看板</td><td>知识命中率</td><td><span class="status status--warning">待处理</span></td><td>18:18</td><td class="cell-actions"><button class="text-button">查看</button></td></tr>
+              <tr><td>部分任务响应超时</td><td>乐享运营</td><td>调用成功率</td><td><span class="status status--info">处理中</span></td><td>17:42</td><td class="cell-actions"><button class="text-button">查看</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+      <p class="template-note">实现时同时覆盖图表加载、空、错误、数据延迟和联动筛选撤销状态。</p>
+    </div>
+  </main>
+</body>
+</html>

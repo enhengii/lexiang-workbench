@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽专项模板 - 多步流程</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001"><div class="page-heading"><h1 class="page-title">权限申请向导</h1><p class="page-desc">专项流程变体：普通组件沿用业务表单与分栏设置规范，步骤状态由流程任务决定。</p></div><span class="status status--neutral">草稿</span></header>
+      <section class="workflow-shell">
+        <aside class="card workflow-rail local-nav" aria-label="流程模块">
+          <div><h2 class="section-title">申请范围</h2><p class="section-desc">切换模块前处理未保存内容。</p></div>
+          <nav class="local-nav-list"><button class="local-nav-item is-active">申请链路</button><button class="local-nav-item">审批列表</button><button class="local-nav-item">角色范围</button></nav>
+        </aside>
+        <article class="card workflow-panel">
+          <div class="section-header"><div><h2 class="section-title">选择申请类型</h2><p class="section-desc">内容区可滚动，底部流程操作保持可达。</p></div><span class="meta">第 1 / 5 步</span></div>
+          <div class="tabs" role="tablist" aria-label="流程步骤"><button class="tab" role="tab" aria-selected="true">1. 选择类型</button><button class="tab" role="tab" aria-selected="false">2. 填写信息</button><button class="tab" role="tab" aria-selected="false">3. 权限范围</button><button class="tab" role="tab" aria-selected="false">4. 关联确认</button><button class="tab" role="tab" aria-selected="false">5. 审批执行</button></div>
+          <div class="workflow-body">
+            <button class="choice-card is-selected" aria-pressed="true"><strong>权限变更</strong><p class="page-desc">调整现有成员的业务权限。</p></button>
+            <button class="choice-card" aria-pressed="false"><strong>新增角色</strong><p class="page-desc">创建并配置新的角色范围。</p></button>
+            <button class="choice-card" aria-pressed="false"><strong>临时授权</strong><p class="page-desc">按时间范围授予临时权限。</p></button>
+          </div>
+          <div class="toolbar"><button class="btn" disabled>上一步</button><div class="action-group"><button class="btn">保存草稿</button><button class="btn btn--primary">下一步</button></div></div>
+        </article>
+      </section>
+      <p class="template-note">该资产是专项变体，不替代七类基础页型；最终实现仍映射到现有 Vue 流程组件和状态。</p>
+    </div>
+  </main>
+</body>
+</html>

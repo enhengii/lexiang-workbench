@@ -1,0 +1,37 @@
+{
+  "projectId": "lexiang-workbench",
+  "skillId": "portal-workbench-ui",
+  "skillVersion": "2026-11-09",
+  "skillRelease": "1109",
+  "baselineName": "1109-filter-placeholder-with-inherited-1028-contract",
+  "updatedAt": "2026-11-12",
+  "candidateRequirement": "2026-11-09-filter-placeholder-layout",
+  "referenceBaseline": {
+    "projectRelease": "1109",
+    "appRootHint": "vue-app"
+  },
+  "audiences": [
+    "pm",
+    "ui-ux",
+    "frontend-development",
+    "review-qa"
+  ],
+  "distributionPolicy": "single-authoritative-skill",
+  "compatibilityPolicy": "portable-target-repository",
+  "sharedRoleComponentLibrary": "assets/vue-content-slot-components",
+  "productSourceWritePolicy": "development-request-with-identified-target-authorizes-in-scope-edits",
+  "inheritedDesignContract": "portal-workbench-ui-1028",
+  "maintenanceNote": "Confirmed 1028 navigation and AI assistant visuals; 2026-11-09 user-confirmed filter placeholder layout supplement for PM/UI/development",
+  "confirmedSupplements": [
+    {
+      "date": "2026-11-09",
+      "contract": "references/filter-placeholder-contract.md",
+      "scope": "query/filter regions; preserve stacked labels in business forms and existing permission approval filter exception"
+    },
+    {
+      "date": "2026-11-12",
+      "contract": "SKILL.md",
+      "scope": "Skill upgrades do not trigger redesign or migration of approved pages; apply new rules only to new content and explicitly requested changes; preserve approved behavior outside that scope"
+    }
+  ]
+}

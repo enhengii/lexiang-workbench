@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 业务表单</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <div class="form-shell">
+        <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">新建业务规则</h1><p class="page-desc">按用户任务分组字段；保存中禁止重复提交，离开未保存页面前需要确认。</p></div>
+        <span class="status status--warning">未保存</span>
+        </header>
+
+        <form class="module-stack">
+        <section class="card module-stack">
+          <div><h2 class="section-title">基础信息</h2><p class="section-desc">用于识别规则及其生效范围。</p></div>
+          <div class="field-grid">
+            <div class="field field--span-2"><label for="form-name">规则名称<span class="required">*</span></label><input id="form-name" class="control" value="高价值线索识别规则" required></div>
+            <div class="field"><label for="form-domain">业务域<span class="required">*</span></label><select id="form-domain" class="control" required><option>企业客户管理</option></select></div>
+            <div class="field"><label for="form-owner">负责人<span class="required">*</span></label><select id="form-owner" class="control" required><option>销售运营</option></select></div>
+            <div class="field field--span-2"><label for="form-desc">规则说明</label><textarea id="form-desc" class="textarea" placeholder="说明目标、判断口径和预期结果"></textarea><span class="helper">建议控制在 200 字以内。</span></div>
+          </div>
+        </section>
+
+        <section class="card module-stack">
+          <div><h2 class="section-title">触发条件</h2><p class="section-desc">字段帮助、错误和必填标识使用稳定位置。</p></div>
+          <div class="field-grid">
+            <div class="field"><label for="form-score">最低评分<span class="required">*</span></label><input id="form-score" class="control" value="120" aria-invalid="true" aria-describedby="score-error"><span id="score-error" class="field-error">请输入 0–100 之间的整数。</span></div>
+            <div class="field"><label for="form-source">线索来源</label><select id="form-source" class="control"><option>全部来源</option><option>官网留资</option></select></div>
+            <div class="field"><label for="form-region">适用区域</label><select id="form-region" class="control"><option>全国</option><option>华东</option></select></div>
+            <div class="field"><label for="form-time">生效时间</label><input id="form-time" class="control" value="保存后立即生效"></div>
+          </div>
+        </section>
+
+        <section class="card module-stack">
+          <div><h2 class="section-title">通知与风险</h2><p class="section-desc">高风险结果需在保存前说明影响范围。</p></div>
+          <div class="notice notice--warning"><div><strong>影响提示</strong><br>保存后将影响当前筛选范围内的新进入线索，不回溯历史数据。</div></div>
+          <label class="field-inline"><input type="checkbox" checked> 规则触发后通知负责人</label>
+          <div class="sticky-actions"><button type="button" class="btn">取消</button><button type="submit" class="btn btn--primary">保存规则</button></div>
+        </section>
+        </form>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

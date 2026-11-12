@@ -1,0 +1,852 @@
+{
+  "schemaVersion": 3,
+  "scope": "middle-content-slot-page-style-and-structure",
+  "extractionDecision": {
+    "decisionId": "content-slot-extraction-2026-08-12",
+    "decidedAt": "2026-08-12",
+    "decision": "approved-for-skill-vue-library",
+    "source": "user-reviewed UAT component candidate preview",
+    "target": "Skill-bundled Vue component baseline for PM, UI, AI and development work",
+    "currentEffect": "Skill Vue reference library only; no UAT or product source change",
+    "approvedCandidateGroups": [
+      "ContentPageHeader",
+      "ActionButton",
+      "SectionCard",
+      "MetricGrid / MetricCard",
+      "FilterBar",
+      "DataTable / ListSurface",
+      "StatusTag",
+      "FormControl",
+      "ContentTabs",
+      "Pagination",
+      "FeedbackState",
+      "ChartPanel + TimeRangeFilter"
+    ],
+    "deferredCandidateGroups": []
+  },
+  "skillLibraryImplementation": {
+    "decisionId": "content-slot-skill-library-implementation-2026-08-12",
+    "status": "implemented-in-design-skill",
+    "implementedComponentIds": [
+      "CS-B001",
+      "CS-B002",
+      "CS-B003",
+      "CS-B004",
+      "CS-B005",
+      "CS-B006",
+      "CS-C001",
+      "CS-C002",
+      "CS-C003",
+      "CS-C005",
+      "CS-C006",
+      "CS-C007",
+      "CS-C008",
+      "CS-C009",
+      "CS-C010"
+    ],
+    "contract": "references/content-slot-component-contracts.md",
+    "preview": "assets/content-slot-component-library.html",
+    "styles": "assets/content-template.css",
+    "projectEffect": "none; product shared Vue source and consumer migration not started"
+  },
+  "skillVueLibrary": {
+    "status": "implemented",
+    "scope": "PM prototypes, AI generated pages, development requirements and engineering handoff",
+    "root": "assets/vue-content-slot-components",
+    "entry": "assets/vue-content-slot-components/index.ts",
+    "styles": "assets/vue-content-slot-components/content-slot-components.css",
+    "usage": "references/content-slot-vue-library.md",
+    "productSourceEffect": "none",
+    "skillVueComponent": true,
+    "productSharedVueComponent": false,
+    "componentSources": {
+      "CS-B001": [
+        "components/ContentPageHeader.vue"
+      ],
+      "CS-B002": [
+        "components/MetricGrid.vue",
+        "components/MetricCard.vue"
+      ],
+      "CS-B003": [
+        "components/SectionCard.vue"
+      ],
+      "CS-B004": [
+        "components/ChartPanel.vue"
+      ],
+      "CS-B005": [
+        "components/TimeRangeFilter.vue"
+      ],
+      "CS-B006": [
+        "components/SectionHeader.vue"
+      ],
+      "CS-C001": [
+        "components/ActionButton.vue"
+      ],
+      "CS-C002": [
+        "components/FormControl.vue"
+      ],
+      "CS-C003": [
+        "components/StatusTag.vue"
+      ],
+      "CS-C005": [
+        "components/ContentTabs.vue"
+      ],
+      "CS-C006": [
+        "components/ListSurface.vue"
+      ],
+      "CS-C007": [
+        "components/FilterBar.vue"
+      ],
+      "CS-C008": [
+        "components/DataTable.vue"
+      ],
+      "CS-C009": [
+        "components/Pagination.vue"
+      ],
+      "CS-C010": [
+        "components/FeedbackState.vue"
+      ]
+    }
+  },
+  "excludes": [
+    "sidebar",
+    "topbar",
+    "static-tabs",
+    "ai-result-selector",
+    "right-agent",
+    "composer",
+    "sealed-shell"
+  ],
+  "stageDefinitions": {
+    "A": "page-local candidate pattern, not a shared component",
+    "B": "incubating design component with real reuse evidence",
+    "C": "stable design component and default reuse entry"
+  },
+  "reuseScopes": [
+    "Page-local",
+    "Domain",
+    "Common"
+  ],
+  "components": [
+    {
+      "id": "CS-A002",
+      "name": "LeadScoreRuleTable",
+      "stage": "A",
+      "reuseScope": "Page-local",
+      "task": "edit additive and subtractive lead scoring rules",
+      "sourcePages": [
+        "/lead/score"
+      ],
+      "consumers": [
+        "/lead/score"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "error",
+        "no-permission",
+        "disabled",
+        "success"
+      ],
+      "projectImplementation": "project-legacy-wrapper",
+      "sharedVueComponent": false,
+      "promotionCondition": "a second lead-domain rule page shares row semantics, editing model and confirmation flow",
+      "antiPattern": "promote it to Common only because it visually resembles a table"
+    },
+    {
+      "id": "CS-A003",
+      "name": "KnowledgeUploadPanel",
+      "stage": "A",
+      "reuseScope": "Page-local",
+      "task": "upload knowledge material and show task progress and result",
+      "sourcePages": [
+        "/geo/knowledge"
+      ],
+      "consumers": [
+        "/geo/knowledge"
+      ],
+      "states": [
+        "initial",
+        "uploading",
+        "success",
+        "partial-success",
+        "error",
+        "stale"
+      ],
+      "projectImplementation": "project-legacy-wrapper",
+      "sharedVueComponent": false,
+      "promotionCondition": "another GEO page shares file constraints, task lifecycle and retry semantics",
+      "antiPattern": "merge unrelated import flows only because they all contain a drop zone"
+    },
+    {
+      "id": "CS-B001",
+      "name": "ContentPageHeader",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "identify the current page from its top-left page-level heading and expose page-level status and primary actions",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "all independent middle-content pages",
+        "T1-T7 templates",
+        "detail/create/settings/WIP/AI-report pages"
+      ],
+      "states": [
+        "default",
+        "with-description",
+        "with-status",
+        "with-actions",
+        "wrapped-actions"
+      ],
+      "skillAssetMarker": "CS-B001",
+      "contractRefs": [
+        "components.md#2-page-header",
+        "content-slot-design-contract.md#5-pageheader-与模块间距合同"
+      ],
+      "acceptanceStatus": "skill-template; project-shared-vue not yet verified",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "exactly one top-left ContentPageHeader per independent page",
+        "fixed icon plus main title plus subtitle structure",
+        "subtitle aligns to the component left edge",
+        "page name is the only h1",
+        "module headings use SectionHeader and h2/h3",
+        "reuse the verified existing project mapping without page-local restyling",
+        "fixed 18x18 project icon",
+        "19px title",
+        "12px subtitle",
+        "3px title-subtitle gap",
+        "16px to first block",
+        "component margin-block is zero",
+        "one spacing owner"
+      ],
+      "promotionCondition": "shared Vue implementation is consumed across two business domains and passes wide/squeezed review",
+      "antiPattern": "missing or duplicated page header, page-specific title DOM, custom marker dialects or duplicated outer margin"
+    },
+    {
+      "id": "CS-B002",
+      "name": "MetricGrid",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "present a comparable KPI summary with responsive equal-height cards",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "dashboard and summary-list templates"
+      ],
+      "states": [
+        "loading",
+        "value",
+        "zero",
+        "missing",
+        "stale",
+        "error"
+      ],
+      "skillAssetMarker": "CS-B002",
+      "contractRefs": [
+        "components.md#3-kpi--stat-card",
+        "content-slot-design-contract.md#41-t3--数据看板"
+      ],
+      "acceptanceStatus": "skill-template; project-shared-vue not yet verified",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "14px grid gap",
+        "equal width",
+        "equal height",
+        "24px normal value",
+        "30px primary value only"
+      ],
+      "promotionCondition": "MetricCard and grid become shared Vue components across two business domains without business flags",
+      "antiPattern": "isGmv/isTraffic/isLead switches or arbitrary KPI class dialects"
+    },
+    {
+      "id": "CS-B003",
+      "name": "SectionCard",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "group one coherent business section with title, description, actions and body",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "content-slot templates"
+      ],
+      "states": [
+        "default",
+        "loading",
+        "empty",
+        "error",
+        "disabled"
+      ],
+      "skillAssetMarker": "CS-B003",
+      "contractRefs": [
+        "components.md#4-card--container",
+        "content-slot-design-contract.md#5-pageheader-与模块间距合同"
+      ],
+      "acceptanceStatus": "skill-template; project-shared-vue not yet verified",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "8px compact/data card or 12px large card",
+        "one header row",
+        "no card-in-card"
+      ],
+      "promotionCondition": "shared Vue component supports representative list and dashboard consumers without layout branching",
+      "antiPattern": "one generic card with page-specific boolean props"
+    },
+    {
+      "id": "CS-B004",
+      "name": "ChartPanel",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "frame a chart with title, time or scope, legend space and feedback states",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "dashboard template"
+      ],
+      "states": [
+        "loading",
+        "data",
+        "empty",
+        "error",
+        "stale"
+      ],
+      "skillAssetMarker": "CS-B004",
+      "contractRefs": [
+        "components.md#6-chart",
+        "responsive-layout-contract.md"
+      ],
+      "acceptanceStatus": "skill-template; project-shared-vue not yet verified",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 3,
+      "locked": [
+        "chart resize after content width change",
+        "title and scope visible",
+        "empty/error not drawn as fake data"
+      ],
+      "promotionCondition": "shared Vue shell handles ECharts lifecycle and Agent squeeze across two business domains",
+      "antiPattern": "hide chart lifecycle and business option inside one oversized component"
+    },
+    {
+      "id": "CS-B005",
+      "name": "TimeRangeFilter",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "change the time range or period for the current page data scope",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "dashboard template"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "selected",
+        "disabled",
+        "loading"
+      ],
+      "skillAssetMarker": "CS-B005",
+      "contractRefs": [
+        "components.md#5-filter-bar",
+        "table-patterns.md"
+      ],
+      "acceptanceStatus": "skill-template; project-shared-vue not yet verified",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 3,
+      "locked": [
+        "visible label",
+        "36px default control",
+        "programmatic accessible name"
+      ],
+      "promotionCondition": "period semantics and event contract are shared across two business domains",
+      "antiPattern": "reuse the same visual control when period semantics or timezone behavior differ"
+    },
+    {
+      "id": "CS-B006",
+      "name": "SectionHeader",
+      "stage": "B",
+      "reuseScope": "Common",
+      "task": "identify a repeatable top-level business module inside the current content page",
+      "sourcePages": [
+        "/dashboard/overview",
+        "/ops/traffic",
+        "/ops/gmv"
+      ],
+      "consumers": [
+        "SectionCard",
+        "ChartPanel",
+        "ListSurface",
+        "dashboard modules"
+      ],
+      "states": [
+        "default",
+        "with-badge",
+        "with-description",
+        "with-meta",
+        "with-actions",
+        "wrapped-actions"
+      ],
+      "skillAssetMarker": "CS-B006",
+      "contractRefs": [
+        "content-slot-component-contracts.md#cs-b006-sectionheader",
+        "content-slot-design-contract.md#311-sectionheader-与-subsectionheading"
+      ],
+      "acceptanceStatus": "skill-library-implemented; project-shared-vue not started",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-page-local",
+      "sharedVueComponent": false,
+      "additionDecision": "user-approved-for-design-skill",
+      "additionWave": 2,
+      "locked": [
+        "repeatable module heading, not page heading",
+        "h2 by default",
+        "4x18 primary marker",
+        "16px title",
+        "16px to section body",
+        "meta/actions wrap as one group"
+      ],
+      "promotionCondition": "shared Vue implementation is consumed by representative dashboard, chart and list modules without page-specific heading dialects",
+      "antiPattern": "second h1, copied ContentPageHeader, business-colored markers or heavy SectionHeader repeated for subsection labels"
+    },
+    {
+      "id": "CS-C001",
+      "name": "ActionButton",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "trigger primary, secondary, danger or compact actions",
+      "sourcePages": [
+        "all content-slot templates"
+      ],
+      "consumers": [
+        "T1-T7 templates"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "disabled",
+        "loading"
+      ],
+      "skillAssetMarker": "CS-C001",
+      "contractRefs": [
+        "components.md#1-button"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 1,
+      "locked": [
+        "8px radius",
+        "13px label",
+        "one primary action per region"
+      ],
+      "antiPattern": "new page-specific button visual language"
+    },
+    {
+      "id": "CS-C002",
+      "name": "FormControl",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "enter or select business filter and form values",
+      "sourcePages": [
+        "all form and filter templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "disabled",
+        "invalid",
+        "readonly"
+      ],
+      "skillAssetMarker": "CS-C002",
+      "contractRefs": [
+        "components.md#7-form-controls",
+        "table-patterns.md",
+        "filter-placeholder-contract.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 1,
+      "locked": [
+        "36px default height",
+        "36px current query/filter controls; 28px only explicitly retained dense toolbar",
+        "visible or accessible label",
+        "shared focus ring"
+      ],
+      "antiPattern": "placeholder as the only accessible name; stacked field titles in new query/filter areas"
+    },
+    {
+      "id": "CS-C003",
+      "name": "StatusTag",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "communicate business status without relying on color alone",
+      "sourcePages": [
+        "all data and workflow templates"
+      ],
+      "consumers": [
+        "T1-T7 templates"
+      ],
+      "states": [
+        "success",
+        "warning",
+        "danger",
+        "info",
+        "primary",
+        "neutral"
+      ],
+      "skillAssetMarker": "CS-C003",
+      "contractRefs": [
+        "components.md#8-status-tag"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 1,
+      "locked": [
+        "semantic color",
+        "text label",
+        "4px radius"
+      ],
+      "antiPattern": "same status uses different colors across pages"
+    },
+    {
+      "id": "CS-C004",
+      "name": "FeedbackNotice",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "show page-level warning, permission, sync or error context",
+      "sourcePages": [
+        "task, form and workflow templates"
+      ],
+      "consumers": [
+        "T4",
+        "T5",
+        "T7"
+      ],
+      "states": [
+        "info",
+        "warning",
+        "danger"
+      ],
+      "skillAssetMarker": "CS-C004",
+      "contractRefs": [
+        "components.md#9-feedback-notice",
+        "content-slot-design-contract.md#8-页面状态合同"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "locked": [
+        "semantic icon or label",
+        "actionable copy",
+        "not color-only"
+      ],
+      "antiPattern": "use a large saturated card as ordinary decoration"
+    },
+    {
+      "id": "CS-C005",
+      "name": "ContentTabs",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "switch stable views of the same data task inside the content slot",
+      "sourcePages": [
+        "configuration and summary-list templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T7"
+      ],
+      "states": [
+        "default",
+        "hover",
+        "focus",
+        "selected",
+        "disabled"
+      ],
+      "skillAssetMarker": "CS-C005",
+      "contractRefs": [
+        "components.md#10-tabs",
+        "accessibility.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 1,
+      "locked": [
+        "aria-selected",
+        "keyboard reachable",
+        "no shell-tab imitation"
+      ],
+      "antiPattern": "reuse content tabs as Topbar static or AI result tabs"
+    },
+    {
+      "id": "CS-C006",
+      "name": "ListSurface",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "keep toolbar, data table and pagination as one continuous data surface",
+      "sourcePages": [
+        "list and summary-list templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T7"
+      ],
+      "states": [
+        "loading",
+        "data",
+        "empty",
+        "error",
+        "no-permission"
+      ],
+      "skillAssetMarker": "CS-C006",
+      "contractRefs": [
+        "content-slot-design-contract.md#32-listworkspace--listsurface",
+        "table-patterns.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "0px internal external gap",
+        "1px separation",
+        "table-only horizontal scroll",
+        "reachable actions"
+      ],
+      "antiPattern": "split toolbar, table and pagination into unrelated page-level cards"
+    },
+    {
+      "id": "CS-C007",
+      "name": "FilterBar",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "filter one data set without mixing page actions or table actions into the same semantic row",
+      "sourcePages": [
+        "list, summary-list and dashboard detail templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T7"
+      ],
+      "states": [
+        "default",
+        "dirty",
+        "loading",
+        "disabled",
+        "validation-error",
+        "collapsed"
+      ],
+      "skillAssetMarker": "CS-C007",
+      "contractRefs": [
+        "components.md#5-filter-bar",
+        "content-slot-design-contract.md#61-filterbar",
+        "table-patterns.md",
+        "filter-placeholder-contract.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "12px to ListSurface",
+        "36px query/filter controls and actions",
+        "placeholder labels inside filters; stacked labels in business forms",
+        "query and reset semantics remain explicit"
+      ],
+      "antiPattern": "mix page primary actions, row actions and filters into one undifferentiated toolbar"
+    },
+    {
+      "id": "CS-C008",
+      "name": "DataTable",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "scan and act on structured records with predictable density and alignment",
+      "sourcePages": [
+        "list, summary-list and configuration templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T7"
+      ],
+      "states": [
+        "loading",
+        "data",
+        "empty",
+        "error",
+        "no-permission",
+        "partial-data"
+      ],
+      "skillAssetMarker": "CS-C008",
+      "contractRefs": [
+        "components.md#12-table",
+        "table-patterns.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "40px header",
+        "48px default row",
+        "40px compact row",
+        "table-only horizontal scroll",
+        "right-aligned numeric and action columns"
+      ],
+      "antiPattern": "invent page-specific row heights or let the whole page scroll horizontally"
+    },
+    {
+      "id": "CS-C009",
+      "name": "Pagination",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "navigate a bounded record set while preserving active filters and count context",
+      "sourcePages": [
+        "list, summary-list and configuration templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T7"
+      ],
+      "states": [
+        "default",
+        "first-page",
+        "middle-page",
+        "last-page",
+        "disabled",
+        "loading"
+      ],
+      "skillAssetMarker": "CS-C009",
+      "contractRefs": [
+        "components.md#13-pagination",
+        "table-patterns.md"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 2,
+      "locked": [
+        "belongs to the same ListSurface as its data",
+        "current page is programmatically exposed",
+        "every KPI/time/status filter change resets to page 1"
+      ],
+      "antiPattern": "detach pagination from the data surface or keep an invalid page after filters change"
+    },
+    {
+      "id": "CS-C010",
+      "name": "FeedbackState",
+      "stage": "C",
+      "reuseScope": "Common",
+      "task": "replace the normal content region with a clear loading, empty, filtered-empty, error or no-permission state and an appropriate recovery action",
+      "sourcePages": [
+        "list, dashboard, task and form templates"
+      ],
+      "consumers": [
+        "T1",
+        "T2",
+        "T3",
+        "T4",
+        "T5",
+        "T6",
+        "T7"
+      ],
+      "states": [
+        "loading",
+        "empty",
+        "filtered-empty",
+        "error",
+        "no-permission",
+        "stale"
+      ],
+      "skillAssetMarker": "CS-C010",
+      "contractRefs": [
+        "components.md#13-空状态-empty",
+        "components.md#14-加载-loading",
+        "content-slot-design-contract.md#8-页面状态合同"
+      ],
+      "acceptanceStatus": "stable skill contract; project implementation mixed",
+      "skillImplementation": "skill-library-implemented",
+      "projectImplementation": "project-mixed-unverified",
+      "sharedVueComponent": false,
+      "extractionApproval": "approved-for-planning",
+      "extractionWave": 1,
+      "locked": [
+        "state-specific title and recovery copy",
+        "no fake data in empty/error states",
+        "one relevant recovery action at most",
+        "does not replace FeedbackNotice for non-blocking context"
+      ],
+      "antiPattern": "use one generic no-data message for loading, permission, error and filtered-empty states"
+    }
+  ]
+}

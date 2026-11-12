@@ -9,9 +9,9 @@
 
 门户工作台 `vue-app/` 的设计、修改或评审统一读取：
 
-`skill/portal-workbench-ui-0914/SKILL.md`
+`skill/portal-workbench-ui-1109/SKILL.md`
 
-再按任务读取其中对应 reference。项目内 0914 Skill 是用户提供原件的分发副本，PM、UI 与研发共用，继承 0908 设计合同；旧版目录保留作历史对照，不再作为默认规范。项目当前功能与用户已确认决定优先，具体接入与兼容说明见 `docs/design/portal-workbench-ui-0914-integration.md`，不得因应用样式回退权限或业务流程。
+再按任务读取其中对应 reference。项目内 1109 Skill 是用户提供原件的完整分发副本，PM、UI 与研发共用，继承 1028/0914/0908 设计合同；旧版目录保留作历史对照，不再作为默认规范。项目当前功能与用户已确认决定优先，具体接入与兼容说明见 `docs/design/portal-workbench-ui-1109-integration.md`，不得因应用样式回退权限或业务流程。
 
 在设计、修改、评审或发布 `leaibot.cn` 的页面样式、交互、组件、中文文案前，必须先读取并遵循（本仓库内路径）：
 
@@ -27,6 +27,8 @@
 - `references/real-pc-dialog-reference.md`
 - `references/real-pc-dialog-states.md`
 - `references/asset-inventory.md`
+
+**已定稿页面保护：Skill 升级不触发现有定稿页面改造。新版规范用于新增内容和用户明确要求修改的部分；范围外已确认的设计、交互与业务行为保持原样。**
 
 ### 门户工作台 Vue 子项目边界
 

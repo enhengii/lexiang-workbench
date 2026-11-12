@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 配置列表</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">数据源配置</h1><p class="page-desc">适用于规则、模型、渠道、数据源和 Skill 等对象的状态化管理。</p></div>
+        <button class="btn btn--primary">新建数据源</button>
+      </header>
+
+      <div class="tabs" role="tablist" aria-label="配置状态">
+        <button class="tab" role="tab" aria-selected="true">全部 24</button>
+        <button class="tab" role="tab" aria-selected="false">运行中 18</button>
+        <button class="tab" role="tab" aria-selected="false">草稿 3</button>
+        <button class="tab" role="tab" aria-selected="false">已停用 2</button>
+        <button class="tab" role="tab" aria-selected="false">失败 1</button>
+      </div>
+
+      <section class="card module-stack" aria-label="配置筛选">
+        <div class="field-grid field-grid--4">
+          <div class="field filter-placeholder field--span-2"><label for="config-search">关键词</label><input id="config-search" class="control" placeholder="搜索名称、标识或负责人"></div>
+          <div class="field filter-placeholder"><label for="config-type">类型</label><select id="config-type" class="control"><option value="全部类型">类型 - 全部</option><option value="API">类型 - API</option><option value="文件">类型 - 文件</option></select></div>
+          <div class="field filter-placeholder"><label for="config-owner">负责人</label><select id="config-owner" class="control"><option value="全部负责人">负责人 - 全部</option><option value="平台管理员">负责人 - 平台管理员</option></select></div>
+        </div>
+        <div class="toolbar"><span class="template-note">表格用于字段对比和批量管理，只有少量对象及能力摘要才使用卡片。</span><div class="action-group"><button class="btn">重置</button><button class="btn btn--primary">查询</button></div></div>
+      </section>
+
+      <section class="card card--flush">
+        <div class="table-toolbar"><div><strong>配置对象</strong><span class="meta"> · 当前视图 24 项</span></div><div class="toolbar-group"><button class="btn btn--compact">批量启用</button><button class="btn btn--compact">刷新</button></div></div>
+        <div class="table-wrap">
+          <table class="data-table data-table--compact">
+            <thead><tr><th>名称</th><th>类型</th><th>当前版本</th><th>负责人</th><th>状态</th><th>更新时间</th><th class="cell-actions">操作</th></tr></thead>
+            <tbody>
+              <tr><td><strong>CRM 线索数据源</strong></td><td>API</td><td>v2.4</td><td>销售运营</td><td><span class="status status--success">运行中</span></td><td>今天 18:20</td><td class="cell-actions"><button class="text-button">编辑</button><button class="text-button text-button--danger">停用</button></td></tr>
+              <tr><td><strong>GEO 信源索引</strong></td><td>索引</td><td>v1.8</td><td>内容运营</td><td><span class="status status--neutral">草稿</span></td><td>今天 16:45</td><td class="cell-actions"><button class="text-button">编辑</button><button class="text-button">发布</button></td></tr>
+              <tr><td><strong>历史订单归档</strong></td><td>文件</td><td>v3.0</td><td>平台管理员</td><td><span class="status status--danger">失败</span></td><td>昨天 23:18</td><td class="cell-actions"><button class="text-button">查看原因</button><button class="text-button">重试</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <nav class="pagination" aria-label="分页"><span>共 24 项</span><button class="page-button">‹</button><button class="page-button" aria-current="page">1</button><button class="page-button">2</button><button class="page-button">›</button></nav>
+      </section>
+      <p class="template-note">启用、停用、发布、撤回和删除均需确认影响范围并反馈结果；空状态需按当前 Tab 解释原因。</p>
+    </div>
+  </main>
+</body>
+</html>

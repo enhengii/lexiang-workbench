@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 标准列表</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">业务列表管理</h1><p class="page-desc">适用于三个以内常用筛选、稳定列结构和分页数据。</p></div>
+        <button class="btn btn--primary">新建记录</button>
+      </header>
+
+      <section class="card module-stack" aria-label="筛选条件">
+        <div class="field-grid field-grid--4">
+          <div class="field filter-placeholder field--span-2"><label for="list-search">关键词</label><input id="list-search" class="control" placeholder="搜索名称、编号或负责人"></div>
+          <div class="field filter-placeholder"><label for="list-status">状态</label><select id="list-status" class="control"><option value="全部状态">状态 - 全部</option><option value="待处理">状态 - 待处理</option><option value="已完成">状态 - 已完成</option></select></div>
+          <div class="field filter-placeholder"><label for="list-source">来源</label><select id="list-source" class="control"><option value="全部来源">来源 - 全部</option><option value="系统导入">来源 - 系统导入</option><option value="人工新增">来源 - 人工新增</option></select></div>
+        </div>
+        <div class="toolbar"><span class="template-note">查询后保留筛选条件并回到第 1 页</span><div class="action-group"><button class="btn">重置</button><button class="btn btn--primary">查询</button></div></div>
+      </section>
+
+      <section class="card card--flush">
+        <div class="table-toolbar">
+          <div><strong>记录列表</strong><span class="meta"> · 共 156 条</span></div>
+          <div class="toolbar-group"><button class="btn btn--compact">刷新</button><button class="btn btn--compact">导出当前结果</button></div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>编号</th><th>名称</th><th>业务域</th><th>负责人</th><th>状态</th><th>更新时间</th><th class="cell-actions">操作</th></tr></thead>
+            <tbody>
+              <tr><td>POC-001</td><td>职场员工审核数据分析</td><td>在职员工管理</td><td>平台管理员</td><td><span class="status status--success">已完成</span></td><td>2026-07-27 18:30</td><td class="cell-actions"><button class="text-button">查看</button><button class="text-button">编辑</button></td></tr>
+              <tr><td>POC-002</td><td>GEO 信源校验</td><td>GEO 看板</td><td>运营 PM</td><td><span class="status status--warning">待确认</span></td><td>2026-07-27 17:42</td><td class="cell-actions"><button class="text-button">查看</button><button class="text-button">处理</button></td></tr>
+              <tr><td>POC-003</td><td>线索评分规则</td><td>企业客户管理</td><td>销售运营</td><td><span class="status status--primary">已启用</span></td><td>2026-07-27 16:18</td><td class="cell-actions"><button class="text-button">查看</button><button class="text-button text-button--danger">停用</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <nav class="pagination" aria-label="分页"><span>共 156 条</span><button class="page-button">‹</button><button class="page-button" aria-current="page">1</button><button class="page-button">2</button><button class="page-button">3</button><button class="page-button">›</button></nav>
+      </section>
+      <p class="template-note">普通业务表格默认 48px 行高；加载、空、错误、无权限和批量结果状态必须另行覆盖。</p>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "release": "1009",
+  "project": "lexiang-new-1009",
+  "date": "2026-10-09",
+  "userAcceptance": "用户当前无问题并授权归档",
+  "evidenceRef": "历史需求日志/20261009_PM新POC差异审阅/",
+  "evidenceLevel": "scoped-browser-and-user-overall-confirmation",
+  "inheritedRegistry": "page-visual-acceptance.json preserves 0914 provenance",
+  "remaining": [
+    "积分1280px测量未完成",
+    "实体触控板捏合未复测",
+    "真实后端与真实审批未验收",
+    "全量测试曾受中文路径编码影响，未宣称全部通过"
+  ]
+}

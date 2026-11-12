@@ -1,0 +1,100 @@
+Portal Workbench UI 1109 Unified Skill
+
+Root:
+- SKILL.md
+- skill.meta.json
+
+Agents:
+- agents/openai.yaml
+
+Scripts:
+- scripts/check-consistency.mjs
+
+Visual Status Registry:
+- references/page-visual-acceptance.json
+- references/va-r2-pilot-plan.md
+- references/design-guard.md
+- references/sealed-module-specs.md
+
+Key References:
+- references/filter-placeholder-contract.md
+- references/ai-product-feedback-contract.md
+- references/unified-role-workflow.md
+- references/content-slot-design-contract.md
+- references/content-slot-component-library.md
+- references/content-slot-component-contracts.md
+- references/content-slot-component-registry.json
+- references/content-slot-vue-library.md
+- references/page-spec-coverage-matrix.md
+- references/page-visual-acceptance.json
+- references/responsive-layout-contract.md
+- references/vue-architecture-contract.md
+- references/style-contract.md
+- references/leaibot-admin-ui.md
+- references/workbench-interactions.md
+- references/components.md
+- references/table-patterns.md
+- references/prd-to-ui-workflow.md
+- references/project-pattern-matching.md
+- references/reusable-interaction-rules.md
+- references/prd-ui-acceptance-checklist.md
+- references/review-checklist.md
+- references/style-qa-checklist.md
+
+Assets:
+- assets/base.css
+- assets/page-template.html
+- assets/logo-full.png
+- assets/logo-icon.png
+- assets/favicon.png
+- assets/content-dashboard-template.html
+- assets/content-list-template.html
+- assets/content-summary-list-template.html
+- assets/content-long-filter-list-template.html
+- assets/content-form-template.html
+- assets/content-task-import-template.html
+- assets/content-split-settings-template.html
+- assets/content-config-list-template.html
+- assets/content-template.css
+- assets/content-workflow-template.html
+- assets/content-report-detail-template.html
+- assets/content-slot-component-library.html
+- assets/vue-content-slot-components/index.ts
+- assets/vue-content-slot-components/content-slot-components.css
+- assets/vue-content-slot-components/components/ActionButton.vue
+- assets/vue-content-slot-components/components/ChartPanel.vue
+- assets/vue-content-slot-components/components/ContentPageHeader.vue
+- assets/vue-content-slot-components/components/ContentTabs.vue
+- assets/vue-content-slot-components/components/DataTable.vue
+- assets/vue-content-slot-components/components/FeedbackState.vue
+- assets/vue-content-slot-components/components/FilterBar.vue
+- assets/vue-content-slot-components/components/FormControl.vue
+- assets/vue-content-slot-components/components/ListSurface.vue
+- assets/vue-content-slot-components/components/MetricCard.vue
+- assets/vue-content-slot-components/components/MetricGrid.vue
+- assets/vue-content-slot-components/components/Pagination.vue
+- assets/vue-content-slot-components/components/SectionCard.vue
+- assets/vue-content-slot-components/components/SectionHeader.vue
+- assets/vue-content-slot-components/components/StatusTag.vue
+- assets/vue-content-slot-components/components/TimeRangeFilter.vue
+- assets/logos/LenovoLogo-Chinese_POS-Red-H.png
+- assets/logos/LenovoLogo-Chinese_POS-Black-H.png
+- assets/logos/LenovoLogo-Chinese_POS-1Color-H.png
+- assets/logos/LenovoLogo-Chinese_REV-1Color-H.png
+- assets/logos/LenovoLogo-w.jpg
+- assets/fonts/SourceHanSansCN-Regular.otf
+- assets/fonts/SourceHanSansCN-Medium.otf
+- assets/fonts/SourceHanSansCN-Bold.otf
+
+Notes:
+- This is the single 0824 authored skill for PM, UI/UX, frontend development and review/QA.
+- It uses release 0824 as the current feature, interaction, implementation and acceptance baseline, preserves release 0730 and earlier releases only as historical non-regression references, and resolves each developer repository through portable `<app-root>` paths.
+- Do not create or independently maintain developer, PM, UI or project-embedded variants.
+- Do not require project or skill fingerprints, personal machine paths or fixed checkout names.
+- Earlier skills and externally archived 0728 screenshots are historical evidence only; the active Skill does not bundle historical captures.
+- Use the unified role workflow and the task-specific contracts from SKILL.md.
+- Required reference-project verification: pnpm guard:design-skill, pnpm lint, pnpm typecheck, pnpm build, pnpm smoke:shell.
+
+1009 Supplement:
+- references/1009-confirmed-adjustments.md
+- references/1009-release-review.json

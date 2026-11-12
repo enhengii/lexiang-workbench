@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 长筛选列表</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">跨业务数据查询</h1><p class="page-desc">高频条件默认展示，次要条件可展开；收起不会清空已填写内容。</p></div>
+        <button class="btn">导出当前筛选结果</button>
+      </header>
+
+      <details class="card filter-details" open>
+        <summary class="section-header"><div><h2 class="section-title">筛选条件</h2><p class="section-desc">已启用 6 个条件，其中 2 个为高级条件</p></div><span class="btn btn--compact"><span class="when-open">收起高级筛选</span><span class="when-closed">展开高级筛选</span></span></summary>
+        <div class="filter-details-body module-stack">
+          <div class="field-grid field-grid--4">
+            <div class="field filter-placeholder field--span-2"><label for="long-search">关键词</label><input placeholder="关键词" id="long-search" class="control" value="企业知识库" aria-describedby="long-search-help"><span id="long-search-help" class="helper">支持名称、ID 和负责人</span></div>
+            <div class="field filter-placeholder"><label for="long-status">任务状态</label><select id="long-status" class="control"><option value="处理中">任务状态 - 处理中</option><option value="全部状态">任务状态 - 全部</option></select></div>
+            <div class="field filter-placeholder"><label for="long-domain">业务域</label><select id="long-domain" class="control"><option value="GEO 看板">业务域 - GEO 看板</option><option value="全部业务域">业务域 - 全部</option></select></div>
+            <div class="field filter-placeholder field--span-2"><label for="long-date">更新时间</label><input placeholder="更新时间" id="long-date" class="control" value="2026-07-01 至 2026-07-27"></div>
+            <div class="field filter-placeholder"><label for="long-owner">负责人</label><select id="long-owner" class="control"><option value="全部负责人">负责人 - 全部</option><option value="运营 PM">负责人 - 运营 PM</option></select></div>
+            <div class="field filter-placeholder"><label for="long-source">数据来源</label><select id="long-source" class="control"><option value="全部来源">数据来源 - 全部</option><option value="AI 生成">数据来源 - AI 生成</option></select></div>
+          </div>
+          <div class="toolbar"><span class="template-note">四列只在内容槽空间足够时成立，日期范围可跨两列。</span><div class="action-group"><button class="btn">重置</button><button class="btn btn--primary">查询</button></div></div>
+        </div>
+      </details>
+
+      <div class="condition-summary" aria-label="已选条件摘要"><strong>已选条件</strong><span class="condition-chip">状态：处理中</span><span class="condition-chip">业务域：GEO 看板</span><span class="condition-chip">更新时间：近 27 天</span><button class="text-button">清空全部</button></div>
+
+      <section class="card card--flush">
+        <div class="table-toolbar"><div><strong>查询结果</strong><span class="meta"> · 共 48 条</span></div><div class="toolbar-group"><button class="btn btn--compact">列设置</button><button class="btn btn--compact">刷新</button></div></div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr><th>对象名称</th><th>业务域</th><th>来源</th><th>负责人</th><th>状态</th><th>更新时间</th><th class="cell-actions">操作</th></tr></thead>
+            <tbody>
+              <tr><td>企业知识库召回优化</td><td>GEO 看板</td><td>AI 生成</td><td>运营 PM</td><td><span class="status status--info">处理中</span></td><td>2026-07-27 18:12</td><td class="cell-actions"><button class="text-button">查看</button></td></tr>
+              <tr><td>品牌信源覆盖分析</td><td>GEO 看板</td><td>系统任务</td><td>内容运营</td><td><span class="status status--warning">待确认</span></td><td>2026-07-27 16:40</td><td class="cell-actions"><button class="text-button">查看</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <nav class="pagination" aria-label="分页"><span>共 48 条</span><button class="page-button">‹</button><button class="page-button" aria-current="page">1</button><button class="page-button">2</button><button class="page-button">›</button></nav>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

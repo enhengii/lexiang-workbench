@@ -1,0 +1,2632 @@
+{
+  "schemaVersion": 2,
+  "baseline": "lexiang-new-0914",
+  "evidenceRole": "current-status-registry",
+  "updatedAt": "2026-09-14",
+  "archivedProject": null,
+  "latestScopedReview": {
+    "date": "2026-09-14",
+    "scope": "New PM requirements styled under inherited 0908 contract; current captures recorded after validation.",
+    "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/"
+  },
+  "sourceProject": "lexiang-new-0914",
+  "historicalEvidence": {
+    "sourceProject": "lexiang-new-0728",
+    "capturedAt": "2026-07-28T19:52:00+08:00",
+    "location": "历史需求日志/20260806_设计Skill视觉证据精简/",
+    "note": "Historical screenshots and their original measurement registry are stored outside the active Skill and must not be treated as current 0825 acceptance evidence."
+  },
+  "profiles": [
+    {
+      "id": "wide",
+      "viewport": {
+        "width": 1920,
+        "height": 900
+      },
+      "agent": "closed"
+    },
+    {
+      "id": "compact",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "agent": "closed"
+    },
+    {
+      "id": "open",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "agent": "open"
+    },
+    {
+      "id": "squeezed",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "agent": "max"
+    }
+  ],
+  "statusDefinitions": {
+    "VA-0": "No current browser evidence.",
+    "VA-R1": "One current browser capture exists; responsive combinations not complete.",
+    "VA-R2": "Wide and squeezed current browser captures exist and overflow measurements pass; interaction and data-state acceptance remains.",
+    "VA-PASS": "Required screenshots, interactions, responsive combinations, data states, accessibility and engineering checks all pass.",
+    "VA-BLOCKED": "Acceptance cannot proceed; blocker and missing evidence are recorded.",
+    "VA-FAIL": "Current browser evidence contains a measurable failure."
+  },
+  "review": {
+    "status": "in-review",
+    "reviewedAt": "2026-09-14",
+    "method": "Playwright Chrome isolated demo admin, screenshots and measurements; scoped interaction checks",
+    "reviewedCaptures": 40,
+    "reviewedPages": 9,
+    "summary": "New PM scope responsive review complete; other historical pages and full real data state acceptance remain."
+  },
+  "pages": [
+    {
+      "pageId": "portal.home",
+      "label": "首页 / 联想门户工作台",
+      "route": "/portal/home",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.overview",
+      "label": "乐享运营 / 运营总览",
+      "route": "/dashboard/overview",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.annotate",
+      "label": "乐享运营 / Query 分析",
+      "route": "/pipeline/annotate",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.quality",
+      "label": "乐享运营 / 质量分析",
+      "route": "/pipeline/quality",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "ops.traffic",
+      "label": "乐享运营 / 流量分析",
+      "route": "/ops/traffic",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "ops.gmv",
+      "label": "乐享运营 / GMV 分析",
+      "route": "/ops/gmv",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.geo",
+      "label": "GEO / 整体数据概览",
+      "route": "/geo/overview",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.geoSource",
+      "label": "GEO / 各平台信源分布",
+      "route": "/geo/source",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.geoIntent",
+      "label": "GEO / 各平台意图分布",
+      "route": "/geo/intent",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.geoConversion",
+      "label": "GEO / GEO 转化看板",
+      "route": "/geo/conversion",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.geoKnowledge",
+      "label": "GEO / 手工上传知识",
+      "route": "/geo/knowledge",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "employee.overview",
+      "label": "在职员工 / 职场员工概览",
+      "route": "/employee/overview",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "employee.certification",
+      "label": "在职员工 / 职场员工审核",
+      "route": "/employee/cert",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "lead.dashboard",
+      "label": "企业客户 / 线索看板",
+      "route": "/lead/dashboard",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "lead.pool",
+      "label": "企业客户 / 线索池",
+      "route": "/lead/pool",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "lead.governmentPool",
+      "label": "企业客户 / 线索池-政企",
+      "route": "/lead/government-pool",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "lead.score",
+      "label": "企业客户 / 打分模型",
+      "route": "/lead/score",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "order.purchaseOrders",
+      "label": "订单管理 / 协议采购单管理",
+      "route": "/order/purchase-orders",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "order.purchaseOrders",
+      "label": "订单管理 / 协议采购单管理",
+      "route": "/order/purchase-orders/:id",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "order.agreement",
+      "label": "订单管理 / 协议产品订单管理",
+      "route": "/order/agreement",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "advertising.productVideo",
+      "label": "advertising.productVideo",
+      "route": "/advertising/product-videos",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/advertising/product-videos",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-advertising-product-videos.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 566.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 502,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/advertising/product-videos",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-advertising-product-videos.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 578.8125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 514.375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/advertising/product-videos",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-advertising-product-videos.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 702.8125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 638.375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/advertising/product-videos",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-advertising-product-videos.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 914.8125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 802.375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "agent.skills",
+      "label": "Agent / Skill Hub",
+      "route": "/agent/skills",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/agent/skills?tab=packages",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-agent-skills-tab-packages.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 839.046875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 41,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/agent/skills?tab=packages",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-agent-skills-tab-packages.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 839.046875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 41,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/agent/skills?tab=packages",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-agent-skills-tab-packages.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 1065.046875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 41,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/agent/skills?tab=packages",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-agent-skills-tab-packages.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 1548.046875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 41,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "wide",
+          "stateRoute": "/agent/skills?tab=packages&mode=create",
+          "evidenceRef": "历史需求日志/20260914_场景定义布局调整/wide-agent-skills-tab-packages-mode-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 50,
+              "padding": "0px 24px",
+              "margin": "16px 0px 0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/agent/skills?tab=packages&mode=create",
+          "evidenceRef": "历史需求日志/20260914_场景定义布局调整/compact-agent-skills-tab-packages-mode-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 50,
+              "padding": "0px 24px",
+              "margin": "16px 0px 0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/agent/skills?tab=packages&mode=create",
+          "evidenceRef": "历史需求日志/20260914_场景定义布局调整/open-agent-skills-tab-packages-mode-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 50,
+              "padding": "0px 24px",
+              "margin": "16px 0px 0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/agent/skills?tab=packages&mode=create",
+          "evidenceRef": "历史需求日志/20260914_场景定义布局调整/squeezed-agent-skills-tab-packages-mode-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 682,
+              "h": 50,
+              "padding": "0px 16px",
+              "margin": "16px 0px 0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "agent.skillCreate",
+      "label": "Agent / Skill 创建",
+      "route": "/agent/skill-create",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/agent/skill-create",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-agent-skill-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 796.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/agent/skill-create",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-agent-skill-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 796.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/agent/skill-create",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-agent-skill-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 796.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/agent/skill-create",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-agent-skill-create.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 844.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "agent.permissions",
+      "label": "Agent / 权限管理",
+      "route": "/agent/permissions",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/agent/permissions",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-agent-permissions.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/agent/permissions",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-agent-permissions.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 804,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/agent/permissions",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-agent-permissions.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 816.234375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 68.234375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 160.234375,
+              "w": 794,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/agent/permissions",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-agent-permissions.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 844.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 732,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "agent.permissions",
+      "label": "Agent / 权限管理 / 管理员清理邮箱 mock",
+      "route": "/agent/permissions/admin-cleanup-email",
+      "scope": "visible",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.query",
+      "label": "Query 明细",
+      "route": "/hidden/dashboard/query",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "dashboard.behavior",
+      "label": "用户行为",
+      "route": "/hidden/dashboard/behavior",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "ops.queryBiz",
+      "label": "Query 业务归因",
+      "route": "/hidden/ops/query-biz",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "ops.keywords",
+      "label": "高频关键词",
+      "route": "/hidden/ops/keywords",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.task",
+      "label": "标注任务",
+      "route": "/hidden/pipeline/task",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.stats",
+      "label": "标注统计",
+      "route": "/hidden/pipeline/stats",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.filter",
+      "label": "数据过滤",
+      "route": "/hidden/pipeline/filter",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "pipeline.monitor",
+      "label": "任务监控",
+      "route": "/hidden/pipeline/monitor",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "employee.list",
+      "label": "员工列表",
+      "route": "/hidden/employee/list",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "employee.detail",
+      "label": "员工详情",
+      "route": "/hidden/employee/detail",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "employee.cert-detail",
+      "label": "认证详情",
+      "route": "/hidden/employee/cert-detail",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "lead.detail",
+      "label": "线索详情",
+      "route": "/hidden/lead/detail",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "order.agreement.detail",
+      "label": "订单管理 / 协议产品订单详情",
+      "route": "/hidden/order/agreement-detail",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "report.overview",
+      "label": "报告总览",
+      "route": "/hidden/report/overview",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "report.quality",
+      "label": "质量报告",
+      "route": "/hidden/report/quality",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "report.detail",
+      "label": "报告详情",
+      "route": "/hidden/report/detail",
+      "scope": "hidden",
+      "visualStatus": "VA-0",
+      "captures": [],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ]
+    },
+    {
+      "pageId": "aiinspect.overview",
+      "label": "aiinspect.overview",
+      "route": "/aiinspect/overview",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/aiinspect/overview",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-aiinspect-overview.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 1423.109375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 137,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/aiinspect/overview",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-aiinspect-overview.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 1474.984375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 137,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/aiinspect/overview",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-aiinspect-overview.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 2570.109375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 290,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/aiinspect/overview",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-aiinspect-overview.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 3029.328125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 443,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "aiinspect.rules",
+      "label": "aiinspect.rules",
+      "route": "/aiinspect/rules",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/aiinspect/rules",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-aiinspect-rules.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 411.21875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 346.78125,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/aiinspect/rules",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-aiinspect-rules.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 411.21875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 346.78125,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/aiinspect/rules",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-aiinspect-rules.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 448.609375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 384.171875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/aiinspect/rules",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-aiinspect-rules.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 496.609375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 384.171875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "aiinspect.issues",
+      "label": "aiinspect.issues",
+      "route": "/aiinspect/issues",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/aiinspect/issues",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-aiinspect-issues.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 826.046875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 180.28125,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/aiinspect/issues",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-aiinspect-issues.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 920.609375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 202.375,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/aiinspect/issues",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-aiinspect-issues.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 968.609375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 202.375,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/aiinspect/issues",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-aiinspect-issues.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 1151.09375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 682,
+              "h": 258.859375,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "aiinspect.notifications",
+      "label": "aiinspect.notifications",
+      "route": "/aiinspect/notifications",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/aiinspect/notifications",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-aiinspect-notifications.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 708.546875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 607.71875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/aiinspect/notifications",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-aiinspect-notifications.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 708.546875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 607.71875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/aiinspect/notifications",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-aiinspect-notifications.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 728.9375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 607.71875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/aiinspect/notifications",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-aiinspect-notifications.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 776.9375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 607.71875,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    },
+    {
+      "pageId": "aiinspect.logs",
+      "label": "aiinspect.logs",
+      "route": "/aiinspect/logs",
+      "scope": "visible",
+      "visualStatus": "VA-R2",
+      "captures": [
+        {
+          "profileId": "wide",
+          "stateRoute": "/aiinspect/logs",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/wide-aiinspect-logs.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1704,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 711.28125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1704,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1704,
+              "h": 646.84375,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "compact",
+          "stateRoute": "/aiinspect/logs",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/compact-aiinspect-logs.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 1064,
+            "sidebar": 168,
+            "agent": 0,
+            "root": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 711.28125,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 192,
+              "y": 76,
+              "w": 1064,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 192,
+              "y": 140.4375,
+              "w": 1064,
+              "h": 646.84375,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "open",
+          "stateRoute": "/aiinspect/logs",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/open-aiinspect-logs.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 794,
+            "sidebar": 58,
+            "agent": 380,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 742.46875,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 794,
+              "h": 48.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 140.4375,
+              "w": 794,
+              "h": 678.03125,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        },
+        {
+          "profileId": "squeezed",
+          "stateRoute": "/aiinspect/logs",
+          "evidenceRef": "历史需求日志/20260914_新增需求0908样式适配/squeezed-aiinspect-logs.png",
+          "httpStatus": 200,
+          "metrics": {
+            "documentOverflowX": 0,
+            "pageContentOverflowX": 0,
+            "contentInnerWidth": 682,
+            "sidebar": 58,
+            "agent": 492,
+            "root": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 837.25,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "header": {
+              "x": 82,
+              "y": 76,
+              "w": 682,
+              "h": 96.4375,
+              "padding": "0px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "first": {
+              "x": 82,
+              "y": 188.4375,
+              "w": 682,
+              "h": 724.8125,
+              "padding": "20px",
+              "margin": "0px",
+              "overflow": 0
+            },
+            "headerGap": 16,
+            "title": {
+              "size": "19px",
+              "weight": "700"
+            },
+            "isLogin": false,
+            "isWip": false
+          },
+          "pageErrors": []
+        }
+      ],
+      "remainingStates": [
+        "C9 full data-state acceptance",
+        "full keyboard acceptance",
+        "real backend integration"
+      ],
+      "reviewScope": "PM new requirements; preview demo data; no real backend claim"
+    }
+  ],
+  "dynamicPages": [
+    {
+      "pageId": "ai.dynamic-report",
+      "label": "AI 动态报告",
+      "scope": "dynamic",
+      "visualStatus": "VA-0",
+      "requiredStates": [
+        "short-payload",
+        "long-payload",
+        "empty",
+        "failure"
+      ],
+      "captures": [],
+      "verifiedStates": [],
+      "remainingStates": [
+        "wide-agent-closed",
+        "1280-agent-max",
+        "short-payload",
+        "long-payload",
+        "empty",
+        "failure",
+        "interactive-keyboard"
+      ]
+    }
+  ]
+}

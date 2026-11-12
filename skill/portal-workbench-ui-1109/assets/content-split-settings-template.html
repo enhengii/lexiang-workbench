@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="zh-CN" data-product="leaibot">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>内容槽模板 - 分栏设置</title>
+  <link rel="stylesheet" href="content-template.css">
+</head>
+<body>
+  <main class="content-slot">
+    <div class="page-stack">
+      <header class="page-header" data-component-id="CS-B001">
+        <div class="page-heading"><h1 class="page-title">业务模块设置</h1><p class="page-desc">页面内局部导航与右侧设置区联动，不复制全局左导航层级。</p></div>
+        <button class="btn">查看变更记录</button>
+      </header>
+
+      <section class="split-layout">
+        <aside class="card local-nav" aria-label="设置分区">
+          <div class="field"><label for="setting-search">查找设置项</label><input id="setting-search" class="control" placeholder="搜索模块或配置"></div>
+          <nav class="local-nav-list">
+            <button class="local-nav-item is-active"><span>基础配置</span><span class="unsaved-dot" aria-label="有未保存变更"></span></button>
+            <button class="local-nav-item"><span>成员与权限</span></button>
+            <button class="local-nav-item"><span>通知策略</span></button>
+            <button class="local-nav-item"><span>数据保留</span></button>
+            <button class="local-nav-item"><span>危险设置</span></button>
+          </nav>
+        </aside>
+
+        <div class="module-stack">
+          <section class="card settings-section">
+            <div class="section-header"><div><h2 class="section-title">基础配置</h2><p class="section-desc">保存仅作用于当前分区。</p></div><span class="status status--warning">有未保存变更</span></div>
+            <div class="settings-row">
+              <div><strong>模块名称</strong><p class="section-desc">显示在业务入口和相关选择器中。</p></div>
+              <div class="field"><label for="setting-name">名称</label><input id="setting-name" class="control" value="企业客户管理"></div>
+            </div>
+            <div class="settings-row">
+              <div><strong>默认负责人</strong><p class="section-desc">新对象未指定负责人时使用。</p></div>
+              <div class="field"><label for="setting-owner">负责人</label><select id="setting-owner" class="control"><option>销售运营组</option><option>平台管理员</option></select></div>
+            </div>
+            <div class="settings-row">
+              <div><strong>自动分配</strong><p class="section-desc">按当前规则将新线索分配给可用成员。</p></div>
+              <div><button class="switch" role="switch" aria-checked="true" aria-label="启用自动分配"></button></div>
+            </div>
+            <div class="action-group justify-end"><button class="btn">撤销更改</button><button class="btn btn--primary">保存当前分区</button></div>
+          </section>
+
+          <section class="card settings-section">
+            <div><h2 class="section-title">数据同步</h2><p class="section-desc">该配置单独保存并返回自己的结果反馈。</p></div>
+            <div class="settings-row"><div><strong>同步频率</strong><p class="section-desc">最近成功同步：今天 17:30</p></div><div class="field-inline"><select class="control" aria-label="同步频率"><option>每 30 分钟</option></select><button class="btn">立即同步</button></div></div>
+          </section>
+        </div>
+      </section>
+      <p class="template-note">窄内容槽时局部导航移动到上方；切换分区前必须处理未保存状态。</p>
+    </div>
+  </main>
+</body>
+</html>
